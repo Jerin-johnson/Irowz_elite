@@ -1,0 +1,13 @@
+<div class="col">
+    <a href="/login" class="text-decoration-none">
+        <div class="product-card card h-100 border-light shadow-sm text-center">
+            <img src="<%= product.image %>" class="card-img-top p-3" alt="<%= product.name %>" style="height: 200px; object-fit: cover;">
+            <div class="card-body">
+                <h3 class="card-title fs-6 fw-semibold"><%= product.name %></h3>
+                <div class="rating text-warning mb-2">★★★★★</div>
+                <p class="price text-danger fw-bold mb-1">₹<%= product.price %></p>
+                <p class="original-price text-muted text-decoration-line-through">₹<%= product.originalPrice %></p>
+            </div>
+        </div>
+    </a>
+</div>

@@ -1,0 +1,93 @@
+const { Schema } = require('mongoose');
+const mongoose = require('mongoose');
+
+const userSchema = new mongoose.Schema({
+  firstName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  lastName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  phone: {
+    type: String,
+    required: false,
+    match: [/^\d{10}$/, 'Phone number must be 10 digits'],
+    sparse:true,
+    default:null
+  },
+  dateOfBirth: {
+    type: Date,
+    required: true
+  },
+  googleId: {
+    type: String,
+    unique:true,
+  },
+  isBlocked:{
+    type: Boolean,
+    default:false
+  },
+  isAdmin:{
+    type:Boolean,
+    default:false
+  },
+  cart:[{
+    type : Schema.Types.ObjectId,
+    ref:"Cart",
+  }],
+  wallet:{
+    type:Number,
+    default:0
+  },
+  wishlist:[{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"WishList"
+  }],
+  orderHistory:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref:"Order"
+  }],
+  referalCode:{
+    type:String
+  },
+  redeemed:{
+    type:Boolean
+  },
+  redeemedUser:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref:"User"
+  }],
+  searchHistory:[{
+    category:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Category"
+    },
+    brand:{
+        type:String
+    },
+    searchOn :{
+        type:Date,
+        default:Date.now
+    }
+  }]
+
+}, { timestamps: true });
+
+const User = mongoose.model('User', userSchema);
+
+module.exports = {User}

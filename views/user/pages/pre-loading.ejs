@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IrowzElite</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-light">
+    <%- include('../../partials/user/header') %>
+
+    <!-- Banner Section -->
+    <section class="banner text-white text-center py-5 d-flex align-items-center justify-content-center" style="background-image: url('/images/banner-bg.jpg'); background-size: cover; background-position: center;">
+        <div class="banner-content">
+            <p class="new-collection mb-3">New Collection</p>
+            <h1 class="display-4 fw-bold mb-3">The Gift Suite</h1>
+            <p class="lead mb-4">Experience collection like never before</p>
+            <a href="/login"><button class="btn btn-light px-4 py-2 fw-semibold">Sign In to Shop</button></a>
+        </div>
+    </section>
+
+    <!-- Tagline Section -->
+    <section class="tagline text-center py-5 bg-white">
+        <h2 class="display-6 fw-bold mb-2">Timeless Elegance Awaits at TimeCrafters:</h2>
+        <h3 class="fs-4 text-muted">Where Precision Meets Style</h3>
+    </section>
+
+    <!-- Product Grid -->
+    <section class="product-grid container py-5 bg-white">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+            <% products.forEach(product => { %>
+                <%- include('../../partials/user/product-card', { product: product }) %>
+            <% }) %>
+        </div>
+    </section>
+
+    <%- include('../../partials/user/footer') %>
+
+    <!-- Bootstrap JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

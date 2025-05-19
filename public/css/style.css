@@ -1,0 +1,80 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+}
+
+/* Banner Section */
+.banner {
+    position: relative;
+    min-height: 500px;
+    background-color: #000;
+}
+
+.banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* Dark overlay for better text readability */
+    z-index: 1;
+}
+
+.banner-content {
+    position: relative;
+    z-index: 2;
+}
+
+.new-collection {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 1rem;
+    color: #fff;
+}
+
+/* Product Card */
+.product-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.product-card:hover {
+    transform: scale(1.05);
+}
+
+.price {
+    font-size: 1.1rem;
+}
+
+.original-price {
+    font-size: 0.9rem;
+}
+
+/* Footer Links */
+footer a:hover {
+    color: #ddd !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+    .banner {
+        min-height: 400px;
+    }
+
+    .banner-content h1 {
+        font-size: 2rem;
+    }
+
+    .banner-content .lead {
+        font-size: 1rem;
+    }
+
+    .tagline h2 {
+        font-size: 1.5rem;
+    }
+
+    .tagline h3 {
+        font-size: 1rem;
+    }
+}
