@@ -4,7 +4,6 @@ const{loadLoginAdmin}=require("../controllers/admin/adminController")
 
 
 
-adminRouter.get("/login",loadLoginAdmin);
 
 
 

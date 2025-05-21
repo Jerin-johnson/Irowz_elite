@@ -1,0 +1,286 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IrowzElite - Luxury Watches</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+
+</head>
+<body>
+ 
+    <%- include('../partials/user/header') %>
+
+  <!-- Hero Banner -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-8 offset-md-2">
+          <h1>The Gift Suite</h1>
+          <p class="lead mb-4">Discover the perfect timepiece for your loved ones</p>
+          <button class="btn btn-dark">SHOP NOW</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Banner -->
+  <div class="container mb-5">
+    <div class="row">
+      <div class="col-md-6 col-sm-12 mb-4">
+        <img src="/img/home/Astronic Watches Stealth Tourbillon.jpeg" alt="Luxury watch" class="img-fluid banner-image">
+      </div>
+      <div class="col-md-3 col-sm-6 mb-4">
+        <img src="/img/home/Astronic Watches Stealth Tourbillon.jpeg" alt="Watch closeup" class="img-fluid mb-4 banner-image">
+        <img src="/img/home/Astronic Watches Stealth Tourbillon.jpeg" alt="Watch detail" class="img-fluid banner-image">
+      </div>
+      <div class="col-md-3 col-sm-6 mb-4">
+        <img src="/img/home/Astronic Watches Stealth Tourbillon.jpeg" alt="Watch on wrist" class="img-fluid mb-4 banner-image">
+        <img src="/img/home/Astronic Watches Stealth Tourbillon.jpeg" alt="Watch on wrist" class="img-fluid banner-image">
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured Section -->
+  <section class="featured-section">
+    <div class="container">
+      <h2 class="section-title">Timeless Elegance Awaits at IrowzElite: Where Precision Meets Style</h2>
+      
+      <!-- Filter Section -->
+      <div class="filter-section mb-4">
+        <div class="row align-items-center">
+          <div class="col-md-2">
+            <h5 class="mb-md-0 mb-2">Filter By:</h5>
+          </div>
+          <div class="col-md-8">
+            <div class="d-flex flex-wrap">
+              <select class="form-select me-2 mb-2" style="max-width: 150px;">
+                <option selected>Brand</option>
+                <option>Rolex</option>
+                <option>Omega</option>
+                <option>TAG Heuer</option>
+                <option>Seiko</option>
+              </select>
+              <select class="form-select me-2 mb-2" style="max-width: 150px;">
+                <option selected>Price</option>
+                <option>$1000 - $3000</option>
+                <option>$3000 - $5000</option>
+                <option>$5000 - $10000</option>
+                <option>$10000+</option>
+              </select>
+              <select class="form-select me-2 mb-2" style="max-width: 150px;">
+                <option selected>Gender</option>
+                <option>Men</option>
+                <option>Women</option>
+                <option>Unisex</option>
+              </select>
+              <select class="form-select me-2 mb-2" style="max-width: 150px;">
+                <option selected>Movement</option>
+                <option>Automatic</option>
+                <option>Quartz</option>
+                <option>Manual</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-2 text-end">
+            <button class="btn btn-sm btn-dark">Apply Filters</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Watch Grid -->
+      <div class="row">
+        <!-- Watch 1 -->
+        <div class="col-lg-4 col-md-6 col-sm-6">
+          <div class="card watch-card">
+            <img src="/img/home/ce1a6b58-7a93-49bd-ab63-d75874d844a3.jpeg" class="card-img-top" alt="Luxury watch">
+            <div class="card-body">
+              <h5 class="card-title">Rolex Submariner</h5>
+              <div class="rating mb-2">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star-half-alt"></i>
+              </div>
+              <p class="price">$7000 <span class="old-price">$7500</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Watch 2 -->
+        <div class="col-lg-4 col-md-6 col-sm-6">
+          <div class="card watch-card">
+            <img src="/img/home/ULYSSE NARDIN.jpeg" class="card-img-top" alt="Luxury watch">
+            <div class="card-body">
+              <h5 class="card-title">Omega Seamaster</h5>
+              <div class="rating mb-2">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="far fa-star"></i>
+              </div>
+              <p class="price">$4800 <span class="old-price">$5200</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Watch 3 -->
+        <div class="col-lg-4 col-md-6 col-sm-6">
+          <div class="card watch-card">
+            <img src="/api/placeholder/400/300" class="card-img-top" alt="Luxury watch">
+            <div class="card-body">
+              <h5 class="card-title">Patek Philippe Calatrava</h5>
+              <div class="rating mb-2">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p class="price">$15000 <span class="old-price">$16500</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Watch 4 -->
+        <div class="col-lg-4 col-md-6 col-sm-6">
+          <div class="card watch-card">
+            <img src="/api/placeholder/400/300" class="card-img-top" alt="Luxury watch">
+            <div class="card-body">
+              <h5 class="card-title">Seiko Prospex</h5>
+              <div class="rating mb-2">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="far fa-star"></i>
+              </div>
+              <p class="price">$1200 <span class="old-price">$1400</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Watch 5 -->
+        <div class="col-lg-4 col-md-6 col-sm-6">
+          <div class="card watch-card">
+            <img src="/api/placeholder/400/300" class="card-img-top" alt="Luxury watch">
+            <div class="card-body">
+              <h5 class="card-title">Audemars Piguet</h5>
+              <div class="rating mb-2">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star-half-alt"></i>
+              </div>
+              <p class="price">$21000 <span class="old-price">$23000</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Watch 6 -->
+        <div class="col-lg-4 col-md-6 col-sm-6">
+          <div class="card watch-card">
+            <img src="/api/placeholder/400/300" class="card-img-top" alt="Luxury watch">
+            <div class="card-body">
+              <h5 class="card-title">TAG Heuer Carrera</h5>
+              <div class="rating mb-2">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="far fa-star"></i>
+              </div>
+              <p class="price">$4500 <span class="old-price">$4900</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Watch 7 -->
+        <div class="col-lg-4 col-md-6 col-sm-6">
+          <div class="card watch-card">
+            <img src="/api/placeholder/400/300" class="card-img-top" alt="Luxury watch">
+            <div class="card-body">
+              <h5 class="card-title">Cartier Tank</h5>
+              <div class="rating mb-2">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p class="price">$6000 <span class="old-price">$6500</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Watch 8 -->
+        <div class="col-lg-4 col-md-6 col-sm-6">
+          <div class="card watch-card">
+            <img src="/api/placeholder/400/300" class="card-img-top" alt="Luxury watch">
+            <div class="card-body">
+              <h5 class="card-title">Jaeger-LeCoultre</h5>
+              <div class="rating mb-2">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star-half-alt"></i>
+              </div>
+              <p class="price">$8500 <span class="old-price">$9200</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Watch 9 -->
+        <div class="col-lg-4 col-md-6 col-sm-6">
+          <div class="card watch-card">
+            <img src="/api/placeholder/400/300" class="card-img-top" alt="Luxury watch">
+            <div class="card-body">
+              <h5 class="card-title">Rolex Datejust</h5>
+              <div class="rating mb-2">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p class="price">$7500 <span class="old-price">$8000</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Pagination -->
+      <nav aria-label="Page navigation" class="d-flex justify-content-center mt-4">
+        <ul class="pagination">
+          <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+          </li>
+          <li class="page-item active"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">3</a></li>
+          <li class="page-item">
+            <a class="page-link" href="#">Next</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </section>
+
+
+<%- include('../partials/user/footer') %>
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

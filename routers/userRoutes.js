@@ -1,17 +1,24 @@
 const express = require("express");
 const userRouter = express.Router();
-const {loadLoadingPage,loadUserRegister}=require("../controllers/user/userController.js");
-
-
-// for loading loading page i.e page before signin
-userRouter.get("/",loadLoadingPage);
-
-
-// For loading register page 
-userRouter.get("/register",loadUserRegister)
+const {loadHomePage,pageNotFound,loadSignup,loadLogin}=require("../controllers/user/userController.js");
 
 
 
+
+
+// For Loading Home page
+userRouter.get("/",loadHomePage);
+
+
+userRouter.get("/signup",loadSignup);
+userRouter.get("/login",loadLogin)
+
+
+
+
+
+//error i.e pageNotFound Page
+userRouter.get("/error-404",pageNotFound)
 
 
 

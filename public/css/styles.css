@@ -1,0 +1,230 @@
+ body {
+      font-family: 'Arial', sans-serif;
+      overflow-x: hidden;
+    }
+    
+    .navbar {
+      padding: 15px 0;
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .navbar-brand {
+      font-weight: bold;
+      font-size: 24px;
+    }
+    
+    .search-bar {
+      position: relative;
+      max-width: 300px;
+      width: 100%;
+    }
+    
+    .search-bar input {
+      border-radius: 20px;
+      padding-right: 40px;
+    }
+    
+    .search-bar button {
+      position: absolute;
+      right: 5px;
+      top: 5px;
+      border: none;
+      background: none;
+      color: #333;
+    }
+    
+    .hero-section {
+      background-color: #f8f9fa;
+      padding: 40px 0;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .hero-section h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      font-weight: 300;
+    }
+    
+    @media (max-width: 768px) {
+      .hero-section h1 {
+        font-size: 2rem;
+      }
+    }
+    
+    .featured-section {
+      padding: 30px 0;
+    }
+    
+    .section-title {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 300;
+      font-size: 1.8rem;
+    }
+    
+    @media (max-width: 768px) {
+      .section-title {
+        font-size: 1.5rem;
+      }
+    }
+    
+    .watch-card {
+      margin-bottom: 30px;
+      transition: transform 0.3s;
+      border: none;
+      border-radius: 0;
+    }
+    
+    .watch-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .watch-card img {
+      height: 200px;
+      object-fit: cover;
+    }
+    
+    .price {
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .old-price {
+      text-decoration: line-through;
+      color: #999;
+      margin-left: 5px;
+      font-size: 0.9em;
+    }
+    
+    .rating {
+      color: #ffc107;
+    }
+    
+    .btn-dark {
+      border-radius: 0;
+      padding: 8px 20px;
+    }
+    
+    .filter-section {
+      background-color: #f8f9fa;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    footer {
+      background-color: #212529;
+      color: #fff;
+      padding: 40px 0 20px;
+    }
+    
+    .footer-title {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      font-weight: 300;
+    }
+    
+    .footer-links {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+    
+    .footer-links a {
+      color: #adb5bd;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .footer-links a:hover {
+      color: #fff;
+    }
+    
+    .social-icons a {
+      color: #fff;
+      margin-right: 15px;
+      font-size: 18px;
+    }
+    
+    .copyright {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #343a40;
+    }
+    
+    /* Modal styles */
+    .form-control {
+      border-radius: 0;
+      padding: 10px 15px;
+    }
+    
+    .btn-link {
+      color: #333;
+      text-decoration: none;
+    }
+    
+    .btn-link:hover {
+      text-decoration: underline;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 991px) {
+      .navbar-nav {
+        margin-bottom: 15px;
+      }
+      
+      .search-bar {
+        margin-bottom: 0;
+        max-width: 150px;
+      }
+      
+      .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+      }
+    }
+    
+    @media (max-width: 767px) {
+      .banner-image {
+        margin-bottom: 15px;
+      }
+      
+      .search-bar {
+        max-width: 120px;
+      }
+    }
+    
+    /* Filter responsiveness */
+    @media (max-width: 991px) {
+      .filter-section .col-md-2,
+      .filter-section .col-md-8,
+      .filter-section .col-md-2.text-end {
+        text-align: left !important;
+        margin-bottom: 10px;
+      }
+    }
+    
+    /* Cart icon */
+    .cart-icon {
+      position: relative;
+    }
+    
+    .cart-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: #dc3545;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
