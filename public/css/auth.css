@@ -254,3 +254,13 @@ body {
     margin-top: 1rem;
     text-align: center;
 }
+
+  .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+ .is-invalid {
+            border-color: red !important;
+           }

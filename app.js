@@ -2,9 +2,35 @@ const express = require("express");
 const app = express();
 const env = require("dotenv").config()
 const {connectDB}= require("./config/db.js");
+
+//google sign in
+const {passport}= require("./config/passport.js")
+
 const {userRouter} = require("./routers/userRoutes.js");
 const {adminRouter} = require("./routers/adminRouter.js");
+const session = require("express-session")
 connectDB()
+
+
+
+// Using express session
+
+app.use(session({
+    secret:process.env.SESSION_SECERT || "my-secert",
+    resave:false,
+    saveUninitialized:true,
+    cookie:{
+        secure:false,
+        httpOnly:true,
+        maxAge:72*60*60*1000
+    }
+}))
+
+
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 
 
