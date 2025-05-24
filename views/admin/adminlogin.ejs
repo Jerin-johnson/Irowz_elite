@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Login - Dashboard</title>
+    <link rel="stylesheet" href="/css/adminAuth.css" />
+    <!-- Bootstrap -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome for icons -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="logo">
+        <div class="logo-icon"></div>
+        <h1>Admin Portal</h1>
+        <p>Secure access to dashboard</p>
+      </div>
+
+      <% if (message && typeof message === 'string' && message.trim() !== '') {
+      %>
+      <div
+        class="alert alert-danger text-center"
+        role="alert"
+        style="margin-bottom: 1rem"
+      >
+        <%= message %>
+      </div>
+      <% } %>
+
+      <form id="loginForm" action="/admin/login" method="post" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            placeholder="admin@company.com"
+            autocomplete="email"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="password-container">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              onclick="togglePassword()"
+            >
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <div class="forgot-password">
+          <a href="#" onclick="handleForgotPassword()">Forgot your password?</a>
+        </div>
+
+        <button type="submit" class="login-button" id="loginBtn">
+          Sign In
+        </button>
+      </form>
+
+      <div class="security-notice">
+        <p>
+          This is a secure admin area. All login attempts are monitored and
+          logged.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      function togglePassword() {
+        const passwordInput = document.getElementById("password");
+        const toggleBtn = document.querySelector(".toggle-password");
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          toggleBtn.textContent = "🙈";
+        } else {
+          passwordInput.type = "password";
+          toggleBtn.textContent = "👁️";
+        }
+      }
+
+      function handleForgotPassword() {
+        alert("Password reset functionality would be implemented here.");
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById("loginForm");
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+
+        form.addEventListener("submit", function (e) {
+          e.preventDefault(); // Prevent actual form submission
+          clearErrors();
+
+          let valid = true;
+
+          if (!emailInput.value.trim()) {
+            showError(emailInput, "Email is required");
+            valid = false;
+          } else if (
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())
+          ) {
+            showError(emailInput, "Enter a valid email");
+            valid = false;
+          }
+
+          if (!passwordInput.value.trim()) {
+            showError(passwordInput, "Password is required");
+            valid = false;
+          } else if (passwordInput.value.trim().length < 6) {
+            showError(passwordInput, "Password must be at least 6 characters");
+            valid = false;
+          }
+
+          if (valid) {
+            form.submit(); // You can also send it via fetch/AJAX if needed
+          }
+        });
+
+        function showError(input, message) {
+          const error = document.createElement("div");
+          error.className = "error-message";
+          error.style.color = "#e53e3e";
+          error.style.fontSize = "12px";
+          error.style.marginTop = "4px";
+          error.textContent = message;
+          input.style.borderColor = "#e53e3e";
+          input.parentElement.appendChild(error);
+        }
+
+        function clearErrors() {
+          document
+            .querySelectorAll(".error-message")
+            .forEach((el) => el.remove());
+          document.querySelectorAll(".form-input").forEach((input) => {
+            input.style.borderColor = "#e2e8f0";
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

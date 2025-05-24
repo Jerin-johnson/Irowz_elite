@@ -1,7 +1,8 @@
 const express = require("express");
 const userRouter = express.Router();
-const {loadHomePage,pageNotFound,loadSignup,loadLogin,signUp,loadOtp,verifyOtp,ResentOtp}=require("../controllers/user/userController.js");
+const {loadHomePage,pageNotFound,loadSignup,loadLogin,signUp,loadOtp,verifyOtp,ResentOtp,verifyLogin,userLogout}=require("../controllers/user/userController.js");
 
+const { userAuth, isUserLoggedIn, isUserLoggedOut,ensureOtpSession} = require("../middleware/userMiddleWare.js")
 //google sign in
 const {passport}= require("../config/passport")
 
@@ -11,18 +12,19 @@ const {passport}= require("../config/passport")
 userRouter.get("/",loadHomePage);
 
 // get and post signup
-userRouter.get("/signup",loadSignup);
+userRouter.get("/signup",isUserLoggedOut,loadSignup);
 userRouter.post("/signup",signUp)
 
-
-userRouter.get("/login",loadLogin)
+// setting login route
+userRouter.get("/login",isUserLoggedOut,loadLogin)
+userRouter.post("/login",verifyLogin)
 
 
 // load otp page and post otp
 
-userRouter.get("/otp",loadOtp);
-userRouter.post("/otp",verifyOtp)
-userRouter.post("/resend-otp",ResentOtp)
+userRouter.get("/otp", ensureOtpSession, loadOtp);
+userRouter.post("/otp", ensureOtpSession, verifyOtp);
+userRouter.post("/resend-otp", ensureOtpSession, ResentOtp);
 
 
 
@@ -32,11 +34,13 @@ userRouter.get("/auth/google",
 );
 
 // Google redirects here after login
-userRouter.get("/auth/google/callback",
-    passport.authenticate("google", {
-        failureRedirect: "/signup",
-        successRedirect: "/", // redirecting to home page
-    })
+userRouter.get("/auth/google/callback", 
+    passport.authenticate("google", { failureRedirect: "/signup" }),
+    async (req, res) => {
+        // storing session manimually
+        req.session.user = req.user._id;
+        res.redirect("/");
+    }
 );
 
 
@@ -46,6 +50,10 @@ userRouter.get("/error-404",pageNotFound)
 
 
 
+
+
+// Logout 
+userRouter.get("/logout",isUserLoggedIn,userLogout)
 
 
 

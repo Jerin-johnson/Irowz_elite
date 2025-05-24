@@ -1,0 +1,191 @@
+  * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #f4f7fa;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #1a202c;
+            font-weight: 600;
+        }
+
+        .filter-search {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .filter {
+            position: relative;
+        }
+
+        .filter select {
+            appearance: none;
+            padding: 8px 30px 8px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #4a5568;
+            background: #f7fafc;
+            cursor: pointer;
+        }
+
+        .filter::after {
+            content: '▼';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #4a5568;
+        }
+
+        .search input {
+            padding: 8px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #4a5568;
+            background: #f7fafc;
+            width: 200px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        th {
+            background: #3b82f6;
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr {
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.3s;
+        }
+
+        tr:hover {
+            background: #f7fafc;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .block-btn {
+            background: #f6e05e;
+            color: #744210;
+        }
+
+        .block-btn:hover {
+            background: #ecc94b;
+        }
+
+        .unblock-btn {
+            background: #68d391;
+            color: #22543d;
+        }
+
+        .unblock-btn:hover {
+            background: #4ade80;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .pagination button {
+            padding: 8px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: #fff;
+            color: #4a5568;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination button.active {
+            background: #3b82f6;
+            color: #fff;
+            border-color: #3b82f6;
+        }
+
+        .pagination button:hover:not(.active) {
+            background: #edf2f7;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 15px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .filter-search {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .search input {
+                width: 100%;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+
+            .action-btn {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+        }

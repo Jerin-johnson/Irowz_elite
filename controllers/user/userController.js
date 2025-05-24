@@ -3,16 +3,27 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const env = require("dotenv").config();
 
-// For loading userRegister page
+// For loading Homepage
 
-const loadHomePage = (req, res) => {
+const loadHomePage = async (req, res) => {
   try {
-    res.render("user/home", { products: null });
+    const userId = req.session.user;
+
+    if (userId) {
+      const findUser = await User.findById(userId);
+      console.log("The Load Home page", findUser);
+      return res.render("user/home", { user: findUser });
+    }
+
+    // If no session user, display as ussally
+    res.render("user/home", { user: null });
+
   } catch (error) {
     console.log(error.message);
     res.status(500).send("Having issues in Loading user Register Page");
   }
 };
+
 
 // page Not Found Code
 const pageNotFound = (req, res) => {
@@ -95,12 +106,12 @@ const signUp = async (req, res) => {
         .json({ message: "Password must be at least 8 characters" });
     }
 
-    const existingUser = await User.findOne({ $or: [{ email }, { phoneno }] });
+    const existingUser = await User.findOne({ $or: [{ email }, {phone: phoneno }] });
     if (existingUser) {
       if (existingUser.email === email) {
         return res.status(400).json({ message: "Email already exists" });
       }
-      if (existingUser.phoneno === phoneno) {
+      if (existingUser.phone === phoneno) {
         return res.status(400).json({ message: "Phone number already exists" });
       }
     }
@@ -123,7 +134,7 @@ const signUp = async (req, res) => {
     };
 
     console.log(`The otp is ${otp}`);
-    return res.status(201).json({ message: "User registered successfully" });
+    return res.status(201).json({ message: "Otp send Successfully" });
 
     // const newUser = new User({
     //   fullName:fullname,
@@ -151,7 +162,12 @@ async function securePassword(password) {
 
 const loadLogin = (req, res) => {
   try {
-    res.render("user/login");
+    if(!req.session.user)
+    {
+      res.render("user/login");
+    }else{
+      res.redirect("/")
+    }
   } catch (error) {
     res.send(error.message);
   }
@@ -229,6 +245,72 @@ const ResentOtp = async (req, res) => {
   }
 };
 
+
+// login post 
+const verifyLogin = async (req,res)=>{
+  try {
+
+    const {email,password} = req.body;
+
+    let user = await User.findOne({email:email,isAdmin:0});
+    
+    if(!user)
+    {
+     return res.render("user/login",{message:"user not found"})
+    }
+    if(user.isBlocked)
+    {
+      return res.render("user/login",{message:"user is blocked by the admin"})
+    }
+
+    if(!password)
+    {
+      return res.render("user/login",{message:"please enter the password"})
+    }
+
+    const comparePassword = await bcrypt.compare(password,user.password);
+
+    if(!comparePassword)
+    {
+      return res.render("user/login",{message:"Invalid credentials"})
+    }
+
+    req.session.user = user._id;
+    res.redirect("/")
+    
+  } catch (error) {
+    
+    console.error("Login error",error);
+    res.render("user/login",{message:"login failed"})
+  }
+
+}
+
+// user Logut
+const userLogout = (req,res)=>{
+  try {
+
+      delete req.session.user; // deleting the session 
+    res.redirect('/login');
+  
+  //  req.session.destroy(err => {
+  //   if (err) {
+  //     console.log('Error destroying session:', err);
+     
+  //     return res.redirect('/error-404');
+  //   }
+  //   // Session destroyed successfully, redirect to login page
+  //   res.redirect('/login');
+  // });
+    
+  } catch (error) {
+
+    console.log(error.message);
+    
+  }
+
+}
+
 // For exporting all the function
 module.exports = {
   loadHomePage,
@@ -239,4 +321,6 @@ module.exports = {
   loadOtp,
   verifyOtp,
   ResentOtp,
+  verifyLogin,
+  userLogout
 };

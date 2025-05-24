@@ -120,109 +120,115 @@
   });
 
   // Form submission
-  document.getElementById('signupForm').addEventListener('submit', async function (event) {
-    event.preventDefault();
+ // Form submission
+document.getElementById('signupForm').addEventListener('submit', async function (event) {
+  event.preventDefault();
 
-    // Reset errors
-    const inputs = document.querySelectorAll('input');
-    const submitbtn = document.querySelector('#submitbtn');
-    const errorMessages = document.querySelectorAll('.error-message');
-    inputs.forEach(input => input.classList.remove('is-invalid'));
-    errorMessages.forEach(error => error.style.display = 'none');
+  const inputs = document.querySelectorAll('input');
+  const submitbtn = document.querySelector('#submitbtn');
+  const errorMessages = document.querySelectorAll('.error-message');
+  inputs.forEach(input => input.classList.remove('is-invalid'));
+  errorMessages.forEach(error => error.style.display = 'none');
 
-    // Values
-    const fullName = document.getElementById('fullName').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const phoneNumber = document.getElementById('phoneNumber').value.trim();
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    const termsCheck = document.getElementById('termsCheck').checked;
+  const fullName = document.getElementById('fullName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phoneNumber = document.getElementById('phoneNumber').value.trim();
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const termsCheck = document.getElementById('termsCheck').checked;
 
-    submitbtn.textContent = "loading...";
-    submitbtn.disabled = true;
+  submitbtn.textContent = "loading...";
+  submitbtn.disabled = true;
 
-    let isValid = true;
+  let isValid = true;
 
-    if (!fullName) {
-      document.getElementById('fullNameError').style.display = 'block';
-      document.getElementById('fullName').classList.add('is-invalid');
-      isValid = false;
-    }
+  // Full Name Validation
+  const fullNameRegex = /^[A-Za-z][A-Za-z ]{2,}$/;
+  if (!fullNameRegex.test(fullName)) {
+    document.getElementById('fullNameError').textContent = 'Enter a valid name starting with a letter and at least 3 characters long';
+    document.getElementById('fullNameError').style.display = 'block';
+    document.getElementById('fullName').classList.add('is-invalid');
+    isValid = false;
+  }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      document.getElementById('emailError').style.display = 'block';
-      document.getElementById('email').classList.add('is-invalid');
-      isValid = false;
-    }
+  // Email Validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    document.getElementById('emailError').style.display = 'block';
+    document.getElementById('email').classList.add('is-invalid');
+    isValid = false;
+  }
 
-    const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(phoneNumber)) {
-      document.getElementById('phoneNumberError').style.display = 'block';
-      document.getElementById('phoneNumber').classList.add('is-invalid');
-      isValid = false;
-    }
+  // Phone Number Validation
+  const phoneRegex = /^\d{10}$/;
+  if (!phoneRegex.test(phoneNumber)) {
+    document.getElementById('phoneNumberError').style.display = 'block';
+    document.getElementById('phoneNumber').classList.add('is-invalid');
+    isValid = false;
+  }
 
-    if (password.length < 8) {
-      document.getElementById('passwordError').style.display = 'block';
-      document.getElementById('password').classList.add('is-invalid');
-      isValid = false;
-    }
+  // Strong Password Validation
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+  if (!passwordRegex.test(password)) {
+    document.getElementById('passwordError').textContent = 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character';
+    document.getElementById('passwordError').style.display = 'block';
+    document.getElementById('password').classList.add('is-invalid');
+    isValid = false;
+  }
 
-    if (password !== confirmPassword) {
-      document.getElementById('confirmPasswordError').style.display = 'block';
-      document.getElementById('confirmPassword').classList.add('is-invalid');
-      isValid = false;
-    }
+  // Confirm Password Match
+  if (password !== confirmPassword) {
+    document.getElementById('confirmPasswordError').style.display = 'block';
+    document.getElementById('confirmPassword').classList.add('is-invalid');
+    isValid = false;
+  }
 
-    if (!termsCheck) {
-      document.getElementById('termsError').style.display = 'block';
-      document.getElementById('termsCheck').classList.add('is-invalid');
-      isValid = false;
-    }
+  // Terms Check
+  if (!termsCheck) {
+    document.getElementById('termsError').style.display = 'block';
+    document.getElementById('termsCheck').classList.add('is-invalid');
+    isValid = false;
+  }
 
-    // Submit
-    if (isValid) {
-      try {
-        const response = await fetch('http://localhost:3000/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fullname: fullName, email, phoneno: phoneNumber, password })
+  if (isValid) {
+    try {
+      const response = await fetch('http://localhost:3000/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullname: fullName, email, phoneno: phoneNumber, password })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Otp send successfully',
+        }).then(() => {
+          window.location.href = "/otp";
         });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Registered Successfully!',
-            text: result.message || 'Welcome to the platform!',
-          }).then(() => {
-            window.location.href = "/otp";
-          });
-          document.getElementById('signupForm').reset();
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Registration Failed',
-            text: result.message || 'Something went wrong. Please try again.',
-          });
-
-        }
-
-      } catch (error) {
+        document.getElementById('signupForm').reset();
+      } else {
         Swal.fire({
           icon: 'error',
-          title: 'Server Error',
-          text: error.message || 'Could not connect to the server.',
+          title: 'Registration Failed',
+          text: result.message || 'Something went wrong. Please try again.',
         });
-
       }
-    }
-                        submitbtn.disabled = false;
-                        submitbtn.textContent ="Sign Up"
 
-  });
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Server Error',
+        text: error.message || 'Could not connect to the server.',
+      });
+    }
+  }
+
+  submitbtn.disabled = false;
+  submitbtn.textContent = "Sign Up";
+});
+
 </script>
 </body>
 </html>
