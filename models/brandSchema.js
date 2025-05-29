@@ -8,13 +8,13 @@ const brandSchema = new Schema({
     unique: true,
     trim: true
   },
-  description: {
-    type: String,
-    required: true,
-    trim: true
-  },
+  // description: {
+  //   type: String,
+  //   required: true,
+  //   trim: true
+  // },
   brandImage: {
-    type: [String],
+    type: String,
     required: true
   },
   isBlocked:{

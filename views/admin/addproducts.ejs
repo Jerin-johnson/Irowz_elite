@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Product – Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/admin/addproduct.css" />
+  <link rel="stylesheet" href="/css/admin/admin.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+</head>
+<body>
+  <%- include('../partials/admin/header') %>
+
+  <div class="container">
+    <div class="header">
+      <h1>ADD NEW PRODUCT</h1>
+      <p>Add a new product to your store</p>
+    </div>
+
+    <div class="add-category-container">
+      <h2>Add Product</h2>
+      <form class="category-form" method="POST" action="/admin/product/add" enctype="multipart/form-data"
+        id="addProductForm" novalidate>
+        <input type="hidden" name="thumbnailIndex" id="thumbnailIndex">
+        <div class="form-group">
+          <label for="name">Product Name</label>
+          <input type="text" id="name" name="name" placeholder="Enter product name" required
+            aria-describedby="nameError" />
+          <p class="error-msg" id="nameError" style="display: none;"></p>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" placeholder="Enter product description" required
+            aria-describedby="descriptionError"></textarea>
+          <p class="error-msg" id="descriptionError" style="display: none;"></p>
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" name="category" required aria-describedby="categoryError">
+            <% if (categories && categories.length > 0) { %>
+              <option value="" disabled selected>Select a category</option>
+              <% categories.forEach(cat => { %>
+                <option value="<%= cat._id %>">
+                  <%= cat.name %>
+                </option>
+              <% }) %>
+            <% } else { %>
+              <option value="" disabled selected>No categories available</option>
+            <% } %>
+          </select>
+          <% if (!categories || categories.length === 0) { %>
+            <p class="error-msg">Please add a category first. <a href="/admin/category/add">Add Category</a></p>
+          <% } %>
+          <p class="error-msg" id="categoryError" style="display: none;"></p>
+        </div>
+
+        <div class="form-group">
+          <label for="brand">Brand</label>
+          <select id="brand" name="brand" required aria-describedby="brandError">
+            <% if (brands && brands.length > 0) { %>
+              <option value="" disabled selected>Select a brand</option>
+              <% brands.forEach(brand => { %>
+                <option value="<%= brand._id %>">
+                  <%= brand.brandName %>
+                </option>
+              <% }) %>
+            <% } else { %>
+              <option value="" disabled selected>No brands available</option>
+            <% } %>
+          </select>
+          <% if (!brands || brands.length === 0) { %>
+            <p class="error-msg">Please add a brand first. <a href="/admin/brand/add">Add Brand</a></p>
+          <% } %>
+          <p class="error-msg" id="brandError" style="display: none;"></p>
+        </div>
+
+        <div class="form-group">
+          <label for="stock">Stock Quantity</label>
+          <input type="number" id="stock" name="stock" placeholder="Enter stock quantity" min="0" required
+            aria-describedby="stockError" />
+          <p class="error-msg" id="stockError" style="display: none;"></p>
+        </div>
+
+        <div class="form-group">
+          <label for="regularPrice">Regular Price (₹)</label>
+          <input type="number" id="regularPrice" name="regularPrice" placeholder="Enter regular price" min="0"
+            step="0.01" required aria-describedby="regularPriceError" />
+          <p class="error-msg" id="regularPriceError" style="display: none;"></p>
+        </div>
+
+        <div class="form-group">
+          <label for="salePrice">Sale Price (₹)</label>
+          <input type="number" id="salePrice" name="salePrice" placeholder="Enter sale price" min="0" step="0.01"
+            required aria-describedby="salePriceError" />
+          <p class="error-msg" id="salePriceError" style="display: none;"></p>
+        </div>
+
+        <div class="form-group">
+          <label for="images">Product Images (Minimum 3)</label>
+          <input type="file" class="form-control" id="images" name="images" accept="image/png, image/jpeg, image/jpg"
+            multiple aria-describedby="imagesError" />
+          <p class="error-msg" id="imagesError" style="display: none;"></p>
+          <div id="imagePreviewContainer" class="image-preview-grid"></div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="window.location.href='/admin/product'"
+            aria-label="Cancel adding product">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn" <% if (!categories || categories.length === 0) { %>disabled<% } %>
+            aria-label="Add product">Add Product</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Crop Modal -->
+    <div class="crop-modal" id="cropModal">
+      <div class="crop-modal-content">
+        <img id="croppedImagePreview" src="" alt="Cropped image preview">
+        <div class="crop-modal-buttons">
+          <button class="save-btn" id="saveCropBtn" aria-label="Save cropped image">Save</button>
+          <button class="cancel-btn" id="cancelCropBtn" aria-label="Cancel cropping">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/admin/adminNav.js"></script>
+    <script src="/js/admin/addProduct.js"></script>
+</body>
+</html>

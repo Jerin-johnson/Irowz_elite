@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Category Management – Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/admin/category.css" />
+  <link rel="stylesheet" href="/css/admin/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+  <%- include('../partials/admin/header') %>
+
+  <div class="container">
+    <div class="header">
+      <h1>CATEGORY MANAGEMENT</h1>
+      <p>Manage your product categories efficiently</p>
+    </div>
+
+    <!-- Controls (search + add) -->
+    <div class="controls">
+      <form method="GET" action="/admin/category" class="search-container">
+        <input  type="text"
+                id="searchInput"
+                class="search-input"
+                name="search"
+                value="<%= search || '' %>"
+                placeholder="Search categories..." />
+        <button type="submit" class="btn btn-secondary">Search</button>
+        <a href="/admin/category">
+          <button type="button" class="btn btn-secondary">Reset</button>
+        </a>
+      </form>
+
+      <a href="/admin/category/add">
+        <button class="btn btn-primary"><span>+</span> Add Category</button>
+      </a>
+    </div>
+
+    <!-- Category Table -->
+    <div class="table-container">
+      <table class="table" id="categoryTable">
+        <thead>
+          <tr>
+            <th>S.NO</th>
+            <th>NAME</th>
+            <th>DESCRIPTION</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (categories.length === 0) { %>
+            <tr>
+              <td colspan="4" class="no-data">
+                <div>📂</div>
+                <h3>No categories found</h3>
+                <p>Try a different search or add a new category</p>
+              </td>
+            </tr>
+          <% } else { %>
+            <% categories.forEach((cat, index) => { %>
+              <tr>
+                <td><%= (currentPage - 1) * limit + index + 1 %></td>
+                <td><%= cat.name %></td>
+                <td><%= cat.description %></td>
+                <td>
+                  <div class="action-buttons">
+                    <a href="/admin/category/edit?id=<%= cat._id %>">
+                      <button class="btn btn-warning btn-sm">Edit</button>
+                    </a>
+                    <% if (cat.isListed) { %>
+                      <button class="btn btn-danger btn-sm unlist-btn" data-url="/admin/category/unlist?id=<%= cat._id %>">Unlist</button>
+                    <% } else { %>
+                      <button class="btn btn-success btn-sm list-btn" data-url="/admin/category/list?id=<%= cat._id %>">List</button>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination generated server-side -->
+    <div class="pagination">
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="/admin/category?page=<%= i %>&search=<%= search || '' %>">
+          <button class="<%= i === currentPage ? 'active' : '' %>"><%= i %></button>
+        </a>
+      <% } %>
+    </div>
+  </div>
+
+  <script src="/js/admin/adminNav.js"></script>
+
+  <!-- SweetAlert confirmation for Unlist/List -->
+  <script>
+    document.querySelectorAll('.unlist-btn, .list-btn').forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        const url = button.getAttribute('data-url');
+        const isUnlist = button.classList.contains('unlist-btn');
+
+        Swal.fire({
+          title: isUnlist ? 'Are you sure?' : 'Confirm Listing',
+          text: isUnlist
+            ? 'You are about to unlist this category.'
+            : 'You are about to list this category.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: isUnlist ? '#d33' : '#28a745',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: isUnlist ? 'Yes, unlist it' : 'Yes, list it',
+          reverseButtons: true
+        }).then(result => {
+          if (result.isConfirmed) {
+            window.location.href = url;
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

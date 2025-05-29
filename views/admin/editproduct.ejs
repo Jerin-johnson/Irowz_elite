@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Product – Admin Panel</title>
+  <link rel="stylesheet" href="/css/admin/editproduct.css" />
+  <link rel="stylesheet" href="/css/admin/admin.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+</head>
+<body>
+  <%- include('../partials/admin/header') %>
+
+  <div class="container">
+    <div class="header">
+      <h1>EDIT PRODUCT</h1>
+      <p>Update product details</p>
+    </div>
+
+    <div class="add-category-container">
+      <h2>Edit Product</h2>
+      <% if (error) { %>
+        <p class="error-msg"><%= error %></p>
+      <% } else if (!product) { %>
+        <p class="error-msg">Product not found.</p>
+      <% } else { %>
+        <form class="category-form" method="POST" action="/admin/product/edit/<%= product._id %>" enctype="multipart/form-data"
+          id="editProductForm" novalidate>
+          <input type="hidden" name="thumbnailIndex" id="thumbnailIndex" value="0">
+          <input type="hidden" id="productId" value="<%= product._id %>">
+          <div class="form-group">
+            <label for="name">Product Name</label>
+            <input type="text" id="name" name="name" value="<%= product.productName %>" placeholder="Enter product name" required />
+            <p class="error-msg" id="nameError"></p>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" placeholder="Enter product description" required><%= product.description %></textarea>
+            <p class="error-msg" id="descriptionError"></p>
+          </div>
+
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+              <% if (categories && categories.length > 0) { %>
+                <option value="" disabled>Select a category</option>
+                <% categories.forEach(cat => { %>
+                  <option value="<%= cat._id %>" <%= product.category && product.category.toString() === cat._id.toString() ? 'selected' : '' %>>
+                    <%= cat.name %>
+                  </option>
+                <% }) %>
+              <% } else { %>
+                <option value="" disabled selected>No categories available</option>
+              <% } %>
+            </select>
+            <% if (!categories || categories.length === 0) { %>
+              <p class="error-msg"><a href="/admin/category/add">Add Category</a></p>
+            <% } %>
+            <p class="error-msg" id="categoryError"></p>
+          </div>
+
+          <div class="form-group">
+            <label for="brand">Brand</label>
+            <select id="brand" name="brand" required>
+              <% if (brands && brands.length > 0) { %>
+                <option value="" disabled>Select a brand</option>
+                <% brands.forEach(brand => { %>
+                  <option value="<%= brand._id %>" <%= product.brand && product.brand.toString() === brand._id.toString() ? 'selected' : '' %>>
+                    <%= brand.brandName %>
+                  </option>
+                <% }) %>
+              <% } else { %>
+                <option value="" disabled selected>No brands available</option>
+              <% } %>
+            </select>
+            <% if (!brands || brands.length === 0) { %>
+              <p class="error-msg"><a href="/admin/brand/add">Add Brand</a></p>
+            <% } %>
+            <p class="error-msg" id="brandError"></p>
+          </div>
+
+          <div class="form-group">
+            <label for="stock">Stock Quantity</label>
+            <input type="number" id="stock" name="stock" value="<%= product.stock %>" placeholder="Enter stock quantity" min="0" required />
+            <p class="error-msg" id="stockError"></p>
+          </div>
+
+          <div class="form-group">
+            <label for="regularPrice">Regular Price (₹)</label>
+            <input type="number" id="regularPrice" name="regularPrice" value="<%= product.regularPrice %>" placeholder="Enter regular price" min="0" step="0.01" required />
+            <p class="error-msg" id="regularPriceError"></p>
+          </div>
+
+          <div class="form-group">
+            <label for="salePrice">Sale Price (₹)</label>
+            <input type="number" id="salePrice" name="salePrice" value="<%= product.salePrice %>" placeholder="Enter sale price" min="0" step="0.01" required />
+            <p class="error-msg" id="salePriceError"></p>
+          </div>
+
+          <div class="form-group">
+            <label for="images">Product Images (3-5)</label>
+            <input type="file" class="form-control" id="images" name="images" accept="image/png, image/jpeg, image/jpg" multiple />
+            <p class="error-msg" id="imagesError"></p>
+            <div id="imagePreviewContainer" class="image-preview-grid">
+              <% product.productImage.forEach((img, index) => { %>
+                <div class="image-preview-wrapper" data-image-id="<%= img._id %>">
+                  <img class="image-preview-img" src="/<%= img.path %>" alt="Product image <%= index + 1 %>">
+                  <button class="remove-btn" type="button" aria-label="Remove image <%= index + 1 %>">×</button>
+                </div>
+              <% }) %>
+            </div>
+            <input type="hidden" name="existingImages" id="existingImages" value='<%= JSON.stringify(product.productImage) %>'>
+            <input type="hidden" name="removedImages" id="removedImages" value="[]">
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='/admin/product'">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="submitBtn" <% if (!categories || categories.length === 0) { %>disabled<% } %>>Update Product</button>
+          </div>
+        </form>
+      <% } %>
+
+      <!-- Crop Modal -->
+      <div class="crop-modal" id="cropModal" style="display: none;">
+        <div class="crop-modal-content">
+          <button class="close-btn" id="closeCropModalBtn" aria-label="Close crop modal">×</button>
+          <img id="croppedImagePreview" src="" alt="Cropped image preview">
+          <div class="crop-modal-buttons">
+            <button class="save-btn" id="saveCropBtn" aria-label="Save cropped image">Save</button>
+            <button class="cancel-btn" id="cancelCropBtn" aria-label="Cancel cropping">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <script src="/js/admin/adminNav.js"></script>
+    <script src="/js/admin/editProduct.js"></script>
+    
+</body>
+</html>

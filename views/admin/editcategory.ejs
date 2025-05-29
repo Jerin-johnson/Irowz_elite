@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Edit Category – Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/admin/admin.css" />
+  <link rel="stylesheet" href="/css/admin/category.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ 
+</head>
+<body>
+  <%- include('../partials/admin/header') %>
+
+  <div class="form-container">
+    <h2>Edit Category</h2>
+    <form id="editCategoryForm" novalidate>
+      <input type="hidden" id="categoryId" value="<%= category._id %>" />
+
+      <div class="form-group">
+        <label for="name">Category Name</label>
+        <input type="text" id="name" value="<%= category.name %>" required />
+        <div id="nameError" class="error-msg"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" rows="4" required><%= category.description %></textarea>
+        <div id="descriptionError" class="error-msg"></div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="/admin/category" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+ <script src="/js/admin/adminNav.js"></script>
+  <script>
+    const form = document.getElementById('editCategoryForm');
+    const nameInput = document.getElementById('name');
+    const descInput = document.getElementById('description');
+    const id = document.getElementById('categoryId').value;
+    const nameError = document.getElementById('nameError');
+    const descError = document.getElementById('descriptionError');
+
+    const validate = () => {
+      let valid = true;
+      const name = nameInput.value.trim();
+      const desc = descInput.value.trim();
+      const regex = /^[A-Za-z0-9\s-]+$/;
+
+      nameError.textContent = '';
+      descError.textContent = '';
+
+      if (!name) {
+        nameError.textContent = 'Name is required.';
+        valid = false;
+      } else if (!regex.test(name)) {
+        nameError.textContent = 'Only letters, numbers, spaces and dashes allowed.';
+        valid = false;
+      }
+
+      if (!desc) {
+        descError.textContent = 'Description is required.';
+        valid = false;
+      } else if (!regex.test(desc)) {
+        descError.textContent = 'Only letters, numbers, spaces and dashes allowed.';
+        valid = false;
+      }
+
+      return valid;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validate()) {
+        return Swal.fire({ icon: 'error', text: 'Fix validation errors.' });
+      }
+
+      try {
+        const res = await fetch(`/admin/category/edit/${id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: nameInput.value.trim(),
+            description: descInput.value.trim()
+          })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Category updated!',
+            showConfirmButton: false,
+            timer: 1500
+          }).then(() => {
+            window.location.href = '/admin/category';
+          });
+        } else {
+          Swal.fire({ icon: 'error', title: 'Update Failed', text: data.message });
+        }
+      } catch (err) {
+        Swal.fire({ icon: 'error', title: 'Error', text: 'Could not connect to server.' });
+      }
+    });
+
+    nameInput.addEventListener('input', validate);
+    descInput.addEventListener('input', validate);
+  </script>
+</body>
+</html>

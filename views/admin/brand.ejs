@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brand Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/css/admin/brand.css" />
+    <link rel="stylesheet" href="/css/admin/admin.css" />
+    <link rel="stylesheet" href="/css/admin/admin.css" />
+  </head>
+  <body>
+    <%- include('../partials/admin/header') %>
+
+    <div class="main-container">
+      <div class="header">
+        <h1>Brands</h1>
+      </div>
+
+      <div class="layout">
+        <!-- Add Brand Form -->
+        <div class="form-section">
+          <h2>Add Brand</h2>
+          <form id="brand-form" class="form" enctype="multipart/form-data">
+            <div class="form-group">
+              <label for="brand-name">Brand Name</label>
+              <input type="text" id="brand-name" name="brandName" placeholder="Enter brand name" required />
+            </div>
+            <div class="form-group">
+              <label for="brand-logo">Brand Logo</label>
+              <input type="file" id="brand-logo" name="brandImage" accept="image/*" />
+            </div>
+            <button type="submit" class="btn btn-primary">Add Brand</button>
+          </form>
+        </div>
+
+        <!-- Brand List -->
+        <div class="list-section">
+          <h3>Brand List</h3>
+          <div class="search-bar">
+            <form id="search-form" action="/admin/brand" method="GET">
+              <input type="text" id="search-input" name="search" placeholder="Search brands..." value="<%= search || '' %>" />
+              <button type="submit" id="search-button" class="btn btn-primary">Search</button>
+            </form>
+          </div>
+
+          <div id="loading" class="loading"><div class="spinner"></div><p>Loading...</p></div>
+          <div id="error" class="error">
+            <p id="error-message">Error loading brands.</p>
+            <button class="btn btn-primary" onclick="window.location.reload()">Retry</button>
+          </div>
+          <div id="empty" class="empty">
+            <p>No brands found. Add a brand!</p>
+          </div>
+
+          <div id="table-wrapper">
+            <table class="brand-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Logo</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="brand-table-body">
+                <% if (brands && brands.length > 0) { %>
+                  <% brands.forEach((brand) => { %>
+                    <tr>
+                      <td><%= brand.brandName %></td>
+                      <td>
+                        <% if (brand.brandImage) { %>
+                          <img src="<%= brand.brandImage %>" class="brand-logo" alt="<%= brand.brandName %>" />
+                        <% } else { %>
+                          <div class="no-logo">No Logo</div>
+                        <% } %>
+                      </td>
+                      <td>
+                        <span class="status-<%= brand.isBlocked ? 'blocked' : 'active' %>">
+                          <%= brand.isBlocked ? 'Blocked' : 'Active' %>
+                        </span>
+                      </td>
+                      <td class="action-buttons">
+                        <button class="btn btn-action <%= brand.isBlocked ? 'btn-unblock' : 'btn-block' %>"
+                          onclick="toggleBrandStatus('<%= brand._id %>')">
+                          <%= brand.isBlocked ? 'Unblock' : 'Block' %>
+                        </button>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" class="no-data">
+                      <div class="no-data-icon">📂</div>
+                      <h3>No brands found</h3>
+                      <p>Try a different search or add a new brand</p>
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination" id="pagination">
+            <% if (totalPages && totalPages > 1) { %>
+              <% for (let i = 1; i <= totalPages; i++) { %>
+                <a href="/admin/brand?page=<%= i %>&search=<%= search || '' %>">
+                  <button class="<%= i === currentPage ? 'active' : '' %>"><%= i %></button>
+                </a>
+              <% } %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/admin/adminNav.js"></script>
+    <script>
+      // Get DOM elements
+  const tableWrapper = document.getElementById('table-wrapper');
+  const loading = document.getElementById('loading');
+  const empty = document.getElementById('empty');
+  const error = document.getElementById('error');
+  const errorMessage = document.getElementById('error-message');
+  const form = document.getElementById("brand-form");
+
+  // Form submission
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const submitBtn = form.querySelector("button");
+    submitBtn.disabled = true;
+    showLoading();
+
+    const formData = new FormData(form);
+    const brandName = formData.get("brandName").trim();
+
+    const nameError = !brandName || brandName.length < 3
+      ? "Brand name must be at least 3 characters."
+      : /^[a-zA-Z0-9\s-]*$/.test(brandName)
+      ? null
+      : "Only letters, numbers, spaces, and hyphens allowed.";
+
+    if (nameError) {
+      Swal.fire({ icon: "error", title: "Invalid Input", text: nameError });
+      submitBtn.disabled = false;
+      hideLoading();
+      return;
+    }
+
+    try {
+      const res = await fetch("/admin/brand", {
+        method: "POST",
+        body: formData,
+        credentials: 'include' // Important for session cookies
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to add brand");
+      }
+      
+      await Swal.fire({ 
+        icon: "success", 
+        title: "Brand added!", 
+        timer: 1500, 
+        showConfirmButton: false 
+      });
+      location.reload();
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Error", text: err.message });
+    } finally {
+      submitBtn.disabled = false;
+      hideLoading();
+    }
+  });
+
+      // Toggle brand status
+      async function toggleBrandStatus(id) {
+        const row = document.querySelector(`button[onclick*="${id}"]`).closest("tr");
+        const brandName = row.querySelector("td").textContent;
+        const currentStatus = row.querySelector(".status-active") ? "active" : "blocked";
+        const newStatus = currentStatus === "active" ? "blocked" : "active";
+
+        const confirm = await Swal.fire({
+          title: `Confirm ${newStatus === "active" ? "Unblock" : "Block"}`,
+          text: `Are you sure you want to ${newStatus === "active" ? "unblock" : "block"} ${brandName}?`,
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Yes",
+          cancelButtonText: "No",
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        try {
+          const res = await fetch(`/admin/brand/${id}/`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ isBlocked: newStatus === "blocked" }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Failed to update status.");
+          await Swal.fire({ icon: "success", title: "Updated!", timer: 1500, showConfirmButton: false });
+          location.reload(); // Reload to reflect server-side pagination
+        } catch (err) {
+          Swal.fire({ icon: "error", title: "Error", text: err.message });
+        }
+      }
+
+      // Show loading
+      function showLoading() {
+        loading.classList.add("show");
+        tableWrapper.style.display = "none";
+        empty.classList.remove("show");
+        error.classList.remove("show");
+      }
+
+      // Hide loading
+      function hideLoading() {
+        loading.classList.remove("show");
+      }
+
+      // Show error
+      function showError(message) {
+        errorMessage.textContent = message;
+        error.classList.add("show");
+        tableWrapper.style.display = "none";
+        empty.classList.remove("show");
+      }
+    </script>
+  </body>
+</html>

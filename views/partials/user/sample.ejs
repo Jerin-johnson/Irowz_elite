@@ -1,0 +1,53 @@
+<header class="irowz-header">
+  <!-- Navigation Bar -->
+  <nav class="irowz-navbar irowz-sticky-top">
+    <div class="irowz-container">
+      <a class="irowz-navbar-brand" href="#">IrowzElite</a>
+      <button class="irowz-navbar-toggler" type="button" onclick="toggleNav()">
+        <span class="irowz-navbar-toggler-icon"></span>
+      </button>
+      <div class="irowz-navbar-collapse" id="navbarNav">
+        <ul class="irowz-navbar-nav">
+          <li class="irowz-nav-item">
+            <a class="irowz-nav-link irowz-active" href="#">Home</a>
+          </li>
+          <li class="irowz-nav-item">
+            <a class="irowz-nav-link" href="#">Brand</a>
+          </li>
+          <li class="irowz-nav-item">
+            <a class="irowz-nav-link" href="#">Product</a>
+          </li>
+          <li class="irowz-nav-item">
+            <a class="irowz-nav-link" href="#">Contact us</a>
+          </li>
+        </ul>
+        <div class="irowz-nav-actions">
+          <div class="irowz-search-bar">
+            <input type="text" placeholder="Search...">
+            <button type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+          <div class="irowz-user-actions">
+            <% if (user) { %>
+            <div class="irowz-dropdown">
+              <a href="/" style="text-decoration: none; color: #ffffff;" class="irowz-sign-in-link"><%= user.fullName.split(" ")[0].toUpperCase() %></a>
+              <div class="irowz-dropdown-content">
+                <a href="/userProfile">Profile</a>
+                <a href="#" >Logout</a>
+              </div>
+            </div>
+            <% } else { %>
+            <a href="/login" class="irowz-btn-login">Login</a>
+            <a href="/signup" class="irowz-btn-signup">Signup</a>
+            <% } %>
+            <a href="#" class="irowz-cart-icon">
+              <i class="fas fa-shopping-cart"></i>
+              <span class="irowz-cart-badge">2</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>

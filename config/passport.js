@@ -20,7 +20,7 @@ async (accessToken, refreshToken, profile, done) => {
             const newUser = new User({
                 googleId: profile.id,
                 fullName: profile.displayName,
-                email: profile.emails[0].value,   // optional: profile.photos[0].value for picture
+                email: profile.emails[0].value,   // 
             });
 
             await newUser.save();

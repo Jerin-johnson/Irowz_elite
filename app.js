@@ -2,6 +2,11 @@ const express = require("express");
 const app = express();
 const env = require("dotenv").config()
 const {connectDB}= require("./config/db.js");
+const  nocache = require("nocache");
+
+
+app.use(nocache())
+
 
 //google sign in
 const {passport}= require("./config/passport.js")
@@ -26,6 +31,7 @@ app.use(session({
     }
 }))
 
+app.use('/uploads', express.static('uploads'));
 
 
 app.use(passport.initialize());
@@ -52,8 +58,6 @@ app.use(express.static('public'));
 
 
 
-
-
 app.use("/",userRouter);
 app.use("/admin",adminRouter)
 
@@ -66,7 +70,7 @@ app.use("/admin",adminRouter)
 
 
 
-app.listen(process.env.PORT || 3000,()=>{
+app.listen(process.env.PORT,()=>{
     console.log("The server is running")
 })
 

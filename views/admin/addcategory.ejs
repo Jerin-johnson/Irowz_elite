@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Category – Admin</title>
+
+   <link rel="stylesheet" href="/css/admin/category.css" />
+  <link rel="stylesheet" href="/css/admin/admin.css" />
+
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+  <%- include('../partials/admin/header') %>
+
+  <div class="add-category-container">
+    <h2>Add New Category</h2>
+    
+    <form id="categoryForm" class="category-form">
+      <div class="form-group">
+        <label for="name">Category Name</label>
+        <input type="text" id="name" name="name" placeholder="Enter category name">
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" placeholder="Enter description" rows="4"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">Add Category</button>
+        <a href="/admin/category" class="btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+  const form = document.getElementById('categoryForm');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('name').value.trim();
+    const description = document.getElementById('description').value.trim();
+
+    // Regex to allow only letters, numbers, spaces, and hyphens
+    const validNameRegex = /^[a-zA-Z0-9\- ]+$/;
+
+    // === VALIDATION ===
+    if (!name || !description) {
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Missing Fields',
+        text: 'Please enter both category name and description.',
+      });
+    }
+
+    if (name.length < 3) {
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Invalid Name',
+        text: 'Category name must be at least 3 characters long.',
+      });
+    }
+
+    if (!validNameRegex.test(name)) {
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Invalid Characters',
+        text: 'Category name must not contain special characters like underscore, @, ! etc.',
+      });
+    }
+
+    if (description.length < 10) {
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Description Too Short',
+        text: 'Description must be at least 10 characters long.',
+      });
+    }
+
+    // === FETCH API ===
+    try {
+      const response = await fetch('/admin/category/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, description })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Category Added',
+          text: result.message || 'Category added successfully!',
+        }).then(() => {
+          window.location.href = '/admin/category';
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: result.message || 'Failed to add category.',
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Request Failed',
+        text: 'Unable to contact server.',
+      });
+    }
+  });
+</script>
+
+  
+</body>
+</html>

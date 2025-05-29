@@ -8,7 +8,7 @@ const loadCustomer = async (req, res) => {
     const filter = req.query.filter || ''
      const search = req.query.search || '';
      const page = parseInt(req.query.page) || 1;
-     const limit =1;
+     const limit =4;
 
     let query = {
       isAdmin:false,
@@ -26,8 +26,8 @@ const loadCustomer = async (req, res) => {
       query.isBlocked = true;
     }
 
-    const user = await User.find(query).sort({createdAt:-1}).limit(limit)
-    .skip((page-1)*limit)
+    const user = await User.find(query).sort({createdAt:-1})
+    .skip((page-1)*limit).limit(limit)
     .exec();
 
     const totalUsers = await User.find(query).countDocuments();

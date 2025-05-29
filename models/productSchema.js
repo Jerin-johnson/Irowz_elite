@@ -12,30 +12,32 @@ const productSchema = new Schema({
     required: true,
     trim: true
   },
-  brand: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  productOffer: {
-    type: Number,
-    required: true,
-    min: 0
-  },
+  // productOffer: {
+  //   type: Number,
+  //   required: true,
+  //   min: 0
+  // },
   quantity: {
     type: Number,
     default: 0,
     min: 0
   },
-  color: {
-    type: String,
-    required: true,
-    trim: true
+  brand: {
+    type: Schema.Types.ObjectId,
+    ref: 'Brand',
   },
+  // color: {
+  //   type: String,
+  //   required: true,
+  //   trim: true
+  // },
   productImage: {
-    type: [String],
-    required: true,
-    validate: [array => array.length > 0, 'At least one product image is required']
+    type: [{
+      path: { type: String, required: true }, // Path to the image file
+      // Add other properties if needed, e.g., filename, size, etc.
+      // filename: { type: String },
+      // size: { type: Number },
+    }],
   },
   isBlocked: {
     type: Boolean,
@@ -47,16 +49,16 @@ const productSchema = new Schema({
     default: 'Available',
     required: true
   },
-  categoryId: {
+  category: {
     type: Schema.Types.ObjectId,
     ref: 'Category',
-    required: true
+    // required: true
   },
-  offerId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Offer',
-    default: null
-  },
+  // offerId: {
+  //   type: Schema.Types.ObjectId,
+  //   ref: 'Offer',
+  //   default: null
+  // },
   stock: {
     type: Number,
     required: true,
@@ -74,7 +76,7 @@ const productSchema = new Schema({
   },
   rating: {
     type: Number,
-    default: 0,
+    default: 4,
     min: 0,
     max: 5
   }

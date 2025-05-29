@@ -1,0 +1,34 @@
+<!-- Product Listing Section -->
+    <section class="product-listing">
+      <h2>All Products</h2>
+      <div class="product-grid">
+        <% allProducts.forEach(product => { %>
+        <div class="product-card">
+          <img src="<%= product.image %>" alt="<%= product.name %>" />
+          <h3><%= product.name %></h3>
+          <div class="price">
+            <span class="original-price">₹<%= product.originalPrice %></span>
+            <span class="discounted-price"
+              >₹<%= product.discountedPrice %></span
+            >
+          </div>
+          <span class="discount"><%= product.discount %></span>
+          <span class="stock-status"><%= product.stockStatus %></span>
+          <div class="rating">
+            <% for (let i = 0; i < 5; i++) { %>
+            <span class="star <%= i < product.rating ? 'filled' : '' %>"
+              >★</span
+            >
+            <% } %>
+            <span>(<%= product.reviews %>)</span>
+          </div>
+          <a href="/add-to-wishlist/<%= product._id %>">
+            <button class="add-to-wishlist">♡ Wishlist</button>
+          </a>
+          <a href="/add-to-cart/<%= product._id %>">
+            <button class="add-to-cart">Add to Cart</button>
+          </a>
+        </div>
+        <% }) %>
+      </div>
+    </section>
