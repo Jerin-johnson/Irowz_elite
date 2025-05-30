@@ -246,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const removeBtn = document.createElement('button');
       removeBtn.className = 'remove-btn';
-      removeBtn.innerHTML = '×';
+      removeBtn.innerHTML = 'X';
       removeBtn.type = 'button';
       removeBtn.setAttribute('aria-label', `Remove image ${index + 1}`);
 

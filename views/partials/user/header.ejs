@@ -6,7 +6,7 @@
     <meta name="keywords" content="Male_Fashion, unica, creative, html" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Male-Fashion | Template</title>
+    <title>Irowz Elitle | Ecommerce</title>
     <style>
        .sign-in-link {
         text-decoration: none;
@@ -56,6 +56,33 @@
         position: relative;
         z-index: 500;
       }
+      .premium-user-link {
+  color: #1a1a1a; /* Dark but soft black */
+  font-weight: 600;
+  font-size: 18px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px; /* space between name and icon */
+  transition: color 0.3s ease;
+}
+
+.premium-user-link:hover {
+  color: #b4883e; /* elegant gold tone on hover */
+}
+
+.premium-user-link i {
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.premium-user-link:hover i {
+  transform: rotate(180deg); /* subtle icon rotation on hover */
+}
+
     </style>
 
     <!-- Google Font -->
@@ -65,6 +92,10 @@
     />
     <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css">
 
+    <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
 
     <!-- Css Styles -->
     <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
@@ -148,7 +179,23 @@
         <div class="row">
           <div class="col-lg-3 col-md-3">
             <div class="header__logo">
-              <a href="/"><img src="img/logo.png" alt="" /></a>
+             <a href="/" style="
+  text-decoration: none; 
+  color: black; 
+  font-size: 35px; 
+  font-style: italic; 
+  font-weight: bold; 
+  letter-spacing: 1px;
+  position: absolute; 
+  top: 19px; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: color 0.3s ease, transform 0.3s ease;
+" 
+onmouseover="this.style.color='black'; this.style.transform='scale(1.05)';" 
+onmouseout="this.style.color='black'; this.style.transform='scale(1)';">
+  Irowz Elite
+</a>
+
             </div>
           </div>
           <div class="col-lg-6 col-md-6">
@@ -165,7 +212,8 @@
             <div class="header__nav__option">
               <% if (user) { %>
               <div class="dropdown">
-                <a style="color: black; font-weight: 600; font-size: 18px;"><%= user.fullName.split(" ")[0].toUpperCase() %></a>
+                <a class="premium-user-link"><%= user.fullName.split(" ")[0].toUpperCase() %> <i class="fas fa-chevron-down"></i>
+</a>
                 <div class="dropdown-content">
                   <a href="/profile">Profile</a>
                   <a href="#" onclick="confirmLogout(event)">Logout</a>

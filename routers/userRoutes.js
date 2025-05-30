@@ -2,7 +2,7 @@ const express = require("express");
 const userRouter = express.Router();
 const {loadHomePage,pageNotFound,loadSignup,loadLogin,signUp,loadOtp,verifyOtp,ResentOtp,verifyLogin,userLogout,loadShoppingPage}=require("../controllers/user/userController.js");
 const{loadVerifyEmail,verifyEmail,loadForgetPasswordPage,loadForgetPasswordOtpPage,verifyForgetOtp,resetPassword,loadProfilePage} = require("../controllers/user/profileController.js")
-const { userAuth, isUserLoggedIn, isUserLoggedOut,ensureOtpSession} = require("../middleware/userMiddleWare.js")
+const { userAuth, isUserLoggedIn, isUserLoggedOut,ensureOtpSession,checkWhetherUserIsBlocked} = require("../middleware/userMiddleWare.js")
 //google sign in
 const {passport}= require("../config/passport");
 const{preventAccessingOtp,preventGoBackToVerifyEmail}=require("../middleware/profileMiddleware.js")
@@ -10,7 +10,7 @@ const{preventAccessingOtp,preventGoBackToVerifyEmail}=require("../middleware/pro
 
 
 // For Loading Home page & shopping page
-userRouter.get("/",loadHomePage);
+userRouter.get("/",checkWhetherUserIsBlocked,loadHomePage);
 userRouter.get("/shop",userAuth,loadShoppingPage);
 
 // get and post signup

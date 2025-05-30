@@ -214,6 +214,62 @@ img.default-img {
     font-size: 12px;
   }
 }
+
+p {
+    font-size: 15px;
+    font-family: "Nunito Sans", sans-serif;
+    color: #ffffff;
+    font-weight: 400;
+    line-height: 25px;
+    margin: 0 0 15px 0;
+}
+.hero__text h6 {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 28px;
+    position: relative;
+    top: 100px;
+    opacity: 0;
+    -webkit-transition: all, 0.3s;
+    -o-transition: all, 0.3s;
+    transition: all, 0.3s;
+}
+.hero__text h2 {
+    color: #000000;
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 58px;
+    margin-bottom: 30px;
+    position: relative;
+    top: 100px;
+    opacity: 0;
+    -webkit-transition: all, 0.6s;
+    -o-transition: all, 0.6s;
+    transition: all, 0.6s;
+}
+
+li[data-filter=".new-arrivals"] {
+  color: #222; /* Dark charcoal, softer than pure black */
+  font-size: 32px;
+  margin-top: 50px;
+  font-weight: 700; /* Bold */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 1.5px; /* Spacing for elegance */
+  text-transform: uppercase; /* Capital letters for impact */
+  border-bottom: 3px solid #c59d5f; /* Gold-ish underline */
+  padding-bottom: 8px;
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+li[data-filter=".new-arrivals"]:hover {
+  color: #c59d5f; /* Gold-ish on hover */
+  border-color: #a37f3a; /* Darker gold on hover */
+}
+
   
 </style>
 
@@ -275,24 +331,24 @@ img.default-img {
 <!-- Hero Section End -->
 
 <!-- Banner Section Begin -->
-<section class="banner spad">
+<!-- <section class="banner spad">
   <div class="container">
     <div class="row">
-      <div class="col-lg-7 offset-lg-4">
+   <div class="col-lg-7 offset-lg-4">
         <div class="banner__item">
           <div class="banner__item__pic">
-            <img src="img/banner/banner-1.jpg" alt="" />
+            <img src="\uploads\images\product-1748523407062-7s8wr2exirs.jpg" alt="" />
           </div>
           <div class="banner__item__text">
-            <h2>Clothing Collections 2030</h2>
-            <a href="#">Shop now</a>
+            <h2>New Collections 2030</h2>
+            <a href="/shop">Shop now</a>
           </div>
         </div>
-      </div>
-      <div class="col-lg-5">
+      </div> -->
+      <!-- <div class="col-lg-5">
         <div class="banner__item banner__item--middle">
           <div class="banner__item__pic">
-            <img src="img/banner/banner-2.jpg" alt="" />
+            <img src="\uploads\images\product-1748523407062-7s8wr2exirs.jpg" alt="" />
           </div>
           <div class="banner__item__text">
             <h2>Accessories</h2>
@@ -313,7 +369,7 @@ img.default-img {
       </div>
     </div>
   </div>
-</section>
+</section>  -->
 <!-- Banner Section End -->
 
 <!-- Product Section Begin -->
@@ -323,7 +379,7 @@ img.default-img {
       <div class="col-lg-12">
         <ul class="filter__controls">
           <!-- <li class="active" data-filter="*">Best Sellers</li> -->
-          <li data-filter=".new-arrivals">New Arrivals</li>
+          <li data-filter=".new-arrivals" style="color: black; font-size: 30px; margin-top: 50px;">New Arrivals</li>
           <!-- <li data-filter=".hot-sales">Hot Sales</li> -->
         </ul>
       </div>
@@ -618,15 +674,15 @@ img.default-img {
           <div class="col-lg-3">
             <div class="categories__text">
               <h2>
-                Clothings Hot <br />
-                <span>Shoe Collection</span> <br />
-                Accessories
+                 Luxury <br />
+                <span> Hot Collection</span> <br />
+                Branded
               </h2>
             </div>
           </div>
           <div class="col-lg-4">
             <div class="categories__hot__deal">
-              <img src="img/product-sale.png" alt="" />
+              <img src="\uploads\images\product-1748523407062-7s8wr2exirs.jpg" style="border-radius: 29px;" alt="" />
               <div class="hot__deal__sticker">
                 <span>Sale Of</span>
                 <h5>$29.99</h5>
@@ -696,8 +752,8 @@ img.default-img {
         <div class="row">
           <div class="col-lg-12">
             <div class="section-title">
-              <span>Latest News</span>
-              <h2>Fashion New Trends</h2>
+              <span>Branded Collections</span>
+              <h2>Watc New Trends</h2>
             </div>
           </div>
         </div>
@@ -714,7 +770,7 @@ img.default-img {
                   2020</span
                 >
                 <h5>What Curling Irons Are The Best Ones</h5>
-                <a href="#">Read More</a>
+                <a href="#">Shop Now</a>
               </div>
             </div>
           </div>
@@ -730,7 +786,7 @@ img.default-img {
                   2020</span
                 >
                 <h5>Eternity Bands Do Last Forever</h5>
-                <a href="#">Read More</a>
+                <a href="#">Shop Now</a>
               </div>
             </div>
           </div>
@@ -746,7 +802,7 @@ img.default-img {
                   2020</span
                 >
                 <h5>The Health Benefits Of Sunglasses</h5>
-                <a href="#">Read More</a>
+                <a href="/">Shop Now</a>
               </div>
             </div>
           </div>

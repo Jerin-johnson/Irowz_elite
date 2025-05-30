@@ -53,6 +53,33 @@ const userAuth = (req,res,next)=>{
     }
 }
 
+const checkWhetherUserIsBlocked = async (req, res, next) => {
+  try {
+    if (req.session.user) {
+      const blockedUser = await User.findOne({
+        _id: req.session.user,
+        isBlocked: true
+      }).lean();
+
+      if (blockedUser) {
+        req.session.destroy(() => {
+          return res.redirect("/login");
+        });
+        return; // Stop further execution
+      }
+
+      return next();
+    } else {
+      return next();
+    }
+  } catch (error) {
+    console.error("Error in checkWhetherUserIsBlocked:", error);
+    return next(error); // Don't leave requests hanging
+  }
+};
+
+
+
 
 const ensureOtpSession = (req, res, next) => {
   if (!req.session.userData || !req.session.userOtp) {
@@ -66,5 +93,6 @@ module.exports ={
     userAuth,
     isUserLoggedIn,
     isUserLoggedOut,
-    ensureOtpSession
+    ensureOtpSession,
+    checkWhetherUserIsBlocked
 }

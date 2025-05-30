@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const { Product } = require("../../models/productSchema");
 const { Category } = require("../../models/categorySchema");
+const {Brand} = require("../../models/brandSchema")
 const env = require("dotenv").config();
 const {
   sendVerficationEmail,
@@ -151,7 +152,7 @@ const loadLogin = (req, res) => {
 
 const loadOtp = (req, res) => {
   try {
-    res.render("user/singup/otp");
+    res.render("user/signup/otp");
   } catch (error) {
     res.send(error.message);
     console.log("Something went wrong in otp page");
@@ -230,29 +231,29 @@ const verifyLogin = async (req, res) => {
     let user = await User.findOne({ email: email, isAdmin: 0 });
 
     if (!user) {
-      return res.render("user/login", { message: "user not found" });
+      return res.render("user/login/login", { message: "user not found" });
     }
     if (user.isBlocked) {
-      return res.render("user/login", {
+      return res.render("user/login/login", {
         message: "user is blocked by the admin",
       });
     }
 
     if (!password) {
-      return res.render("user/login", { message: "please enter the password" });
+      return res.render("user/login/login", { message: "please enter the password" });
     }
 
     const comparePassword = await bcrypt.compare(password, user.password);
 
     if (!comparePassword) {
-      return res.render("user/login", { message: "Invalid credentials" });
+      return res.render("user/login/login", { message: "Invalid credentials" });
     }
 
     req.session.user = user._id;
     res.redirect("/");
   } catch (error) {
     console.error("Login error", error);
-    res.render("user/login", { message: "login failed" });
+    res.render("user/login/login", { message: "login failed" });
   }
 };
 
@@ -277,16 +278,77 @@ const userLogout = (req, res) => {
 };
 
 
-const loadShoppingPage = async (req,res)=>{
-  try {
 
-    const user = await User.findOne({_id:req.session.user})
-    res.render("user/shop",{user})
-  } catch (error) {
-    res.send("Error in shopping page",error.message)
+const loadShoppingPage = async (req, res) => {
+  
+    try {
+        const user = await User.findOne({ _id: req.session.user });
+        const categories = await Category.find({ isListed: true });
+        const categoriesId = categories.map(cat => cat._id.toString());
+        const page = parseInt(req.query.page) || 1;
+        const limit = 4;
+        const skip = (page - 1) * limit;
+        const query = {
+            isBlocked: false,
+            category: { $in: categoriesId },
+            quantity: { $gt: 0 }
+        };
+        if (req.query.category) query.category = req.query.category;
+        if (req.query.brand) query.brand = req.query.brand;
+        if (req.query.price) {
+            const [min, max] = req.query.price.split('-').map(Number);
+            query.salePrice = { $gte: min, ...(max ? { $lte: max } : {}) };
+        }
+        if (req.query.search) {
+            query.productName = { $regex: req.query.search, $options: 'i' };
+        }
+        const sort = req.query.sort ? (req.query.sort === 'low-high' ? { salePrice: 1 } : { salePrice: -1 }) : { createdAt: -1 };
+        const products = await Product.find(query)
+            .sort(sort)
+            .skip(skip)
+            .limit(limit)
+            .populate('brand category');
+        const totalProducts = await Product.countDocuments(query);
+        const totalPages = Math.ceil(totalProducts / limit);
+        const brands = await Brand.find({ isBlocked: false });
+        const priceRanges = [
+            { value: "0-50", label: "$0.00 - $50.00" },
+            { value: "50-100", label: "$50.00 - $100.00" },
+            { value: "100-150", label: "$100.00 - $150.00" },
+            { value: "150-200", label: "$150.00 - $200.00" },
+            { value: "200-250", label: "$200.00 - $250.00" },
+            { value: "250+", label: "$250.00+" }
+        ];
     
-  }
-}
+        const priceSortOptions = [
+            { value: "low-high", label: "Low To High" },
+            { value: "high-low", label: "High To Low" }
+        ];
+
+        res.render("user/shop", {
+            user,
+            categories,
+            brands,
+            totalPages,
+            totalProducts,
+            currentPage: page,
+            products,
+            priceRanges,
+            limit,
+            priceSortOptions,
+            req
+        });
+    } catch (error) {
+        res.status(500).send("Error in shopping page: " + error.message);
+    }
+};
+
+// const loadShoppingPage = async(req,res)=>{
+
+
+
+// }
+
 
 // For exporting all the function
 module.exports = {

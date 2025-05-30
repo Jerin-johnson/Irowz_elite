@@ -33,10 +33,7 @@ const productSchema = new Schema({
   // },
   productImage: {
     type: [{
-      path: { type: String, required: true }, // Path to the image file
-      // Add other properties if needed, e.g., filename, size, etc.
-      // filename: { type: String },
-      // size: { type: Number },
+      path: { type: String, required: true }, 
     }],
   },
   isBlocked: {

@@ -1,121 +1,320 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="/css/admin/customer.css" />
-  <link rel="stylesheet" href="/css/admin/admin.css" />
+<!-- Include the header (navigation bar, logo, etc.) -->
+<%- include('../partials/user/header.ejs') %>
+<link rel="stylesheet" href="/css/shop.css">
 
-  <!-- SweetAlert2 CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-<body>
-
-  <%- include('../partials/admin/header') %>
-
-  <div class="dashboard-container">
-    <div class="header">
-      <h1>DASHBOARD</h1>
-
-      <!-- Filter and Search Form -->
-      <form method="GET" action="/admin/customer" class="filter-search" id="filterForm">
-        <div class="filter">
-          <select name="filter" onchange="this.form.submit()">
-            <option value="">All</option>
-            <option value="blocked" <%= filter === 'blocked' ? 'selected' : '' %>>Blocked</option>
-            <option value="unblocked" <%= filter === 'unblocked' ? 'selected' : '' %>>Unblocked</option>
-          </select>
+<!-- Breadcrumb Section: Shows the navigation path (Home > Shop) -->
+<section class="shp_breadcrumb_option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="shp_breadcrumb_text">
+                    <h4>Shop</h4>
+                    <div class="shp_breadcrumb_links">
+                        <a href="/">Home</a> <span>></span>
+                        <a href="/shop">Shop</a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="search">
-          <input type="text" name="search" value="<%= search || '' %>" placeholder="Search"/>
+    </div>
+</section>
+
+<!-- Shop Section: Contains the sidebar (search/filters) and product list -->
+<section class="shp_section">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar: Search and filter options -->
+            <div class="col-lg-3 col-md-4">
+                <div class="sidebar">
+                    <!-- Search Form: Lets users search for products -->
+                    <div class="shp_search">
+                        <form action="/shop" method="GET" id="searchForm">
+                            <div class="input-group">
+                                <input type="text" name="search" placeholder="Search products..." id="searchInput" value="<%= req.query.search || '' %>" autocomplete="off">
+                                <span class="input-group-btn">
+                                    <button type="submit" class="btn-search"><i class="fa fa-search"></i></button>
+                                </span>
+                            </div>
+                            <!-- Hidden inputs to keep filters when searching -->
+                            <% if (req.query.category) { %>
+                                <% let categoriesToPreserve = Array.isArray(req.query.category) ? req.query.category : [req.query.category]; %>
+                                <% categoriesToPreserve.forEach(cat => { %>
+                                    <input type="hidden" name="category[]" value="<%= cat %>">
+                                <% }) %>
+                            <% } %>
+                            <% if (req.query.brand) { %>
+                                <% let brandsToPreserve = Array.isArray(req.query.brand) ? req.query.brand : [req.query.brand]; %>
+                                <% brandsToPreserve.forEach(br => { %>
+                                    <input type="hidden" name="brand[]" value="<%= br %>">
+                                <% }) %>
+                            <% } %>
+                            <% if (req.query.price) { %>
+                                <% let pricesToPreserve = Array.isArray(req.query.price) ? req.query.price : [req.query.price]; %>
+                                <% pricesToPreserve.forEach(pr => { %>
+                                    <input type="hidden" name="price[]" value="<%= pr %>">
+                                <% }) %>
+                            <% } %>
+                            <% if (req.query.sort) { %>
+                                <input type="hidden" name="sort" value="<%= req.query.sort %>">
+                            <% } %>
+                            <!-- Keep the current page when searching -->
+                            <% if (currentPage) { %>
+                                <input type="hidden" name="page" value="<%= currentPage %>">
+                            <% } %>
+                        </form>
+                    </div>
+
+                    <!-- Filter Form: Lets users filter by category, brand, and price -->
+                    <div class="shp_filters">
+                        <form action="/shop" method="GET" id="filterForm">
+                            <div class="accordion" id="shp_accordion">
+                                <!-- Categories Filter -->
+                                <div class="shp_filter">
+                                    <div class="shp_filter_heading">
+                                        <a data-toggle="collapse" data-target="#shp_collapse_categories">Categories <i class="fa fa-chevron-down"></i></a>
+                                    </div>
+                                    <div id="shp_collapse_categories" class="collapse">
+                                        <div class="shp_filter_body">
+                                            <div class="shp_filter_categories">
+                                                <ul class="shp_scroll">
+                                                    <% categories.forEach(category => { %>
+                                                        <% let isCategoryChecked = false; %>
+                                                        <% if (req.query.category) { %>
+                                                            <% if (Array.isArray(req.query.category)) { %>
+                                                                <% isCategoryChecked = req.query.category.includes(category._id.toString()); %>
+                                                            <% } else { %>
+                                                                <% isCategoryChecked = req.query.category === category._id.toString(); %>
+                                                            <% } %>
+                                                        <% } %>
+                                                        <li>
+                                                            <label>
+                                                                <input type="checkbox" name="category[]" value="<%= category._id %>" <%= isCategoryChecked ? 'checked' : '' %>>
+                                                                <%= category.name %>
+                                                            </label>
+                                                        </li>
+                                                    <% }) %>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Brands Filter -->
+                                <div class="shp_filter">
+                                    <div class="shp_filter_heading">
+                                        <a data-toggle="collapse" data-target="#shp_collapse_brands">Brands <i class="fa fa-chevron-down"></i></a>
+                                    </div>
+                                    <div id="shp_collapse_brands" class="collapse">
+                                        <div class="shp_filter_body">
+                                            <div class="shp_filter_brands">
+                                                <ul>
+                                                    <% brands.forEach(brand => { %>
+                                                        <% let isBrandChecked = false; %>
+                                                        <% if (req.query.brand) { %>
+                                                            <% if (Array.isArray(req.query.brand)) { %>
+                                                                <% isBrandChecked = req.query.brand.includes(brand._id.toString()); %>
+                                                            <% } else { %>
+                                                                <% isBrandChecked = req.query.brand === brand._id.toString(); %>
+                                                            <% } %>
+                                                        <% } %>
+                                                        <li>
+                                                            <label>
+                                                                <input type="checkbox" name="brand[]" value="<%= brand._id %>" <%= isBrandChecked ? 'checked' : '' %>>
+                                                                <%= brand.brandName %>
+                                                            </label>
+                                                        </li>
+                                                    <% }) %>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Price Filter -->
+                                <div class="shp_filter">
+                                    <div class="shp_filter_heading">
+                                        <a data-toggle="collapse" data-target="#shp_collapse_price">Filter Price <i class="fa fa-chevron-down"></i></a>
+                                    </div>
+                                    <div id="shp_collapse_price" class="collapse">
+                                        <div class="shp_filter_body">
+                                            <div class="shp_filter_price">
+                                                <ul>
+                                                    <% priceRanges.forEach(range => { %>
+                                                        <% let isPriceChecked = false; %>
+                                                        <% if (req.query.price) { %>
+                                                            <% if (Array.isArray(req.query.price)) { %>
+                                                                <% isPriceChecked = req.query.price.includes(range.value); %>
+                                                            <% } else { %>
+                                                                <% isPriceChecked = req.query.price === range.value; %>
+                                                            <% } %>
+                                                        <% } %>
+                                                        <li>
+                                                            <label>
+                                                                <input type="checkbox" name="price[]" value="<%= range.value %>" <%= isPriceChecked ? 'checked' : '' %>>
+                                                                <%= range.label %>
+                                                            </label>
+                                                        </li>
+                                                    <% }) %>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Apply Filters Button -->
+                            <div class="shp_filter_apply">
+                                <button type="submit" class="shp_btn_apply">Apply Filters</button>
+                            </div>
+                            <!-- Hidden inputs to keep search and sort when filtering -->
+                            <% if (req.query.search) { %>
+                                <input type="hidden" name="search" value="<%= req.query.search %>">
+                            <% } %>
+                            <% if (req.query.sort) { %>
+                                <input type="hidden" name="sort" value="<%= req.query.sort %>">
+                            <% } %>
+                            <!-- Keep the current page when filtering -->
+                            <% if (currentPage) { %>
+                                <input type="hidden" name="page" value="<%= currentPage %>">
+                            <% } %>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product List and Sorting -->
+            <div class="col-lg-9 col-md-8">
+                <!-- Product Options: Shows results count and sorting dropdown -->
+                <div class="shp_product_options">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 col-md-6 col-sm-6">
+                            <div class="shp_product_results">
+                                <p>Showing <%= products.length > 0 ? `${(currentPage - 1) * limit + 1}–${Math.min(currentPage * limit, totalProducts)} of ${totalProducts}` : '0' %> results</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6">
+                            <div class="shp_product_sort">
+                                <form action="/shop" method="GET">
+                                    <label for="shp_sort">Sort by:</label>
+                                    <select id="shp_sort" name="sort" onchange="this.form.submit()">
+                                        <option value="price-asc" <%= req.query.sort === 'price-asc' ? 'selected' : '' %>>Price: Low to High</option>
+                                        <option value="price-desc" <%= req.query.sort === 'price-desc' ? 'selected' : '' %>>Price: High to Low</option>
+                                        <option value="name-asc" <%= req.query.sort === 'name-asc' ? 'selected' : '' %>>Name: A to Z</option>
+                                        <option value="name-desc" <%= req.query.sort === 'name-desc' ? 'selected' : '' %>>Name: Z to A</option>
+                                    </select>
+                                    <!-- Hidden inputs to keep filters when sorting -->
+                                    <% if (req.query.category) { %>
+                                        <% let categoriesToPreserve = Array.isArray(req.query.category) ? req.query.category : [req.query.category]; %>
+                                        <% categoriesToPreserve.forEach(cat => { %>
+                                            <input type="hidden" name="category[]" value="<%= cat %>">
+                                        <% }) %>
+                                    <% } %>
+                                    <% if (req.query.brand) { %>
+                                        <% let brandsToPreserve = Array.isArray(req.query.brand) ? req.query.brand : [req.query.brand]; %>
+                                        <% brandsToPreserve.forEach(br => { %>
+                                            <input type="hidden" name="brand[]" value="<%= br %>">
+                                        <% }) %>
+                                    <% } %>
+                                    <% if (req.query.price) { %>
+                                        <% let pricesToPreserve = Array.isArray(req.query.price) ? req.query.price : [req.query.price]; %>
+                                        <% pricesToPreserve.forEach(pr => { %>
+                                            <input type="hidden" name="price[]" value="<%= pr %>">
+                                        <% }) %>
+                                    <% } %>
+                                    <% if (req.query.search) { %>
+                                        <input type="hidden" name="search" value="<%= req.query.search %>">
+                                    <% } %>
+                                    <!-- Keep the current page when sorting -->
+                                    <% if (currentPage) { %>
+                                        <input type="hidden" name="page" value="<%= currentPage %>">
+                                    <% } %>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product List: Displays products in a grid -->
+                <div class="row shp_product_filter">
+                    <% products.forEach(product => { %>
+                        <div class="col-lg-4 col-md-6 col-sm-6">
+                            <div class="shp_product_cart_wrap <%= product.status === 'Discounted' ? 'shp_sale' : '' %>">
+                                <div class="shp_product_img_action_wrap">
+                                    <div class="shp_product_img">
+                                        <a href="/product/<%= product._id %>" class="shp_product_img_zoom">
+                                            <img src="<%= product.productImage[0]?.path %>" alt="<%= product.productName %>" class="default-img">
+                                        </a>
+                                    </div>
+                                    <% if (product.status === 'Discounted') { %>
+                                        <span class="shp_label">Sale</span>
+                                    <% } %>
+                                    <div class="shp_product_action_1">
+                                        <a href="/wishlist/add/<%= product._id %>" class="shp_action_btn hover-up" title="Add to Wishlist">
+                                            <i class="fa fa-heart"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="shp_product_details">
+                                    <h6><a href="/product/<%= product._id %>"><%= product.productName %></a></h6>
+                                    <div class="shp_rating">
+                                        <% for(let i = 0; i < 5; i++) { %>
+                                            <i class="fa fa-star<%= i < product.rating ? '' : '-o' %>"></i>
+                                        <% } %>
+                                    </div>
+                                    <!-- Price: Show regular price with strikethrough if discounted -->
+                                    <div class="shp_price">
+                                        <% if (product.status === 'Discounted' && product.regularPrice) { %>
+                                            <span class="regular-price">$<%= product.regularPrice.toFixed(2) %></span>
+                                        <% } %>
+                                        <h5>$<%= product.salePrice.toFixed(2) %></h5>
+                                    </div>
+                                    <div class="shp_color_select">
+                                        <% (product.colors || []).forEach((color, index) => { %>
+                                            <label class="<%= color.isActive ? 'active ' + color.class : color.class %>" for="shp_color_<%= product._id %>_<%= index %>">
+                                                <input type="radio" id="shp_color_<%= product._id %>_<%= index %>" name="color_<%= product._id %>" value="<%= color.value %>">
+                                            </label>
+                                        <% }) %>
+                                    </div>
+                                    <a href="/cart/add/<%= product._id %>" class="shp_add_cart">Add To Cart</a>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <!-- Pagination: Shows page numbers to navigate between pages -->
+                <% if (totalPages > 1) { %>
+                    <div class="pagination">
+                        <!-- Build the query string for pagination links -->
+                        <% let queryParams = []; %>
+                        <% if (req.query.search) { %>
+                            <% queryParams.push('search=' + req.query.search); %>
+                        <% } %>
+                        <% if (req.query.category) { %>
+                            <% let categories = Array.isArray(req.query.category) ? req.query.category : [req.query.category]; %>
+                            <% categories.forEach(cat => queryParams.push('category[]=' + cat)); %>
+                        <% } %>
+                        <% if (req.query.brand) { %>
+                            <% let brands = Array.isArray(req.query.brand) ? req.query.brand : [req.query.brand]; %>
+                            <% brands.forEach(br => queryParams.push('brand[]=' + br)); %>
+                        <% } %>
+                        <% if (req.query.price) { %>
+                            <% let prices = Array.isArray(req.query.price) ? req.query.price : [req.query.price]; %>
+                            <% prices.forEach(pr => queryParams.push('price[]=' + pr)); %>
+                        <% } %>
+                        <% if (req.query.sort) { %>
+                            <% queryParams.push('sort=' + req.query.sort); %>
+                        <% } %>
+                        <% let queryString = queryParams.length > 0 ? '&' + queryParams.join('&') : ''; %>
+                        <!-- Generate page number links -->
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                            <a href="/shop?page=<%= i %><%= queryString %>">
+                                <button class="<%= i === currentPage ? 'active' : '' %>"><%= i %></button>
+                            </a>
+                        <% } %>
+                    </div>
+                <% } %>
+            </div>
         </div>
-        <button type="submit">Apply</button>
-         <a href="/admin/customer">
-            <button type="button" >Reset</button>
-         </a>
-      </form>
     </div>
+</section>
 
-    <!-- User Table -->
-    <table>
-      <thead>
-        <tr>
-          <th>S.No</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Mobile</th>
-          <th>Update</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% users.forEach((user, index) => { %>
-          <tr>
-            <td><%= (currentPage - 1) * limit + index + 1 %></td>
-            <td><%= user.fullName %></td>
-            <td><%= user.email %></td>
-             <td><%= user.phone %></td>
-           
-            <td>
-               <% if (user.isBlocked) { %>
-                <a href="/admin/unblock?id=<%= user._id %>">
-                  <button class="action-btn unblock-btn">Unblock</button>
-                </a>
-              <% } else { %>
-                <a href="/admin/block?id=<%= user._id %>">
-                  <button class="action-btn block-btn">Block</button>
-                </a>
-              <% } %>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-
-    <!-- Pagination -->
-    <div class="pagination">
-      <% for (let i = 1; i <= totalPages; i++) { %>
-        <a href="/admin/customer?page=<%= i %>&filter=<%= filter || '' %>&search=<%= search || '' %>">
-          <button class="<%= i === currentPage ? 'active' : '' %>"><%= i %></button>
-        </a>
-      <% } %>
-    </div>
-  </div>
-
-  <script src="/js/admin/adminNav.js"></script>
-
- 
-  <script>
-    const form = document.getElementById('filterForm');
-    form.addEventListener('change', () => {
-      form.submit();
-    });
-
-
-      // Confirmation for Block 
-
-    // SweetAlert confirmation only for block buttons
-    document.querySelectorAll('.block-btn').forEach(button => {
-      button.addEventListener('click', function (e) {
-        e.preventDefault();
-        const link = this.closest('a').href;
-
-        Swal.fire({
-          title: 'Are you sure?',
-          text: 'You are about to block this user.',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#d33',
-          cancelButtonColor: '#3085d6',
-          confirmButtonText: 'Yes, block',
-          reverseButtons: true
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.href = link;
-          }
-        });
-      });
-    });
-  </script>
-</body>
-</html>
+<!-- Include the footer (copyright, links, etc.) -->
+<%- include('../partials/user/footer.ejs') %>
