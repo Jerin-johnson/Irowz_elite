@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= product.productName %> | Irowz Elite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+    <style>
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        /* Header Styles */
+        .header {
+            position: relative;
+            z-index: 500;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header__top {
+            background-color: #d6d5d5;
+            padding: 10px 0;
+        }
+
+        .header__top__wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header__top__left p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .header__top__right {
+            text-align: right;
+        }
+
+        .header__top__links a {
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            margin-left: 15px;
+        }
+
+        .header__top__links a:hover {
+            color: #b4883e;
+        }
+
+        .header__main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 0;
+        }
+
+        .header__logo a {
+            text-decoration: none;
+            color: #000;
+            font-size: 35px;
+            font-style: italic;
+            font-weight: bold;
+            letter-spacing: 1px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .header__logo a:hover {
+            color: #b4883e;
+            transform: scale(1.05);
+        }
+
+        .header__menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .header__menu ul li {
+            margin: 0 20px;
+        }
+
+        .header__menu ul li a {
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .header__menu ul li a:hover {
+            color: #b4883e;
+        }
+
+        .header__nav__option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sign-in-link {
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .sign-in-link:hover {
+            color: #b4883e;
+        }
+
+        .premium-user-link {
+            color: #333;
+            font-weight: 600;
+            font-size: 18px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.3s ease;
+        }
+
+        .premium-user-link:hover {
+            color: #b4883e;
+        }
+
+        .premium-user-link i {
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        .premium-user-link:hover i {
+            transform: rotate(180deg);
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            right: 0;
+        }
+
+        .dropdown-content a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .header__nav__option a img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .canvas__open {
+            display: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* Product Details Styles */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+
+        .breadcrumbs {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .breadcrumbs a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .breadcrumbs a:hover {
+            color: #b4883e;
+        }
+
+        .product-details {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .product-images {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .main-image {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .main-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.2s ease;
+        }
+
+        .zoom-lens {
+            position: absolute;
+            border: 2px solid #b4883e;
+            width: 120px;
+            height: 120px;
+            background-color: rgba(180, 136, 62, 0.1);
+            display: none;
+            cursor: crosshair;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+
+        .thumbnail-images {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .thumbnail-images img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .thumbnail-images img:hover, .thumbnail-images img.active {
+            border-color: #b4883e;
+        }
+
+        .product-info {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .product-info h1 {
+            font-size: 28px;
+            margin: 0 0 10px;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .rating i {
+            color: #f1c40f;
+        }
+
+        .price {
+            font-size: 24px;
+            font-weight: 700;
+            color: #b4883e;
+            margin-bottom: 10px;
+        }
+
+        .regular-price {
+            font-size: 18px;
+            color: #999;
+            text-decoration: line-through;
+            margin-left: 10px;
+        }
+
+        .discount {
+            font-size: 16px;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        .stock-status {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .stock-status.available {
+            color: #27ae60;
+        }
+
+        .stock-status.out-of-stock, .stock-status.unavailable {
+            color: #e74c3c;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .add-to-cart, .add-to-wishlist {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-to-cart {
+            background-color: #b4883e;
+            color: #fff;
+        }
+
+        .add-to-cart:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .add-to-cart:hover:not(:disabled) {
+            background-color: #8e6b2f;
+        }
+
+        .add-to-wishlist {
+            background-color: #fff;
+            color: #b4883e;
+            border: 1px solid #b4883e;
+        }
+
+        .add-to-wishlist:hover {
+            background-color: #b4883e;
+            color: #fff;
+        }
+
+        .view-product {
+            display: inline-block;
+            background-color: #fff;
+            color: #b4883e;
+            padding: 8px 16px;
+            border: 1px solid #b4883e;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .view-product:hover {
+            background-color: #b4883e;
+            color: #fff;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .highlights, .more-info, .reviews, .related-products {
+            margin-top: 40px;
+        }
+
+        .highlights h2, .more-info h2, .reviews h2, .related-products h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .highlights ul, .more-info ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .highlights ul li, .more-info ul li {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .more-info p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .reviews .review {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .related-products .products {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .related-products .product {
+            flex: 1;
+            min-width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .related-products .product img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .related-products .product h3 {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .related-products .product p {
+            font-size: 16px;
+            color: #b4883e;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background-color: #d6d5d5;
+            padding: 40px 0;
+            margin-top: 40px;
+        }
+
+        .footer .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer__section {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer__section h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .footer__section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer__section ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer__section ul li a {
+            text-decoration: none;
+            color: #666;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .footer__section ul li a:hover {
+            color: #b4883e;
+        }
+
+        .footer__bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #ccc;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .footer__bottom p {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 991px) {
+            .header__main {
+                flex-wrap: wrap;
+                position: relative;
+            }
+
+            .header__logo {
+                flex: 1;
+            }
+
+            .header__menu {
+                display: none;
+                width: 100%;
+                text-align: center;
+            }
+
+            .header__menu.active {
+                display: block;
+            }
+
+            .header__menu ul {
+                flex-direction: column;
+            }
+
+            .header__menu ul li {
+                margin: 10px 0;
+            }
+
+            .header__nav__option {
+                flex: 1;
+                justify-content: flex-end;
+            }
+
+            .canvas__open {
+                display: block;
+                position: absolute;
+                right: 20px;
+                top: 20px;
+            }
+
+            .product-details {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .product-images {
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .main-image {
+                max-width: 100%;
+                height: 400px;
+            }
+
+            .thumbnail-images {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                justify-content: flex-start;
+                padding-bottom: 10px;
+            }
+
+            .thumbnail-images::-webkit-scrollbar {
+                height: 6px;
+            }
+
+            .thumbnail-images::-webkit-scrollbar-thumb {
+                background: #b4883e;
+                border-radius: 3px;
+            }
+
+            .thumbnail-images::-webkit-scrollbar-track {
+                background: #ddd;
+            }
+
+            .product-info {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .header__top__wrapper {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header__top__right {
+                text-align: left;
+                margin-top: 10px;
+            }
+
+            .header__top__links a {
+                margin-left: 0;
+                margin-right: 15px;
+            }
+
+            .main-image {
+                height: 350px;
+            }
+
+            .thumbnail-images img {
+                width: 70px;
+                height: 70px;
+            }
+
+            .related-products .product {
+                min-width: 150px;
+            }
+
+            .footer .container {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .footer__section {
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 479px) {
+            .header__logo a {
+                font-size: 28px;
+            }
+
+            .header__nav__option {
+                gap: 10px;
+            }
+
+            .sign-in-link, .premium-user-link {
+                font-size: 14px;
+            }
+
+            .main-image {
+                height: 300px;
+            }
+
+            .thumbnail-images img {
+                width: 60px;
+                height: 60px;
+            }
+
+            .product-info h1 {
+                font-size: 24px;
+            }
+
+            .price {
+                font-size: 20px;
+            }
+
+            .add-to-cart, .add-to-wishlist {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .view-product {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .related-products .product {
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section Begin -->
+    <header class="header">
+        <div class="header__top">
+            <div class="container">
+                <div class="header__top__wrapper">
+                    <div class="header__top__left">
+                        <p>Free shipping, 30-day return or refund guarantee.</p>
+                    </div>
+                    <div class="header__top__right">
+                        <div class="header__top__links">
+                            <a href="/login">Sign in</a>
+                            <a href="#">FAQs</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="header__main">
+                <div class="header__logo">
+                    <a href="/">Irowz Elite</a>
+                </div>
+                <nav class="header__menu mobile-menu">
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/shop">Shop</a></li>
+                        <li><a href="/wishlist">Wishlist</a></li>
+                        <li><a href="/contact">Contacts</a></li>
+                    </ul>
+                </nav>
+                <div class="header__nav__option">
+                    <% if (user) { %>
+                    <div class="dropdown">
+                        <a class="premium-user-link"><%= user.fullName.split(" ")[0].toUpperCase() %> <i class="fas fa-chevron-down"></i></a>
+                        <div class="dropdown-content">
+                            <a href="/profile">Profile</a>
+                            <a href="/logout" onclick="confirmLogout(event)">Logout</a>
+                        </div>
+                    </div>
+                    <% } else { %>
+                    <a href="/signup" class="sign-in-link">Sign Up</a>
+                    <a href="/login" class="sign-in-link">Login</a>
+                    <% } %>
+                    <a href="/shop" class="search-switch"><i class="fi-rs-search"></i></a>
+                    <a href="/cart"><i class="fi-rs-shopping-cart"></i> <span>0</span></a>
+                </div>
+                <div class="canvas__open"><i class="fa fa-bars"></i></div>
+            </div>
+        </div>
+    </header>
+    <!-- Header Section End -->
+
+    <!-- Product Details Section Begin -->
+    <div class="container">
+        <% if (product.isBlocked || product.stock <= 0 || product.status === 'Out of Stock') { %>
+            <div class="error-message">
+                This product is currently unavailable. <a href="/shop">Return to Shop</a>
+            </div>
+        <% } else { %>
+            <div class="breadcrumbs">
+                <a href="/">Home</a> > <a href="/shop">Shop</a> > <%= product.productName %>
+            </div>
+            <div class="product-details">
+                <div class="product-images">
+                    <div class="main-image" id="mainImageContainer">
+                        <img src="/<%= product.productImage[0].path %>" alt="<%= product.productName %>" id="mainImage">
+                        <div class="zoom-lens" id="zoomLens"></div>
+                    </div>
+                    <div class="thumbnail-images">
+                        <% product.productImage.forEach((image, index) => { %>
+                            <img src="/<%= image.path %>" alt="Thumbnail" onclick="changeImage('/<%= image.path %>', this)" class="<%= index === 0 ? 'active' : '' %>">
+                        <% }) %>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h1><%= product.productName %></h1>
+                    <div class="rating">
+                        <% for (let i = 0; i < 5; i++) { %>
+                            <i class="fas fa-star <%= i < product.rating ? '' : 'far' %>"></i>
+                        <% } %>
+                        <span>(<%= product.rating %>/5)</span>
+                    </div>
+                    <div class="price">
+                        $<%= product.salePrice.toFixed(2) %>
+                        <% if (product.regularPrice > product.salePrice) { %>
+                            <span class="regular-price">$<%= product.regularPrice.toFixed(2) %></span>
+                        <% } %>
+                    </div>
+                    <% if (product.regularPrice > product.salePrice) { %>
+                        <div class="discount">
+                            Save <%= ((product.regularPrice - product.salePrice) / product.regularPrice * 100).toFixed(0) %>% with this deal!
+                        </div>
+                    <% } %>
+                    <div class="stock-status <%= product.stock > 0 ? 'available' : 'out-of-stock' %>">
+                        <%= product.stock > 0 ? `In Stock (${product.stock} available)` : 'Out of Stock' %>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="add-to-cart" <%= product.stock <= 0 ? 'disabled' : '' %> onclick="addToCart('<%= product._id %>')">Add to Cart</button>
+                        <% if (user) { %>
+                            <button class="add-to-wishlist" onclick="addToWishlist('<%= product._id %>')">Add to Wishlist</button>
+                        <% } %>
+                    </div>
+                    <div class="highlights">
+                        <h2>Product Highlights</h2>
+                        <ul>
+                            <li><strong>Brand:</strong> <%= product.brand ? product.brand.brandName : 'N/A' %></li>
+                            <li><strong>Category:</strong> <%= product.category ? product.category.name : 'N/A' %></li>
+                            <li><strong>Description:</strong> <%= product.description %></li>
+                        </ul>
+                    </div>
+                    <div class="more-info">
+                        <h2>More Information</h2>
+                        <p>
+                            This product is crafted with premium materials to ensure durability and comfort. It features advanced technology for enhanced performance, making it ideal for both casual and professional use. The sleek design complements any style, while the ergonomic construction provides ease of use. Key specifications include:
+                        </p>
+                        <ul>
+                            <li><strong>Material:</strong> High-quality synthetic fabric and stainless steel components</li>
+                            <li><strong>Weight:</strong> 1.2 kg</li>
+                            <li><strong>Dimensions:</strong> 30 x 20 x 10 cm</li>
+                            <li><strong>Warranty:</strong> 2 years</li>
+                            <li><strong>Features:</strong> Water-resistant, adjustable settings, eco-friendly materials</li>
+                        </ul>
+                    </div>
+                    <div class="reviews">
+                        <h2>Customer Reviews</h2>
+                        <% if (reviews.length > 0) { %>
+                            <% reviews.forEach(review => { %>
+                                <div class="review">
+                                    <p><strong><%= review.userName %></strong>: <%= review.comment %></p>
+                                    <div class="rating">
+                                        <% for (let i = 0; i < 5; i++) { %>
+                                            <i class="fas fa-star <%= i < review.rating ? '' : 'far' %>"></i>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <p>No reviews yet. Be the first to review this product!</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+            <div class="related-products">
+                <h2>Related Products</h2>
+                <div class="products">
+                    <% relatedProducts.forEach(related => { %>
+                        <div class="product">
+                            <img src="/<%= related.productImage[0].path %>" alt="<%= related.productName %>">
+                            <h3><%= related.productName %></h3>
+                            <p>$<%= related.salePrice.toFixed(2) %></p>
+                            <a href="/product/details/<%= related._id %>" class="view-product">View Product</a>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        <% } %>
+    </div>
+    <!-- Product Details Section End -->
+
+    <!-- Footer Section Begin -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__section">
+                <h3>About Us</h3>
+                <ul>
+                    <li><a href="/about">Our Story</a></li>
+                    <li><a href="/contact">Contact Us</a></li>
+                    <li><a href="/faq">FAQs</a></li>
+                </ul>
+            </div>
+            <div class="footer__section">
+                <h3>Customer Service</h3>
+                <ul>
+                    <li><a href="/returns">Returns & Refunds</a></li>
+                    <li><a href="/shipping">Shipping Info</a></li>
+                    <li><a href="/support">Support</a></li>
+                </ul>
+            </div>
+            <div class="footer__section">
+                <h3>Follow Us</h3>
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">Instagram</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer__bottom">
+            <p>© 2025 Irowz Elite. All rights reserved.</p>
+        </div>
+    </footer>
+    <!-- Footer Section End -->
+
+    <script>
+        function changeImage(src, element) {
+            const mainImage = document.getElementById('mainImage');
+            mainImage.src = src;
+            document.querySelectorAll('.thumbnail-images img').forEach(img => img.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function addToCart(productId) {
+            fetch(`/cart/add/${productId}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Product added to cart!');
+                    } else {
+                        window.location.href = '/shop';
+                        alert(data.message || 'Product is unavailable.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to cart:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        }
+
+        function addToWishlist(productId) {
+            fetch(`/wishlist/add/${productId}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Product added to wishlist!');
+                    } else {
+                        alert(data.message || 'Failed to add to wishlist.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to wishlist:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        }
+
+        function confirmLogout(event) {
+            event.preventDefault();
+            swal({
+                title: "Are you sure?",
+                text: "You will be logged out of your account.",
+                icon: "warning",
+                buttons: {
+                    cancel: {
+                        text: "Cancel",
+                        value: null,
+                        visible: true,
+                        className: "",
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: "Logout",
+                        value: true,
+                        visible: true,
+                        className: "",
+                        closeModal: true
+                    }
+                },
+                dangerMode: true,
+            })
+            .then((willLogout) => {
+                if (willLogout) {
+                    window.location.href = '/logout';
+                }
+            });
+        }
+
+        // In-Place Image Zoom Functionality
+        const mainImageContainer = document.getElementById('mainImageContainer');
+        const mainImage = document.getElementById('mainImage');
+        const zoomLens = document.getElementById('zoomLens');
+
+        let isZoomEnabled = false;
+
+        function updateZoomAvailability() {
+            // Enable zoom only on larger screens (above 767px)
+            isZoomEnabled = window.innerWidth > 767;
+            mainImageContainer.style.cursor = isZoomEnabled ? 'crosshair' : 'default';
+        }
+
+        mainImageContainer.addEventListener('mouseenter', () => {
+            if (isZoomEnabled) {
+                zoomLens.style.display = 'block';
+                mainImage.style.transform = 'scale(2)'; // Zoom in by scaling the image
+                mainImage.style.transformOrigin = '0 0'; // Default transform origin
+            }
+        });
+
+        mainImageContainer.addEventListener('mouseleave', () => {
+            zoomLens.style.display = 'none';
+            mainImage.style.transform = 'scale(1)'; // Reset zoom
+            mainImage.style.transformOrigin = 'center center'; // Reset transform origin
+        });
+
+        mainImageContainer.addEventListener('mousemove', (e) => {
+            if (!isZoomEnabled) return;
+
+            const rect = mainImageContainer.getBoundingClientRect();
+            const lensWidth = zoomLens.offsetWidth;
+            const lensHeight = zoomLens.offsetHeight;
+
+            // Calculate lens position
+            let x = e.clientX - rect.left - lensWidth / 2;
+            let y = e.clientY - rect.top - lensHeight / 2;
+
+            // Constrain lens within the image boundaries
+            x = Math.max(0, Math.min(x, rect.width - lensWidth));
+            y = Math.max(0, Math.min(y, rect.height - lensHeight));
+
+            zoomLens.style.left = `${x}px`;
+            zoomLens.style.top = `${y}px`;
+
+            // Adjust the transform origin of the image based on lens position
+            const originX = (x + lensWidth / 2) / rect.width * 100;
+            const originY = (y + lensHeight / 2) / rect.height * 100;
+            mainImage.style.transformOrigin = `${originX}% ${originY}%`;
+        });
+
+        // Mobile Menu Toggle
+        document.querySelector('.canvas__open').addEventListener('click', () => {
+            document.querySelector('.header__menu').classList.toggle('active');
+        });
+
+        // Update zoom availability on load and resize
+        updateZoomAvailability();
+        window.addEventListener('resize', updateZoomAvailability);
+    </script>
+</body>
+</html>

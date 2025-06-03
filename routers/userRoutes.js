@@ -5,7 +5,8 @@ const{loadVerifyEmail,verifyEmail,loadForgetPasswordPage,loadForgetPasswordOtpPa
 const { userAuth, isUserLoggedIn, isUserLoggedOut,ensureOtpSession,checkWhetherUserIsBlocked} = require("../middleware/userMiddleWare.js")
 //google sign in
 const {passport}= require("../config/passport");
-const{preventAccessingOtp,preventGoBackToVerifyEmail}=require("../middleware/profileMiddleware.js")
+const{preventAccessingOtp,preventGoBackToVerifyEmail}=require("../middleware/profileMiddleware.js");
+const{loadProductDetailedPage}=require("../controllers/user/productController.js")
 
 
 
@@ -31,10 +32,10 @@ userRouter.post("/resend-otp", ensureOtpSession, ResentOtp);
 
 // reset password
 userRouter.get("/verify-email",preventGoBackToVerifyEmail,loadVerifyEmail)
-userRouter.post("/verify-email",verifyEmail)
-userRouter.get("/forgetpassword/otp",preventAccessingOtp,loadForgetPasswordOtpPage);
+userRouter.post("/verify-email",isUserLoggedOut,verifyEmail)
+userRouter.get("/forgetpassword/otp",isUserLoggedOut,preventAccessingOtp,loadForgetPasswordOtpPage);
 userRouter.post("/forgetpassword/otp",preventAccessingOtp,verifyForgetOtp)
-userRouter.get("/forgetpassword",loadForgetPasswordPage);
+userRouter.get("/forgetpassword",isUserLoggedOut,loadForgetPasswordPage);
 userRouter.post("/forgetpassword",resetPassword);
 
 
@@ -63,6 +64,9 @@ userRouter.get("/auth/google/callback",
 userRouter.get("/error-404",pageNotFound)
 
 
+
+// Product managememnt 
+userRouter.get("/product/details/:pid",userAuth,loadProductDetailedPage)
 
 
 

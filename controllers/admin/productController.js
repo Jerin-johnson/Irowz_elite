@@ -171,6 +171,7 @@ const editProduct = async (req, res) => {
       removedImages,
     } = req.body;
     const images = req.files;
+    console.log(req.files)
 
     // Basic validation
     if (
@@ -207,6 +208,8 @@ const editProduct = async (req, res) => {
     const existingImagesArray = JSON.parse(existingImages || "[]");
     const removedImagesArray = JSON.parse(removedImages || "[]");
 
+  
+
     // Validate image count
     const newImages = images
       ? images.map((file) => ({
@@ -217,6 +220,7 @@ const editProduct = async (req, res) => {
     const remainingImages = existingImagesArray.filter(
       (img) => !removedImagesArray.includes(img._id.toString())
     );
+    
     const totalImages = remainingImages.length + newImages.length;
     if (totalImages < 3 || totalImages > 5) {
       throw new Error("Please ensure 3 to 5 images in total");
@@ -317,47 +321,6 @@ const unBlockProduct = async (req, res) => {
   }
 };
 
-// const editAddProduct = async (req, res) => {
-//   try {
-//     const productId = req.params.id; // Fixed parameter name
-//     const files = req.files;
-
-//     if (!files || files.length === 0) {
-//       return res.status(400).json({ message: "No files uploaded" });
-//     }
-
-//     const product = await Product.findById(productId);
-//     if (!product) {
-//       return res.status(404).json({ message: "Product not found" });
-//     }
-
-//     // Check total image count
-//     if (product.productImage.length + files.length > 5) {
-//       return res
-//         .status(400)
-//         .json({ message: "Maximum 5 images allowed per product" });
-//     }
-
-//     // Add new images
-//     const newImages = files.map((file) => ({
-//       path: `uploads/${file.filename}`,
-//       filename: file.filename,
-//       originalname: file.originalname,
-//     }));
-
-//     product.productImage.push(...newImages);
-//     product.updatedAt = new Date();
-//     await product.save();
-
-//     res.status(200).json({
-//       message: "Images uploaded successfully",
-//       newImages: newImages,
-//     });
-//   } catch (error) {
-//     console.error("Upload images error:", error);
-//     res.status(500).json({ message: error.message || "Server error" });
-//   }
-// };
 
 module.exports = {
   loadProductPage,

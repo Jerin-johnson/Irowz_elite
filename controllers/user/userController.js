@@ -3,31 +3,33 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const { Product } = require("../../models/productSchema");
 const { Category } = require("../../models/categorySchema");
-const {Brand} = require("../../models/brandSchema")
+const { Brand } = require("../../models/brandSchema");
 const env = require("dotenv").config();
 const {
   sendVerficationEmail,
   generateOtp,
   securePassword,
 } = require("../../helpers/helper");
+const mongoose = require('mongoose');
+
 
 // For loading Homepage
 
 const loadHomePage = async (req, res) => {
   try {
+   
     const userId = req.session.user;
 
     const categories = await Category.find({ isListed: true });
-    const categoryIds = categories.length>0 ?categories.map((cat) => cat._id):[];
+    const categoryIds =
+      categories.length > 0 ? categories.map((cat) => cat._id) : [];
 
     const productData = await Product.find({
       isBlocked: false,
       category: { $in: categoryIds },
       quantity: { $gt: 0 },
-    })
-      .sort({ createdAt: -1 })
-      // .limit(4);
-    console.log(productData)
+    }).sort({ createdAt: -1 }).limit(8);
+    
     if (userId) {
       const findUser = await User.findById(userId);
       console.log("The Load Home page", findUser);
@@ -40,7 +42,6 @@ const loadHomePage = async (req, res) => {
     res.status(500).send("Having issues in loading home page");
   }
 };
-
 
 // page Not Found Code
 const pageNotFound = (req, res) => {
@@ -240,7 +241,9 @@ const verifyLogin = async (req, res) => {
     }
 
     if (!password) {
-      return res.render("user/login/login", { message: "please enter the password" });
+      return res.render("user/login/login", {
+        message: "please enter the password",
+      });
     }
 
     const comparePassword = await bcrypt.compare(password, user.password);
@@ -280,74 +283,134 @@ const userLogout = (req, res) => {
 
 
 const loadShoppingPage = async (req, res) => {
-  
-    try {
-        const user = await User.findOne({ _id: req.session.user });
-        const categories = await Category.find({ isListed: true });
-        const categoriesId = categories.map(cat => cat._id.toString());
-        const page = parseInt(req.query.page) || 1;
-        const limit = 4;
-        const skip = (page - 1) * limit;
-        const query = {
-            isBlocked: false,
-            category: { $in: categoriesId },
-            quantity: { $gt: 0 }
-        };
-        if (req.query.category) query.category = req.query.category;
-        if (req.query.brand) query.brand = req.query.brand;
-        if (req.query.price) {
-            const [min, max] = req.query.price.split('-').map(Number);
-            query.salePrice = { $gte: min, ...(max ? { $lte: max } : {}) };
-        }
-        if (req.query.search) {
-            query.productName = { $regex: req.query.search, $options: 'i' };
-        }
-        const sort = req.query.sort ? (req.query.sort === 'low-high' ? { salePrice: 1 } : { salePrice: -1 }) : { createdAt: -1 };
-        const products = await Product.find(query)
-            .sort(sort)
-            .skip(skip)
-            .limit(limit)
-            .populate('brand category');
-        const totalProducts = await Product.countDocuments(query);
-        const totalPages = Math.ceil(totalProducts / limit);
-        const brands = await Brand.find({ isBlocked: false });
-        const priceRanges = [
-            { value: "0-50", label: "$0.00 - $50.00" },
-            { value: "50-100", label: "$50.00 - $100.00" },
-            { value: "100-150", label: "$100.00 - $150.00" },
-            { value: "150-200", label: "$150.00 - $200.00" },
-            { value: "200-250", label: "$200.00 - $250.00" },
-            { value: "250+", label: "$250.00+" }
-        ];
-    
-        const priceSortOptions = [
-            { value: "low-high", label: "Low To High" },
-            { value: "high-low", label: "High To Low" }
-        ];
-
-        res.render("user/shop", {
-            user,
-            categories,
-            brands,
-            totalPages,
-            totalProducts,
-            currentPage: page,
-            products,
-            priceRanges,
-            limit,
-            priceSortOptions,
-            req
-        });
-    } catch (error) {
-        res.status(500).send("Error in shopping page: " + error.message);
+  try {
+    const { search, category, brand, price, sort, page = 1 } = req.query; //destruing all query and setting default values to page=1;
+    const currentPage = parseInt(page) || 1;
+    if (isNaN(currentPage) || currentPage < 1) {
+      return res.redirect("/shop?page=1"); //if current page is not valididno then rederited the user again
     }
+    const limit = 4;
+    const skip = (currentPage - 1) * limit;
+
+    //validation for all the query fields
+    const validatedSearch = search ? search.trim() : ""; // Trims search input, defaults to empty string.
+    const validatedCategory =
+      category && mongoose.isValidObjectId(category) ? category : null; // Validates category as an ObjectId.
+    const validatedBrand =
+      brand && mongoose.isValidObjectId(brand) ? brand : null; // Validates brand as an ObjectId.
+    const validatedPrice =
+      price && /^[0-9]+(-[0-9]+)?$/.test(price) ? price : null; // checking the query format is like this '0-50'
+
+    let validatedSort = "newest"; // Assigning a default value
+
+    if (
+      sort &&
+      ["price-asc", "price-desc", "name-asc", "name-desc", "newest"].includes(sort)) {
+      validatedSort = sort;
+    }
+
+    let query = { isBlocked: false, quantity: { $gte: 0 } };
+
+    if (validatedSearch) {
+      query.productName = { $regex: validatedSearch, $options: "i" };
+    }
+  
+    if (validatedCategory) {
+     
+      query.category = validatedCategory;
+       console.log(query.category)
+    }
+    
+    if (validatedBrand) {
+      query.brand = validatedBrand;
+      // Filters by brand ID.
+    }
+
+    if (validatedPrice) {
+      const [min, max] = validatedPrice.split("-");
+      if (max) {
+        query.salePrice = { $gte: parseFloat(min), $lte: parseFloat(max) };
+      } else {
+        query.salePrice = { $gte: parseFloat(min) };
+      }
+      // Filters by price range.
+    }
+
+    let sortOption = {};
+    switch (validatedSort) {
+      case "price-asc":
+        sortOption.salePrice = 1;
+        break;
+      case "price-desc":
+        sortOption.salePrice = -1;
+        break;
+      case "name-asc":
+        sortOption.productName = 1;
+        break;
+      case "name-desc":
+        sortOption.productName = -1;
+        break;
+      case "newest":
+      default:
+        sortOption.createdAt = -1;
+    }
+
+
+    console.log(sortOption)
+      const priceRanges = [
+      { value: "0-50", label: "$0.00 - $50.00" },
+      { value: "50-100", label: "$50.00 - $100.00" },
+      { value: "100-150", label: "$100.00 - $150.00" },
+      { value: "150-200", label: "$150.00 - $200.00" },
+      { value: "200-250", label: "$200.00 - $250.00" },
+      { value: "250", label: "$250.00+" },
+    ];
+
+    console.log("How does the query object look like",query);
+
+    let products = await Product.find(query)
+    .populate("category")
+    .populate("brand")
+    .sort(sortOption)
+      .skip(skip)
+      .limit(limit);
+
+      console.log("The Product =",products)
+    //this will return the filtered, sorted, and paginated products.
+
+    const totalProducts = await Product.countDocuments(query); // Counts total matching products for pagination.
+    
+
+    const totalPages = Math.ceil(totalProducts / limit); // Calculates total pages for pagination links.
+                                                          
+    //For the sidebar of FilterOption
+    const categories = await Category.find({ isListed: true }); 
+    const brands = await Brand.find({ isListed: true, isBlocked: false });  
+
+    // For displaying the userName at the top
+    const user = await User.findById(req.session.user);
+
+    res.render("user/shop", {
+      user,
+      categories,
+      brands,
+      totalPages,
+      totalProducts,
+      currentPage,
+      products,
+      priceRanges,
+      limit,
+      req,
+    });
+  } catch (error) {
+
+    console.error('Error in /shop route:', error);
+     res.status(500).send('Server Error');
+  
+  }
 };
 
-// const loadShoppingPage = async(req,res)=>{
 
-
-
-// }
 
 
 // For exporting all the function
@@ -362,5 +425,6 @@ module.exports = {
   ResentOtp,
   verifyLogin,
   userLogout,
-  loadShoppingPage
+  loadShoppingPage,
+
 };

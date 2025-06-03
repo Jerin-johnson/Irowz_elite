@@ -392,7 +392,7 @@ li[data-filter=".new-arrivals"]:hover {
       <div class="product-cart-wrap mb-30">
         <div class="product-img-action-wrap">
           <div class="product-img product-img-zoom">
-            <a href="/productDetails?id=<%= products[i]._id %>">
+            <a href="/product/details/<%= products[i]._id %>">
               <img
                 class="default-img"
                 src="<%= products[i].productImage[0].path %>"
@@ -415,7 +415,7 @@ li[data-filter=".new-arrivals"]:hover {
         <div class="product-content-wrap">
           <h6><%= products[i].productName %></h6>
           <h5>$<%= products[i].salePrice %></h5>
-          <a href="/productDetails?id=<%= products[i]._id %>">Add to Cart</a>
+          <a href="/product/details/<%= products[i]._id %>">Add to Cart</a>
         </div>
       </div>
     </div>

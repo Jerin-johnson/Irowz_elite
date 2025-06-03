@@ -8,7 +8,7 @@ const passport = require("passport");
 
 const loadVerifyEmail = (req, res) => {
   try {
-    res.render("user/verifyemail");
+    res.render("user/forgetpassword/verifyemail");
   } catch (error) {
     res.send("something went wrong", error.message);
   }
@@ -50,14 +50,14 @@ const verifyEmail = async (req, res) => {
 
 const loadForgetPasswordPage = (req, res) => {
   try {
-    res.render("user/resetpassword");
+    res.render("user/forgetpassword/resetpassword");
   } catch (error) {
     res.send("Error while sending forgetpassword page", error.message);
   }
 };
 const loadForgetPasswordOtpPage = (req, res) => {
   try {
-    res.render("user/forgetpasswordotp");
+    res.render("user/forgetpassword/forgetpasswordotp");
   } catch (error) {
     res.send(
       "Something happen while loading the forgetPassword otp page",

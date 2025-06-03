@@ -72,54 +72,64 @@
 
   let countdown;
 
-  // Start the countdown timer
-  function startTimer(remaining) {-
-    clearInterval(countdown); // Clear previous timer
+  function startTimer(remaining) {
+    clearInterval(countdown);
     countdown = setInterval(() => {
       const minutes = Math.floor(remaining / 60);
       const seconds = remaining % 60;
       display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
       if (--remaining < 0) {
         clearInterval(countdown);
         display.textContent = 'OTP expired';
         submitBtn.disabled = true;
         resendBtn.disabled = false;
         resendBtn.classList.remove('resend-disabled');
-        localStorage.removeItem('otpStart'); // clear expired timestamp
+        localStorage.removeItem('otpStart');
       }
     }, 1000);
   }
 
-  // Load timer state on page load
   window.addEventListener('DOMContentLoaded', () => {
-    const savedTime = localStorage.getItem('otpStart');
     const now = Date.now();
+    let savedTime = localStorage.getItem('otpStart');
 
-    if (savedTime) {
-      const elapsed = Math.floor((now - parseInt(savedTime)) / 1000);
-      const remaining = 60 - elapsed;
+    // If no saved time exists or it's invalid, create a new timestamp
+    if (!savedTime || isNaN(parseInt(savedTime))) {
+      localStorage.setItem('otpStart', now.toString());
+      savedTime = now.toString();
+    }
 
-      if (remaining > 0) {
-        resendBtn.disabled = true;
-        resendBtn.classList.add('resend-disabled');
-        startTimer(remaining);
+    const elapsed = Math.floor((now - parseInt(savedTime)) / 1000);
+    let remaining = 60 - elapsed;
+
+    // Fix: Ensure minimum remaining time and handle edge cases
+    if (remaining <= 0) {
+      // If calculated remaining is 0 or negative, check if it's a fresh page load
+      const timeDiff = now - parseInt(savedTime);
+      
+      // If the time difference is very small (less than 5 seconds), treat as new session
+      if (timeDiff < 5000) {
+        // Reset the timer for new session
+        localStorage.setItem('otpStart', now.toString());
+        remaining = 60;
       } else {
+        // Genuinely expired
         display.textContent = 'OTP expired';
         resendBtn.disabled = false;
         resendBtn.classList.remove('resend-disabled');
         submitBtn.disabled = true;
         localStorage.removeItem('otpStart');
+        return;
       }
-    } else {
-      localStorage.setItem('otpStart', now.toString());
-      resendBtn.disabled = true;
-      resendBtn.classList.add('resend-disabled');
-      startTimer(60);
     }
+
+    // Start the timer with valid remaining time
+    resendBtn.disabled = true;
+    resendBtn.classList.add('resend-disabled');
+    submitBtn.disabled = false;
+    startTimer(remaining);
   });
 
-  // OTP form submit
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
     errorMsg.style.display = 'none';
@@ -144,7 +154,8 @@
       const data = await res.json();
 
       if (data.success) {
-        window.location.href = '/'; // Redirect on success
+        localStorage.removeItem('otpStart');
+        window.location.href = '/';
       } else {
         errorMsg.textContent = data.message || 'Invalid OTP.';
         errorMsg.style.display = 'block';
@@ -158,7 +169,6 @@
     }
   });
 
-  // Resend OTP
   resendBtn.addEventListener('click', async () => {
     resendBtn.textContent = 'Resending...';
     resendBtn.disabled = true;
@@ -175,9 +185,10 @@
         });
 
         otpInput.value = '';
-        localStorage.setItem('otpStart', Date.now().toString()); // Reset timer reference
+        localStorage.setItem('otpStart', Date.now().toString());
         resendBtn.disabled = true;
         resendBtn.classList.add('resend-disabled');
+        submitBtn.disabled = false;
         startTimer(60);
       } else {
         Swal.fire({
@@ -196,4 +207,3 @@
 
 </body>
 </html>
-
