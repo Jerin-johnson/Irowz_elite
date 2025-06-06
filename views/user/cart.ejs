@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart | Irowz Elite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+    <%- include('./partials/_styles') %>
+    <style>
+        .cart-container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .cart-items {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .cart-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .cart-item {
+            display: grid;
+            grid-template-columns: 100px 1fr auto;
+            gap: 20px;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            align-items: center;
+        }
+        
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        .item-price {
+            color: #b4883e;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .item-original-price {
+            color: #999;
+            text-decoration: line-through;
+            font-size: 14px;
+        }
+        
+        .item-attributes {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .attribute {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .item-stock {
+            font-size: 12px;
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .item-stock.low {
+            color: #ffc107;
+        }
+        
+        .item-stock.out {
+            color: #dc3545;
+        }
+        
+        .item-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-end;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .qty-btn {
+            background: #f8f9fa;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .qty-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .qty-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .qty-input {
+            border: none;
+            padding: 8px 12px;
+            width: 60px;
+            text-align: center;
+            outline: none;
+        }
+        
+        .item-total {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .item-remove {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s ease;
+        }
+        
+        .item-remove:hover {
+            color: #a71e2a;
+        }
+        
+        .cart-summary {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+        }
+        
+        .summary-row.total {
+            border-top: 1px solid #e9ecef;
+            padding-top: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .summary-label {
+            color: #666;
+        }
+        
+        .summary-value {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .discount-code {
+            margin-bottom: 20px;
+        }
+        
+        .discount-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .discount-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        .discount-input input:focus {
+            border-color: #b4883e;
+        }
+        
+        .discount-input button {
+            background: #b4883e;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .discount-input button:hover {
+            background: #8e6b2f;
+        }
+        
+        .checkout-btn {
+            width: 100%;
+            background: #b4883e;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        .checkout-btn:hover {
+            background: #8e6b2f;
+        }
+        
+        .continue-shopping {
+            width: 100%;
+            background: transparent;
+            color: #b4883e;
+            border: 1px solid #b4883e;
+            padding: 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .continue-shopping:hover {
+            background: #b4883e;
+            color: white;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-cart i {
+            font-size: 64px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .empty-cart h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .empty-cart p {
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .suggested-products {
+            margin-top: 40px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .suggested-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .suggested-item {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .suggested-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .suggested-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .suggested-item h4 {
+            font-size: 14px;
+            margin: 0 0 10px;
+            color: #333;
+        }
+        
+        .suggested-item .price {
+            color: #b4883e;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .suggested-item .btn {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .cart-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .cart-summary {
+                position: static;
+                order: -1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .cart-item {
+                grid-template-columns: 80px 1fr;
+                gap: 15px;
+            }
+            
+            .item-actions {
+                grid-column: 1 / -1;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 15px;
+                padding-top: 15px;
+                border-top: 1px solid #e9ecef;
+            }
+            
+            .item-image {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .suggested-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .cart-item {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .item-image {
+                width: 100px;
+                height: 100px;
+                margin: 0 auto;
+            }
+            
+            .item-details {
+                text-align: center;
+            }
+            
+            .item-actions {
+                justify-content: center;
+                gap: 20px;
+            }
+            
+            .suggested-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .discount-input {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('./partials/_header') %>
+    
+    <div class="container">
+        <!-- Breadcrumbs -->
+        <nav aria-label="breadcrumb" class="mt-4">
+            <ol class="breadcrumb" style="background: none; padding: 0; margin: 0; list-style: none; display: flex; gap: 5px;">
+                <li class="breadcrumb-item"><a href="/" style="color: #b4883e; text-decoration: none;">Home</a></li>
+                <li style="color: #666;"> > </li>
+                <li class="breadcrumb-item active" style="color: #333;">Shopping Cart</li>
+            </ol>
+        </nav>
+
+        <div class="cart-container" id="cartContainer">
+            <!-- Cart Items -->
+            <div class="cart-items">
+                <div class="cart-header">
+                    <h2 style="margin: 0; color: #333;">Shopping Cart (3 items)</h2>
+                    <button class="btn btn-outline-danger btn-sm" onclick="clearCart()">
+                        <i class="fas fa-trash"></i> Clear Cart
+                    </button>
+                </div>
+
+                <!-- Cart Item 1 -->
+                <div class="cart-item" data-id="1">
+                    <div class="item-image">
+                        <img src="/placeholder.svg?height=100&width=100" alt="Premium Leather Wallet">
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-name">Premium Leather Wallet with RFID Protection</h3>
+                        <div class="item-price">
+                            $71.99
+                            <span class="item-original-price">$89.99</span>
+                        </div>
+                        <div class="item-attributes">
+                            <span class="attribute">Color: Black</span>
+                            <span class="attribute">Size: Regular</span>
+                        </div>
+                        <div class="item-stock">✓ In Stock</div>
+                    </div>
+                    <div class="item-actions">
+                        <div class="quantity-controls">
+                            <button class="qty-btn" onclick="updateQuantity(1, -1)">-</button>
+                            <input type="number" class="qty-input" value="1" min="1" max="10" onchange="updateQuantity(1, 0, this.value)">
+                            <button class="qty-btn" onclick="updateQuantity(1, 1)">+</button>
+                        </div>
+                        <div class="item-total">$71.99</div>
+                        <button class="item-remove" onclick="removeItem(1)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cart Item 2 -->
+                <div class="cart-item" data-id="2">
+                    <div class="item-image">
+                        <img src="/placeholder.svg?height=100&width=100" alt="Wireless Headphones">
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-name">Wireless Bluetooth Headphones - Noise Cancelling</h3>
+                        <div class="item-price">$169.99</div>
+                        <div class="item-attributes">
+                            <span class="attribute">Color: Matte Black</span>
+                            <span class="attribute">Warranty: 2 Years</span>
+                        </div>
+                        <div class="item-stock">✓ In Stock</div>
+                    </div>
+                    <div class="item-actions">
+                        <div class="quantity-controls">
+                            <button class="qty-btn" onclick="updateQuantity(2, -1)">-</button>
+                            <input type="number" class="qty-input" value="2" min="1" max="10" onchange="updateQuantity(2, 0, this.value)">
+                            <button class="qty-btn" onclick="updateQuantity(2, 1)">+</button>
+                        </div>
+                        <div class="item-total">$339.98</div>
+                        <button class="item-remove" onclick="removeItem(2)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cart Item 3 -->
+                <div class="cart-item" data-id="3">
+                    <div class="item-image">
+                        <img src="/placeholder.svg?height=100&width=100" alt="Premium Backpack">
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-name">Premium Travel Backpack - Water Resistant</h3>
+                        <div class="item-price">
+                            $89.99
+                            <span class="item-original-price">$119.99</span>
+                        </div>
+                        <div class="item-attributes">
+                            <span class="attribute">Color: Navy Blue</span>
+                            <span class="attribute">Capacity: 35L</span>
+                        </div>
+                        <div class="item-stock low">⚠ Only 2 left</div>
+                    </div>
+                    <div class="item-actions">
+                        <div class="quantity-controls">
+                            <button class="qty-btn" onclick="updateQuantity(3, -1)">-</button>
+                            <input type="number" class="qty-input" value="1" min="1" max="2" onchange="updateQuantity(3, 0, this.value)">
+                            <button class="qty-btn" onclick="updateQuantity(3, 1)">+</button>
+                        </div>
+                        <div class="item-total">$89.99</div>
+                        <button class="item-remove" onclick="removeItem(3)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="cart-summary">
+                <h3 style="margin: 0 0 20px; color: #333;">Order Summary</h3>
+                
+                <div class="summary-row">
+                    <span class="summary-label">Subtotal (3 items)</span>
+                    <span class="summary-value">$501.96</span>
+                </div>
+                
+                <div class="summary-row">
+                    <span class="summary-label">Discount</span>
+                    <span class="summary-value" style="color: #28a745;">-$50.00</span>
+                </div>
+                
+                <div class="summary-row">
+                    <span class="summary-label">Shipping</span>
+                    <span class="summary-value" style="color: #28a745;">Free</span>
+                </div>
+                
+                <div class="summary-row">
+                    <span class="summary-label">Tax</span>
+                    <span class="summary-value">$36.16</span>
+                </div>
+                
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>$488.12</span>
+                </div>
+                
+                <div class="discount-code">
+                    <label style="font-weight: 600; color: #333; margin-bottom: 10px; display: block;">
+                        <i class="fas fa-tag"></i> Discount Code
+                    </label>
+                    <div class="discount-input">
+                        <input type="text" placeholder="Enter code" id="discountCode">
+                        <button onclick="applyDiscount()">Apply</button>
+                    </div>
+                </div>
+                
+                <button class="checkout-btn" onclick="proceedToCheckout()">
+                    <i class="fas fa-lock"></i> Proceed to Checkout
+                </button>
+                
+                <a href="/shop" class="continue-shopping">
+                    <i class="fas fa-arrow-left"></i> Continue Shopping
+                </a>
+                
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+                    <div style="display: flex; align-items: center; gap: 10px; color: #666; font-size: 14px;">
+                        <i class="fas fa-shield-alt" style="color: #28a745;"></i>
+                        <span>Secure checkout with SSL encryption</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; color: #666; font-size: 14px; margin-top: 10px;">
+                        <i class="fas fa-truck" style="color: #b4883e;"></i>
+                        <span>Free shipping on orders over $75</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty Cart State (Hidden by default) -->
+        <div class="empty-cart" id="emptyCart" style="display: none;">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>Your cart is empty</h3>
+            <p>Looks like you haven't added anything to your cart yet</p>
+            <a href="/shop" class="btn btn-primary">Start Shopping</a>
+        </div>
+
+        <!-- Suggested Products -->
+        <div class="suggested-products">
+            <h3 style="margin: 0 0 20px; color: #333;">
+                <i class="fas fa-lightbulb" style="color: #ffc107;"></i> You might also like
+            </h3>
+            <div class="suggested-grid">
+                <div class="suggested-item">
+                    <img src="/placeholder.svg?height=120&width=200" alt="Suggested Product">
+                    <h4>Luxury Watch</h4>
+                    <div class="price">$299.99</div>
+                    <button class="btn btn-outline-primary btn-sm" onclick="addToCart('suggested1')">
+                        <i class="fas fa-plus"></i> Add to Cart
+                    </button>
+                </div>
+                <div class="suggested-item">
+                    <img src="/placeholder.svg?height=120&width=200" alt="Suggested Product">
+                    <h4>Designer Sunglasses</h4>
+                    <div class="price">$159.99</div>
+                    <button class="btn btn-outline-primary btn-sm" onclick="addToCart('suggested2')">
+                        <i class="fas fa-plus"></i> Add to Cart
+                    </button>
+                </div>
+                <div class="suggested-item">
+                    <img src="/placeholder.svg?height=120&width=200" alt="Suggested Product">
+                    <h4>Smart Fitness Tracker</h4>
+                    <div class="price">$129.99</div>
+                    <button class="btn btn-outline-primary btn-sm" onclick="addToCart('suggested3')">
+                        <i class="fas fa-plus"></i> Add to Cart
+                    </button>
+                </div>
+                <div class="suggested-item">
+                    <img src="/placeholder.svg?height=120&width=200" alt="Suggested Product">
+                    <h4>Wireless Speaker</h4>
+                    <div class="price">$89.99</div>
+                    <button class="btn btn-outline-primary btn-sm" onclick="addToCart('suggested4')">
+                        <i class="fas fa-plus"></i> Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('./partials/_footer') %>
+
+    <script>
+        function updateQuantity(itemId, change, newValue = null) {
+            const item = document.querySelector(`[data-id="${itemId}"]`);
+            const qtyInput = item.querySelector('.qty-input');
+            const totalElement = item.querySelector('.item-total');
+            
+            let currentQty = parseInt(qtyInput.value);
+            let newQty;
+            
+            if (newValue !== null) {
+                newQty = parseInt(newValue);
+            } else {
+                newQty = currentQty + change;
+            }
+            
+            // Ensure quantity is within valid range
+            const maxQty = parseInt(qtyInput.max) || 10;
+            newQty = Math.max(1, Math.min(newQty, maxQty));
+            
+            qtyInput.value = newQty;
+            
+            // Update item total (this is a simplified calculation)
+            const priceText = item.querySelector('.item-price').textContent;
+            const price = parseFloat(priceText.replace('$', '').split(' ')[0]);
+            const newTotal = (price * newQty).toFixed(2);
+            totalElement.textContent = `$${newTotal}`;
+            
+            // Update cart summary
+            updateCartSummary();
+        }
+        
+        function removeItem(itemId) {
+            swal({
+                title: "Remove Item?",
+                text: "This item will be removed from your cart.",
+                icon: "warning",
+                buttons: {
+                    cancel: "Cancel",
+                    confirm: "Remove"
+                },
+                dangerMode: true,
+            })
+            .then((willRemove) => {
+                if (willRemove) {
+                    const item = document.querySelector(`[data-id="${itemId}"]`);
+                    if (item) {
+                        item.style.transform = 'translateX(-100%)';
+                        item.style.opacity = '0';
+                        setTimeout(() => {
+                            item.remove();
+                            updateCartSummary();
+                            checkEmptyCart();
+                        }, 300);
+                    }
+                    swal("Removed!", "Item has been removed from your cart.", "success");
+                }
+            });
+        }
+        
+        function clearCart() {
+            swal({
+                title: "Clear Cart?",
+                text: "This will remove all items from your cart.",
+                icon: "warning",
+                buttons: {
+                    cancel: "Cancel",
+                    confirm: "Clear All"
+                },
+                dangerMode: true,
+            })
+            .then((willClear) => {
+                if (willClear) {
+                    document.getElementById('cartContainer').style.display = 'none';
+                    document.getElementById('emptyCart').style.display = 'block';
+                    swal("Cart Cleared!", "All items have been removed from your cart.", "success");
+                }
+            });
+        }
+        
+        function updateCartSummary() {
+            // This would typically calculate the new totals based on current cart items
+            // For demo purposes, we'll just show the update
+            console.log('Cart summary updated');
+        }
+        
+        function checkEmptyCart() {
+            const cartItems = document.querySelectorAll('.cart-item');
+            if (cartItems.length === 0) {
+                document.getElementById('cartContainer').style.display = 'none';
+                document.getElementById('emptyCart').style.display = 'block';
+            }
+        }
+        
+        function applyDiscount() {
+            const discountCode = document.getElementById('discountCode').value;
+            if (discountCode.trim()) {
+                if (discountCode.toUpperCase() === 'SAVE10') {
+                    swal("Discount Applied!", "You saved $10 with code SAVE10", "success");
+                } else {
+                    swal("Invalid Code", "Please check your discount code and try again.", "error");
+                }
+            }
+        }
+        
+        function proceedToCheckout() {
+            window.location.href = '/checkout';
+        }
+        
+        function addToCart(productId) {
+            swal("Added to Cart!", "Item has been added to your cart.", "success");
+        }
+
+        // Mobile Menu Toggle
+        document.querySelector('.canvas__open').addEventListener('click', () => {
+            document.querySelector('.header__menu').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

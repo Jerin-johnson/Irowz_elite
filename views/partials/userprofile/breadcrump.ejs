@@ -1,0 +1,54 @@
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb" style="background: none; padding: 0; margin: 0; list-style: none; display: flex; gap: 5px;">
+        <li class="breadcrumb-item"><a href="/" style="color: #b4883e; text-decoration: none;">Home</a></li>
+        <li style="color: #666;"> > </li>
+        <li class="breadcrumb-item"><a href="/profile" style="color: #b4883e; text-decoration: none;">My Account</a></li>
+        
+        <% if (typeof currentPage !== 'undefined') { %>
+            <% if (currentPage !== 'profile') { %>
+                <li style="color: #666;"> > </li>
+                <% if (currentPage === 'edit-profile') { %>
+                    <li class="breadcrumb-item active" style="color: #333;">Edit Profile</li>
+                <% } else if (currentPage === 'change-password') { %>
+                    <li class="breadcrumb-item active" style="color: #333;">Change Password</li>
+                <% } else if (currentPage === 'orders') { %>
+                    <li class="breadcrumb-item active" style="color: #333;">My Orders</li>
+                <% } else if (currentPage === 'order-details') { %>
+                    <li style="color: #666;"> > </li>
+                    <li class="breadcrumb-item"><a href="/orders" style="color: #b4883e; text-decoration: none;">Orders</a></li>
+                    <li style="color: #666;"> > </li>
+                    <li class="breadcrumb-item active" style="color: #333;">Order #<%= orderId || '12345' %></li>
+                <% } else if (currentPage === 'address') { %>
+                    <li class="breadcrumb-item active" style="color: #333;">Address Book</li>
+                <% } else if (currentPage === 'add-address') { %>
+                    <li style="color: #666;"> > </li>
+                    <li class="breadcrumb-item"><a href="/address" style="color: #b4883e; text-decoration: none;">Address Book</a></li>
+                    <li style="color: #666;"> > </li>
+                    <li class="breadcrumb-item active" style="color: #333;">Add New Address</li>
+                <% } else if (currentPage === 'edit-address') { %>
+                    <li style="color: #666;"> > </li>
+                    <li class="breadcrumb-item"><a href="/address" style="color: #b4883e; text-decoration: none;">Address Book</a></li>
+                    <li style="color: #666;"> > </li>
+                    <li class="breadcrumb-item active" style="color: #333;">Edit Address</li>
+                <% } else if (currentPage === 'wishlist') { %>
+                    <li class="breadcrumb-item active" style="color: #333;">Wishlist</li>
+                <% } else if (currentPage === 'wallet') { %>
+                    <li class="breadcrumb-item active" style="color: #333;">My Wallet</li>
+                <% } else if (currentPage === 'payment-methods') { %>
+                    <li class="breadcrumb-item active" style="color: #333;">Payment Methods</li>
+                <% } else if (currentPage === 'add-payment-method') { %>
+                    <li style="color: #666;"> > </li>
+                    <li class="breadcrumb-item"><a href="/payment-methods" style="color: #b4883e; text-decoration: none;">Payment Methods</a></li>
+                    <li style="color: #666;"> > </li>
+                    <li class="breadcrumb-item active" style="color: #333;">Add Payment Method</li>
+                <% } else if (currentPage === 'returns') { %>
+                    <li class="breadcrumb-item active" style="color: #333;">Returns & Refunds</li>
+                <% } else if (currentPage === 'coupons') { %>
+                    <li class="breadcrumb-item active" style="color: #333;">Coupons & Offers</li>
+                <% } else if (currentPage === 'notifications') { %>
+                    <li class="breadcrumb-item active" style="color: #333;">Notifications</li>
+                <% } %>
+            <% } %>
+        <% } %>
+    </ol>
+</nav>

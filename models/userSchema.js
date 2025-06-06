@@ -21,69 +21,70 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: false,
+    unique: true,             // ✅ Ensures no duplicate phone numbers
+    sparse: true,             // ✅ Enforces uniqueness only when the field is present
     match: [/^\d{10}$/, 'Phone number must be 10 digits'],
-    sparse:true,
-    default:null
+    default: null
   },
   dateOfBirth: {
     type: Date,
-    // required: true
+    // optional field
   },
   googleId: {
     type: String,
-    unique:true,
-    sparse: true, // Only enforces uniqueness if googleId is present
+    unique: true,
+    sparse: true // Only enforces uniqueness if googleId is present
   },
-  isBlocked:{
+  isBlocked: {
     type: Boolean,
-    default:false
+    default: false
   },
-  isAdmin:{
-    type:Boolean,
-    default:false
+  isAdmin: {
+    type: Boolean,
+    default: false
   },
-  cart:[{
-    type : Schema.Types.ObjectId,
-    ref:"Cart",
+  cart: [{
+    type: Schema.Types.ObjectId,
+    ref: "Cart",
   }],
-  wallet:{
-    type:Number,
-    default:0
+  wallet: {
+    type: Number,
+    default: 0
   },
-  wishlist:[{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:"WishList"
-  }],
-  orderHistory:[{
+  wishlist: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref:"Order"
+    ref: "WishList"
   }],
-  referalCode:{
-    type:String
-  },
-  redeemed:{
-    type:Boolean
-  },
-  redeemedUser:[{
+  orderHistory: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref:"User"
+    ref: "Order"
   }],
-  searchHistory:[{
-    category:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Category"
+  referalCode: {
+    type: String
+  },
+  redeemed: {
+    type: Boolean,
+    default: false
+  },
+  redeemedUser: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  }],
+  searchHistory: [{
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category"
     },
-    brand:{
-        type:String
+    brand: {
+      type: String
     },
-    searchOn :{
-        type:Date,
-        default:Date.now
+    searchOn: {
+      type: Date,
+      default: Date.now
     }
   }]
-
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
 
-module.exports = {User}
+module.exports = { User };

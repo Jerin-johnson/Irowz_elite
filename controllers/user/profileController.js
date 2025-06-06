@@ -3,7 +3,11 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const env = require("dotenv").config();
 const session = require("express-session");
-const { sendVerficationEmail, generateOtp ,securePassword} = require("../../helpers/helper");
+const {
+  sendVerficationEmail,
+  generateOtp,
+  securePassword,
+} = require("../../helpers/helper");
 const passport = require("passport");
 
 const loadVerifyEmail = (req, res) => {
@@ -16,35 +20,34 @@ const loadVerifyEmail = (req, res) => {
 
 const verifyEmail = async (req, res) => {
   try {
-    let { email } = req.body;
-    let user = await User.findOne({ email: email });
+    const { email } = req.body;
+    const user = await User.findOne({ email: email });
     console.log(user);
-    if (user) {
-      const otp = generateOtp();
-      req.session.userOtp = otp;
-      console.log("The otp send is ", otp);
-      // req.session.otpCreatedAt = Date.now();
-
-      const emailSent = await sendVerficationEmail(email, otp);
-      console.log(emailSent);
-
-      if (emailSent) {
-        req.session.verification = {
-          email,
-          status: "otp_send", // so that the use cannot go back to the verify email page
-        };
-
-        return res
-          .status(200)
-          .json({ success: true, message: "otp is send successfully" });
-      } else {
-       return res.status(500).json({ message: "error while sending email" });
-      }
-    } else {
-     return res.status(500).json({ message: "User doesn't exit" });
+    if (!user) {
+      return res.status(500).json({ message: "User doesn't exit" });
     }
+
+    const otp = generateOtp();
+    req.session.userOtp = otp;
+    console.log("The otp send is ", otp);
+    // req.session.otpCreatedAt = Date.now();
+
+    const emailSent = await sendVerficationEmail(email, otp);
+    console.log(emailSent);
+
+    if (!emailSent) {
+      return res.status(500).json({ message: "error while sending email" });
+    }
+    req.session.verification = {
+      email,
+      status: "otp_send", // so that the use cannot go back to the verify email page
+    };
+
+    return res
+      .status(200)
+      .json({ success: true, message: "otp is send successfully" });
   } catch (error) {
-   return res.send("error in verify email page", error.message);
+    return res.send("error in verify email page", error.message);
   }
 };
 
@@ -68,12 +71,10 @@ const loadForgetPasswordOtpPage = (req, res) => {
 
 const verifyForgetOtp = async (req, res) => {
   try {
-    const otp = req.body.otp?.trim(); 
-   
-   
+    const otp = req.body.otp?.trim();
+
     console.log("Session OTP:", req.session.userOtp);
     console.log("Entered OTP:", req.body.otp);
-
 
     if (String(req.session.userOtp) === String(otp)) {
       delete req.session.userOtp;
@@ -83,47 +84,283 @@ const verifyForgetOtp = async (req, res) => {
     return res.status(500).json({ success: false, message: "Invalid OTP" });
   } catch (error) {
     return res.status(500).json({
-      message: "There is something wrong in verify forget OTP page: " + error.message,
+      message:
+        "There is something wrong in verify forget OTP page: " + error.message,
     });
   }
 };
 
-const resetPassword =async (req,res)=>{
+const resetPassword = async (req, res) => {
+  try {
+    let newPassword = req.body.newPassword;
+    let email = req.session.verification.email;
 
-    try {
-        let newPassword = req.body.newPassword;
-        let email =req.session.verification.email;
+    const hashedPassword = await securePassword(newPassword);
 
-        const hashedPassword = await securePassword(newPassword);
-        
-        const change = await User.updateOne({email:email},{$set:{password:hashedPassword}})
-        res.redirect("/login");
-        
-    } catch (error) {
-        
-        res.send(error.message)
+    const change = await User.updateOne(
+      { email: email },
+      { $set: { password: hashedPassword } }
+    );
+    res.redirect("/login");
+  } catch (error) {
+    res.send(error.message);
+  }
+};
+
+const loadProfilePage = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const userData = await User.findOne({ _id: user });
+
+    res.render("user/profile/profile", { user: userData, stats: null });
+  } catch (error) {
+    res.send("Some error while loading the profile page", error);
+    res.redirect("/error-404");
+  }
+};
+
+const loadEditProflie = async (req, res) => {
+  try {
+    res.render("user/profile/editprofile");
+  } catch (error) {}
+};
+
+// change and update the password
+
+const loadChangePassword = async (req, res) => {
+  try {
+    res.render("user/profile/changepass");
+  } catch (error) {
+    console.error(error.message);
+    res.redirect("/error-404");
+  }
+};
+
+const updateChangePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if(!currentPassword || !newPassword || !confirmPassword)
+    {
+      return res.status(400).json({success:false,message:"All fields are required"});
     }
 
+    const user = await User.findById(req.session.user);
+    if(!user)
+    {
+      return res.status(400).redirect("/login");
+    }
 
-}
-
-const loadProfilePage = async (req,res)=>{
-
-  try {
-
-    const user = req.session.user;
-    const userData = await User.findOne({_id:user});
     
-    res.render('user/profile',{})
-    
+    const isMatch = await bcrypt.compare(currentPassword,user.password);
+    if(!isMatch)
+    {
+      return res.status(400).json({success:false,message:"Password doesn't match"});
+    }
+
+    if( newPassword !== confirmPassword)
+    {
+      return res.status(400).json({ success: false, message: "New password and confirm password do not match" });
+
+    };
+
+    const hashedPassword = await securePassword(newPassword);
+
+    const updatedPassworduser = await User.findByIdAndUpdate(req.session.user,{$set:{password:hashedPassword}});
+
+    await updatedPassworduser.save();
+
+    return res.status(200).json({success:true,message:"The password updated successfully"});
+
+
+
   } catch (error) {
-    
-
-    res.send("Some error while loading the profile page",error);
+    console.log(error.message);
     res.redirect("/error-404")
   }
+};
 
-}
+const loadAddressPage = async (req, res) => {
+  try {
+    res.render("user/address/list");
+  } catch (error) {}
+};
+
+const loadAddAddressPage = async (req, res) => {
+  try {
+    res.render("user/address/add");
+  } catch (error) {}
+};
+
+// verifying and updataing the email
+
+const loadUpdateEmailOtp = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    if (!userId) {
+      return res.status(400).redirect("/login");
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).redirect("/login");
+    }
+
+    const otp = generateOtp();
+    console.log("The sended otp is", otp);
+
+    const isSendEmail = await sendVerficationEmail(user.email, otp);
+    if (!isSendEmail) {
+      throw new Error("Something went wrong email can't send");
+    }
+
+    req.session.userOtp = otp;
+    req.session.userData = user;
+    req.session.otpVerified = false;
+
+    res.render("user/profile/verfiyotp");
+  } catch (error) {
+    console.error(error);
+    res.redirect("/error-404");
+  }
+};
+
+
+const verifyUpdateEmailOtp = async (req, res) => {
+  try {
+    if (!req.session.userData || !req.session.userData.email) {
+      return res
+        .status(500)
+        .json({ success: false, message: "User is not found in session" });
+    }
+
+    const { otp } = req.body;
+
+    console.log("The otp entered", otp);
+    console.log("The otp in the session", req.session.userOtp);
+    if (!req.session.userOtp) return res.redirect("/");
+
+    if (String(req.session.userOtp) !== String(otp)) {
+      return res
+        .status(500)
+        .json({ success: false, message: "Otp doesn't match" });
+    }
+
+    req.session.otpVerified = true;
+    return res
+      .status(200)
+      .json({ success: true, message: "Redirecting to change email" });
+  } catch (error) {
+    console.error(error.message);
+
+    res.redirect("/error-404");
+  }
+};
+
+const loadUpdateEmail = async (req, res) => {
+  try {
+    if (!req.session.userData.email && !req.session.userOtp)
+      return res
+        .status(400)
+        .json({ success: false, message: "Email doesn't found in session" });
+
+    if(!req.session?.otpVerified)
+    {
+      return res.redirect("/");
+    }
+    req.session.otpVerified = false;
+    res.render("user/profile/changeemail");
+  } catch (error) {
+    console.log(error.message);
+    res.redirect("/error-404");
+  }
+};
+
+const updateEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!req.session.user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized. Please log in." });
+    }
+
+    if (!email) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Please enter a valid email" });
+    }
+
+    //  Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid email format" });
+    }
+
+    const existEmail = await User.findOne({ email });
+    if (existEmail) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email already exists" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.session.user,
+      { $set: { email } },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    console.log("Updated user:", updatedUser);
+
+    delete req.session.userOtp;
+    delete req.session.userData;
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Email updated successfully" });
+  } catch (error) {
+    console.error("Update email error:", error.message);
+    return res.redirect("/error-404");
+  }
+};
+
+
+const resendOtpEmail = async (req, res) => {
+  try {
+    if (!req.session.userData || !req.session.userData.email) {
+      return res.redirect("/login");
+    }
+
+    const otp = generateOtp();
+    req.session.userOtp = otp;
+    console.log("The resended Otp is", otp);
+
+    const sendEmail = await sendVerficationEmail(
+      req.session.userData.email,
+      otp
+    );
+    if (!sendEmail) {
+      return res
+        .status(500)
+        .json({ success: false, message: "Unable to send email" });
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Otp resended successfully" });
+  } catch (error) {
+    console.error(error.message);
+    return res.json({ success: false, message: error.message });
+  }
+};
 
 module.exports = {
   loadVerifyEmail,
@@ -132,5 +369,15 @@ module.exports = {
   loadForgetPasswordOtpPage,
   verifyForgetOtp,
   resetPassword,
-  loadProfilePage
+  loadProfilePage,
+  loadEditProflie,
+  loadChangePassword,
+  loadAddressPage,
+  loadAddAddressPage,
+  updateChangePassword,
+  loadUpdateEmailOtp,
+  verifyUpdateEmailOtp,
+  updateEmail,
+  loadUpdateEmail,
+  resendOtpEmail,
 };

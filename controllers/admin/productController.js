@@ -7,6 +7,25 @@ const fs = require("fs");
 const sharp = require("sharp");
 const path = require("path");
 
+
+
+
+// prdouct management page
+
+
+// adminRouter.get("/product",adminAuth,loadProductPage);
+
+// adminRouter.get("/product/edit",adminAuth,loadEditProduct)
+// adminRouter.post("/product/edit/:id",adminAuth,upload.array('images',5),editProduct);
+
+
+// adminRouter.get("/product/add",adminAuth,loadAddProductPage);
+// adminRouter.post("/product/add",upload.array('images',5),addProduct);
+// adminRouter.get("/product/block",adminAuth,blockProduct)
+// adminRouter.get("/product/unblock",adminAuth,unBlockProduct)
+
+
+
 const loadProductPage = async (req, res) => {
   try {
     const { search = "", page = 1 } = req.query;

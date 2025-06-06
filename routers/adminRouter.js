@@ -1,7 +1,7 @@
 const express = require("express");
 const adminRouter = express.Router();
 const{loadLoginAdmin,verifyAdminLogin,loadAdminDash,adminLogout}=require("../controllers/admin/adminController")
-const {adminAuth} = require("../middleware/adminMiddleWare")
+const {adminAuth,isAdminLoggedOut} = require("../middleware/adminMiddleWare")
 const{loadCustomer,blockUser,unblockUser} = require("../controllers/admin/customerController");
 const {loadCategory,addCategory,loadAddCategory,listCategory,unlistCategory,loadEditCategory,editCategory}= require("../controllers/admin/categoryContoller")
 const {loadProductPage,loadAddProductPage,addProduct,editProduct,loadEditProduct,blockProduct,unBlockProduct} = require("../controllers/admin/productController");
@@ -10,7 +10,7 @@ const {loadBrandPage,addBrand,changeStatus} = require("../controllers/admin/bran
 
 
 
-adminRouter.get("/login",loadLoginAdmin)
+adminRouter.get("/login",isAdminLoggedOut,loadLoginAdmin)
 adminRouter.post("/login",verifyAdminLogin)
 
 

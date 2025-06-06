@@ -1,6 +1,16 @@
 const { Category } = require("../../models/categorySchema");
 //  const { User } = require("../../models/userSchema");
 
+
+
+// adminRouter.get("/category",adminAuth,loadCategory)
+// adminRouter.get("/category/add",adminAuth,loadAddCategory)
+// adminRouter.post("/category/add",adminAuth,addCategory)
+// adminRouter.get("/category/list",adminAuth,listCategory);
+// adminRouter.get("/category/unlist",adminAuth,unlistCategory);
+// adminRouter.get("/category/edit",adminAuth,loadEditCategory);
+// adminRouter.post("/category/edit/:id",adminAuth,editCategory);
+
 const loadCategory = async (req, res) => {
   try {
     const search = req.query.search || "";

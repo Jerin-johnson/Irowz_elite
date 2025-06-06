@@ -1,0 +1,49 @@
+<header class="header">
+    <div class="header__top">
+        <div class="container">
+            <div class="header__top__wrapper">
+                <div class="header__top__left">
+                    <p>Free shipping, 30-day return or refund guarantee.</p>
+                </div>
+                <div class="header__top__right">
+                    <div class="header__top__links">
+                        <a href="/login">Sign in</a>
+                        <a href="#">FAQs</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="header__main">
+            <div class="header__logo">
+                <a href="/">Irowz Elite</a>
+            </div>
+            <nav class="header__menu mobile-menu">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/shop">Shop</a></li>
+                    <li><a href="/wishlist">Wishlist</a></li>
+                    <li><a href="/contact">Contacts</a></li>
+                </ul>
+            </nav>
+            <div class="header__nav__option">
+                <% if (typeof user !== 'undefined' && user) { %>
+                <div class="dropdown">
+                    <a class="premium-user-link"><%= user.fullName.split(" ")[0].toUpperCase() %> <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="/profile">Profile</a>
+                        <a href="/logout" onclick="confirmLogout(event)">Logout</a>
+                    </div>
+                </div>
+                <% } else { %>
+                <a href="/signup" class="sign-in-link">Sign Up</a>
+                <a href="/login" class="sign-in-link">Login</a>
+                <% } %>
+                <a href="/shop" class="search-switch"><i class="fi-rs-search"></i></a>
+                <a href="/cart"><i class="fi-rs-shopping-cart"></i> <span>0</span></a>
+            </div>
+            <div class="canvas__open"><i class="fa fa-bars"></i></div>
+        </div>
+    </div>
+</header>

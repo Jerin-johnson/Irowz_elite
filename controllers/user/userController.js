@@ -12,6 +12,7 @@ const {
 } = require("../../helpers/helper");
 const mongoose = require('mongoose');
 
+const { PAGINATION, SORT_OPTIONS, PRICE_RANGES } = require("../../constants/constant")
 
 // For loading Homepage
 
@@ -121,14 +122,6 @@ const signUp = async (req, res) => {
     console.log(`The otp is ${otp}`);
     return res.status(201).json({ message: "Otp send Successfully" });
 
-    // const newUser = new User({
-    //   fullName:fullname,
-    //   email,
-    //   phone :phoneno,
-    //   password: hashedPassword
-    // });
-
-    // await newUser.save();
   } catch (error) {
     console.error("Signup error:", error);
     res.status(500).json({ message: "Server error, please try again later" });
@@ -282,112 +275,73 @@ const userLogout = (req, res) => {
 
 
 
+
+
 const loadShoppingPage = async (req, res) => {
   try {
-    const { search, category, brand, price, sort, page = 1 } = req.query; //destruing all query and setting default values to page=1;
+    const { search, category, brand, price, sort, page = 1 } = req.query;
     const currentPage = parseInt(page) || 1;
+
     if (isNaN(currentPage) || currentPage < 1) {
-      return res.redirect("/shop?page=1"); //if current page is not valididno then rederited the user again
+      return res.redirect("/shop?page=1");
     }
-    const limit = 4;
+
+    const limit = PAGINATION.PRODUCTS_PER_PAGE;
     const skip = (currentPage - 1) * limit;
 
-    //validation for all the query fields
-    const validatedSearch = search ? search.trim() : ""; // Trims search input, defaults to empty string.
+    const validatedSearch = search ? search.trim() : "";
     const validatedCategory =
-      category && mongoose.isValidObjectId(category) ? category : null; // Validates category as an ObjectId.
+      category && mongoose.isValidObjectId(category) ? category : null;
     const validatedBrand =
-      brand && mongoose.isValidObjectId(brand) ? brand : null; // Validates brand as an ObjectId.
+      brand && mongoose.isValidObjectId(brand) ? brand : null;
     const validatedPrice =
-      price && /^[0-9]+(-[0-9]+)?$/.test(price) ? price : null; // checking the query format is like this '0-50'
+      price && /^[0-9]+(-[0-9]+)?$/.test(price) ? price : null;
 
-    let validatedSort = "newest"; // Assigning a default value
+    let validatedSort = SORT_OPTIONS.DEFAULT;
 
-    if (
-      sort &&
-      ["price-asc", "price-desc", "name-asc", "name-desc", "newest"].includes(sort)) {
+    if (sort && SORT_OPTIONS.ALLOWED.includes(sort)) {
       validatedSort = sort;
     }
 
-    let query = { isBlocked: false, quantity: { $gte: 0 } };
+    let query = {
+      isBlocked: false,
+      quantity: { $gte: 0 },
+    };
 
     if (validatedSearch) {
       query.productName = { $regex: validatedSearch, $options: "i" };
     }
-  
+
     if (validatedCategory) {
-     
       query.category = validatedCategory;
-       console.log(query.category)
     }
-    
+
     if (validatedBrand) {
       query.brand = validatedBrand;
-      // Filters by brand ID.
     }
 
     if (validatedPrice) {
       const [min, max] = validatedPrice.split("-");
-      if (max) {
-        query.salePrice = { $gte: parseFloat(min), $lte: parseFloat(max) };
-      } else {
-        query.salePrice = { $gte: parseFloat(min) };
-      }
-      // Filters by price range.
+      query.salePrice = max
+        ? { $gte: parseFloat(min), $lte: parseFloat(max) }
+        : { $gte: parseFloat(min) };
     }
 
-    let sortOption = {};
-    switch (validatedSort) {
-      case "price-asc":
-        sortOption.salePrice = 1;
-        break;
-      case "price-desc":
-        sortOption.salePrice = -1;
-        break;
-      case "name-asc":
-        sortOption.productName = 1;
-        break;
-      case "name-desc":
-        sortOption.productName = -1;
-        break;
-      case "newest":
-      default:
-        sortOption.createdAt = -1;
-    }
+    const sortOption = SORT_OPTIONS.SORT_QUERY_MAP[validatedSort];
 
 
-    console.log(sortOption)
-      const priceRanges = [
-      { value: "0-50", label: "$0.00 - $50.00" },
-      { value: "50-100", label: "$50.00 - $100.00" },
-      { value: "100-150", label: "$100.00 - $150.00" },
-      { value: "150-200", label: "$150.00 - $200.00" },
-      { value: "200-250", label: "$200.00 - $250.00" },
-      { value: "250", label: "$250.00+" },
-    ];
-
-    console.log("How does the query object look like",query);
-
-    let products = await Product.find(query)
-    .populate("category")
-    .populate("brand")
-    .sort(sortOption)
+    const products = await Product.find(query)
+      .populate("category")
+      .populate("brand")
+      .sort(sortOption)
       .skip(skip)
       .limit(limit);
 
-      console.log("The Product =",products)
-    //this will return the filtered, sorted, and paginated products.
+    const totalProducts = await Product.countDocuments(query);
+    const totalPages = Math.ceil(totalProducts / limit);
 
-    const totalProducts = await Product.countDocuments(query); // Counts total matching products for pagination.
-    
-
-    const totalPages = Math.ceil(totalProducts / limit); // Calculates total pages for pagination links.
-                                                          
-    //For the sidebar of FilterOption
-    const categories = await Category.find({ isListed: true }); 
-    const brands = await Brand.find({ isListed: true, isBlocked: false });  
-
-    // For displaying the userName at the top
+    const categories = await Category.find({ isListed: true });
+    const brands = await Brand.find({ isListed: true, isBlocked: false });
     const user = await User.findById(req.session.user);
 
     res.render("user/shop", {
@@ -398,17 +352,18 @@ const loadShoppingPage = async (req, res) => {
       totalProducts,
       currentPage,
       products,
-      priceRanges,
+      priceRanges: PRICE_RANGES,
       limit,
       req,
     });
   } catch (error) {
-
-    console.error('Error in /shop route:', error);
-     res.status(500).send('Server Error');
-  
+    console.error("Error in /shop route:", error);
+    res.status(500).send("Server Error");
   }
 };
+
+
+
 
 
 

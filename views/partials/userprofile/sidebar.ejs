@@ -1,0 +1,91 @@
+<div class="profile-sidebar">
+    <div class="user-info">
+        <div class="user-avatar">
+            <i class="fas fa-user-circle fa-3x"></i>
+        </div>
+        <% if (typeof user !== 'undefined' && user) { %>
+        <h4>Welcome, <%= user.fullName.split(" ")[0] %>!</h4>
+        <p class="text-muted"><%= user.email %></p>
+        <% } else { %>
+        <h4>Welcome, Guest!</h4>
+        <% } %>
+    </div>
+    <nav class="nav flex-column">
+    <a class="nav-link" href="/profile" data-page="profile">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+    </a>
+    <a class="nav-link" href="/profile/edit" data-page="edit-profile">
+        <i class="fas fa-user-edit"></i> Edit Profile
+    </a>
+    <a class="nav-link" href="/orders" data-page="orders">
+        <i class="fas fa-shopping-bag"></i> My Orders
+    </a>
+    <a class="nav-link" href="/address" data-page="address">
+        <i class="fas fa-map-marker-alt"></i> Address Book
+    </a>
+    <a class="nav-link" href="/wallet" data-page="wallet">
+        <i class="fas fa-wallet"></i> My Wallet
+    </a>
+    <a class="nav-link" href="/payment-methods" data-page="payment-methods">
+        <i class="fas fa-credit-card"></i> Payment Methods
+    </a>
+    <a class="nav-link" href="/returns" data-page="returns">
+        <i class="fas fa-undo-alt"></i> Returns & Refunds
+    </a>
+    <a class="nav-link" href="/coupons" data-page="coupons">
+        <i class="fas fa-tags"></i> Coupons & Offers
+    </a>
+    <a class="nav-link" href="/profile/password/edit" data-page="change-password">
+        <i class="fas fa-lock"></i> Change Password
+    </a>
+    <a class="nav-link" href="/notifications" data-page="notifications">
+        <i class="fas fa-bell"></i> Notifications
+    </a>
+    <a class="nav-link" href="/logout" onclick="confirmLogout(event)">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+</nav>
+</div>
+
+<script>
+// Set active sidebar link based on current page
+document.addEventListener('DOMContentLoaded', function() {
+    const currentPath = window.location.pathname;
+    const sidebarLinks = document.querySelectorAll('.nav-link[data-page]');
+    
+    // Remove active class from all links
+    sidebarLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Determine which link should be active based on current path
+    let activeLink = null;
+    
+    if (currentPath === '/profile' || currentPath === '/profile/') {
+        activeLink = document.querySelector('[data-page="profile"]');
+    } else if (currentPath.includes('/profile/edit')) {
+        activeLink = document.querySelector('[data-page="edit-profile"]');
+    } else if (currentPath.includes('/profile/change-password') || currentPath.includes('/change-password')) {
+        activeLink = document.querySelector('[data-page="change-password"]');
+    } else if (currentPath.includes('/orders')) {
+        activeLink = document.querySelector('[data-page="orders"]');
+    } else if (currentPath.includes('/address')) {
+        activeLink = document.querySelector('[data-page="address"]');
+    } else if (currentPath.includes('/wallet')) {
+        activeLink = document.querySelector('[data-page="wallet"]');
+    } else if (currentPath.includes('/payment-methods')) {
+        activeLink = document.querySelector('[data-page="payment-methods"]');
+    } else if (currentPath.includes('/returns')) {
+        activeLink = document.querySelector('[data-page="returns"]');
+    } else if (currentPath.includes('/coupons')) {
+        activeLink = document.querySelector('[data-page="coupons"]');
+    } else if (currentPath.includes('/notifications')) {
+        activeLink = document.querySelector('[data-page="notifications"]');
+    }
+    
+    // Add active class to the determined link
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
+});
+</script>
