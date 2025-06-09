@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
-    <%- include('./partials/_styles') %>
+   <%- include('../partials/userprofile/style') %>
     <style>
         .cart-container {
             display: grid;
@@ -424,7 +424,7 @@
     </style>
 </head>
 <body>
-    <%- include('./partials/_header') %>
+    <%- include('../partials/userprofile/header') %>
     
     <div class="container">
         <!-- Breadcrumbs -->
@@ -644,7 +644,7 @@
         </div>
     </div>
 
-    <%- include('./partials/_footer') %>
+   <%- include('../partials/userprofile/footer') %>
 
     <script>
         function updateQuantity(itemId, change, newValue = null) {

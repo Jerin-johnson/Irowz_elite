@@ -1,6 +1,8 @@
 <%- include('../partials/user/header.ejs') %>
 
 <link rel="stylesheet" href="/css/shop.css">
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- Breadcrumb Section -->
 <section class="shp_breadcrumb_option">
@@ -202,9 +204,9 @@
                                         </span>
                                     <% } %>
                                     <div class="shp_product_action_1">
-                                        <a href="/wishlist/add/<%= product._id %>" class="shp_action_btn hover-up" title="Add to Wishlist">
+                                        <button onclick="addToWishlist('<%= product._id %>')" class="shp_action_btn hover-up" title="Add to Wishlist">
                                             <i class="fa fa-heart"></i>
-                                        </a>
+                                        </button>
                                     </div>
                                 </div>
                                 <div class="shp_product_details">
@@ -225,7 +227,7 @@
                                             </label>
                                         <% }) %>
                                     </div>
-                                    <a href="/cart/add/<%= product._id %>" class="shp_add_cart">Add To Cart</a>
+                                    <button onclick="addToCart('<%= product._id %>')" class="shp_add_cart">Add To Cart</button>
                                 </div>
                             </div>
                         </div>
@@ -263,5 +265,85 @@
         </div>
     </div>
 </section>
+
+<script>
+// Function to add product to wishlist
+async function addToWishlist(productId) {
+    try {
+        const response = await fetch(`/wishlist/add/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Added to Wishlist!',
+                text: result.message || 'Product has been added to your wishlist.',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message || 'Failed to add product to wishlist.',
+                confirmButtonText: 'OK'
+            });
+        }
+    } catch (error) {
+        console.error('Error adding to wishlist:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Something went wrong. Please try again.',
+            confirmButtonText: 'OK'
+        });
+    }
+}
+
+// Function to add product to cart
+async function addToCart(productId) {
+    try {
+        const response = await fetch(`/cart/add/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Added to Cart!',
+                text: result.message || 'Product has been added to your cart.',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message || 'Failed to add product to cart.',
+                confirmButtonText: 'OK'
+            });
+        }
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Something went wrong. Please try again.',
+            confirmButtonText: 'OK'
+        });
+    }
+}
+</script>
 
 <%- include('../partials/user/footer.ejs') %>

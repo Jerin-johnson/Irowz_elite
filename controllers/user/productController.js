@@ -9,9 +9,9 @@ const loadProductDetailedPage = async (req, res) => {
         const reviews =[];
 
         // Get user if session exists
-        // let user = null;
+        let user = null;
         if (req.session.user) {
-          const user = await User.findOne({_id:req.session.user,isBlocked:false});
+           user = await User.findOne({_id:req.session.user,isBlocked:false});
             
         }
 

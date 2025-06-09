@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
-    <%- include('./partials/_styles') %>
+    <%- include('../partials/userprofile/style') %>
     <style>
         .wishlist-header {
             display: flex;
@@ -77,11 +77,11 @@
         }
         
         .item-badge.sale {
-            background: #28a745;
+            background: #b33900;
         }
         
         .item-badge.new {
-            background: #007bff;
+            background: #00ff26;
         }
         
         .remove-wishlist {
@@ -332,7 +332,7 @@
     </style>
 </head>
 <body>
-    <%- include('./partials/_header') %>
+    <%- include('../partials/userprofile/header') %>
     
     <div class="container">
         <!-- Breadcrumbs -->
@@ -361,19 +361,16 @@
         <div class="wishlist-stats">
             <div class="stats-grid">
                 <div class="stat-item">
-                    <h4>6</h4>
+                    <h4><%= wishlistItems.length %></h4>
                     <p>Total Items</p>
                 </div>
                 <div class="stat-item">
-                    <h4>$1,247.94</h4>
+                    <h4>$<%= totalValue.toFixed(2) %></h4>
                     <p>Total Value</p>
                 </div>
+    
                 <div class="stat-item">
-                    <h4>$189.50</h4>
-                    <p>Total Savings</p>
-                </div>
-                <div class="stat-item">
-                    <h4>4</h4>
+                    <h4><%= inStockCount %></h4>
                     <p>In Stock</p>
                 </div>
             </div>
@@ -381,252 +378,88 @@
 
         <!-- Wishlist Items -->
         <div class="wishlist-grid" id="wishlistGrid">
-            <!-- Item 1 -->
-            <div class="wishlist-item" data-id="1">
-                <div class="item-image">
-                    <img src="/placeholder.svg?height=250&width=280" alt="Premium Leather Wallet">
-                    <div class="item-badge sale">20% OFF</div>
-                    <button class="remove-wishlist" onclick="removeFromWishlist(1)">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="item-details">
-                    <h3 class="item-title">Premium Leather Wallet with RFID Protection</h3>
-                    <div class="item-rating">
-                        <div class="stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
+            <% if (wishlistItems.length > 0) { %>
+                <% wishlistItems.forEach(item => { %>
+                    <div class="wishlist-item" data-id="<%= item.productId._id %>">
+                        <div class="item-image">
+                            <img src="/<%= item.productId.productImage[0]?.path || '/placeholder.svg?height=250&width=280' %>" alt="<%= item.productId.productName %>">
+                            <% if (item.productId.status === 'Discounted' && item.productId.regularPrice > item.productId.salePrice) { %>
+                                <div class="item-badge sale">
+                                    <%= Math.round(((item.productId.regularPrice - item.productId.salePrice) / item.productId.regularPrice) * 100) %>% OFF
+                                </div>
+                            <% } else if (item.productId.createdAt > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) { %>
+                                <div class="item-badge new">NEW</div>
+                            <% } %>
+                            <button class="remove-wishlist" onclick="removeFromWishlist('<%= item.productId._id %>')">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
-                        <span class="rating-text">(4.5) 124 reviews</span>
-                    </div>
-                    <div class="stock-status in-stock">
-                        <i class="fas fa-check-circle"></i> In Stock
-                    </div>
-                    <div class="item-price">
-                        <span class="current-price">$71.99</span>
-                        <span class="original-price">$89.99</span>
-                        <span class="discount-percent">20% OFF</span>
-                    </div>
-                    <div class="item-actions">
-                        <button class="btn-add-to-cart" onclick="addToCart(1)">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
-                        </button>
-                        <button class="btn-view-product" onclick="viewProduct(1)">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Item 2 -->
-            <div class="wishlist-item" data-id="2">
-                <div class="item-image">
-                    <img src="/placeholder.svg?height=250&width=280" alt="Luxury Watch">
-                    <div class="item-badge new">NEW</div>
-                    <button class="remove-wishlist" onclick="removeFromWishlist(2)">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="item-details">
-                    <h3 class="item-title">Luxury Automatic Watch - Stainless Steel</h3>
-                    <div class="item-rating">
-                        <div class="stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
+                        <div class="item-details">
+                            <h3 class="item-title"><%= item.productId.productName %></h3>
+                            <div class="item-rating">
+                                <div class="stars">
+                                    <% for (let i = 1; i <= 5; i++) { %>
+                                        <% if (i <= Math.floor(item.productId.rating)) { %>
+                                            <i class="fas fa-star"></i>
+                                        <% } else if (i === Math.ceil(item.productId.rating) && item.productId.rating % 1 !== 0) { %>
+                                            <i class="fas fa-star-half-alt"></i>
+                                        <% } else { %>
+                                            <i class="far fa-star"></i>
+                                        <% } %>
+                                    <% } %>
+                                </div>
+                                <span class="rating-text">(<%= item.productId.rating.toFixed(1) %>) <%= Math.floor(Math.random() * 200) + 50 %> reviews</span>
+                            </div>
+                            <div class="stock-status <%= item.productId.stock > 5 ? 'in-stock' : item.productId.stock > 0 ? 'low-stock' : 'out-of-stock' %>">
+                                <% if (item.productId.stock > 5) { %>
+                                    <i class="fas fa-check-circle"></i> In Stock
+                                <% } else if (item.productId.stock > 0) { %>
+                                    <i class="fas fa-exclamation-triangle"></i> Only <%= item.productId.stock %> left
+                                <% } else { %>
+                                    <i class="fas fa-times-circle"></i> Out of Stock
+                                <% } %>
+                            </div>
+                            <div class="item-price">
+                                <span class="current-price">$<%= item.productId.salePrice.toFixed(2) %></span>
+                                <% if (item.productId.regularPrice > item.productId.salePrice) { %>
+                                    <span class="original-price">$<%= item.productId.regularPrice.toFixed(2) %></span>
+                                    
+                                <% } %>
+                            </div>
+                            <div class="item-actions">
+                                <% if (item.productId.stock > 0) { %>
+                                    <button class="btn-add-to-cart" onclick="addToCart('<%= item.productId._id %>')">
+                                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                                    </button>
+                                <% } else { %>
+                                    <button class="btn-add-to-cart" disabled style="opacity: 0.6; cursor: not-allowed;">
+                                        <i class="fas fa-bell"></i> Notify Me
+                                    </button>
+                                <% } %>
+                                <button class="btn-view-product" onclick="viewProduct('<%= item.productId._id %>')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
-                        <span class="rating-text">(5.0) 89 reviews</span>
                     </div>
-                    <div class="stock-status in-stock">
-                        <i class="fas fa-check-circle"></i> In Stock
-                    </div>
-                    <div class="item-price">
-                        <span class="current-price">$299.99</span>
-                    </div>
-                    <div class="item-actions">
-                        <button class="btn-add-to-cart" onclick="addToCart(2)">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
-                        </button>
-                        <button class="btn-view-product" onclick="viewProduct(2)">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Item 3 -->
-            <div class="wishlist-item" data-id="3">
-                <div class="item-image">
-                    <img src="/placeholder.svg?height=250&width=280" alt="Designer Sunglasses">
-                    <button class="remove-wishlist" onclick="removeFromWishlist(3)">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="item-details">
-                    <h3 class="item-title">Designer Sunglasses - Polarized UV Protection</h3>
-                    <div class="item-rating">
-                        <div class="stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="far fa-star"></i>
-                        </div>
-                        <span class="rating-text">(4.0) 67 reviews</span>
-                    </div>
-                    <div class="stock-status low-stock">
-                        <i class="fas fa-exclamation-triangle"></i> Only 3 left
-                    </div>
-                    <div class="item-price">
-                        <span class="current-price">$159.99</span>
-                    </div>
-                    <div class="item-actions">
-                        <button class="btn-add-to-cart" onclick="addToCart(3)">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
-                        </button>
-                        <button class="btn-view-product" onclick="viewProduct(3)">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Item 4 -->
-            <div class="wishlist-item" data-id="4">
-                <div class="item-image">
-                    <img src="/placeholder.svg?height=250&width=280" alt="Bluetooth Headphones">
-                    <div class="item-badge sale">15% OFF</div>
-                    <button class="remove-wishlist" onclick="removeFromWishlist(4)">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="item-details">
-                    <h3 class="item-title">Wireless Bluetooth Headphones - Noise Cancelling</h3>
-                    <div class="item-rating">
-                        <div class="stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                        </div>
-                        <span class="rating-text">(4.6) 203 reviews</span>
-                    </div>
-                    <div class="stock-status in-stock">
-                        <i class="fas fa-check-circle"></i> In Stock
-                    </div>
-                    <div class="item-price">
-                        <span class="current-price">$169.99</span>
-                        <span class="original-price">$199.99</span>
-                        <span class="discount-percent">15% OFF</span>
-                    </div>
-                    <div class="item-actions">
-                        <button class="btn-add-to-cart" onclick="addToCart(4)">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
-                        </button>
-                        <button class="btn-view-product" onclick="viewProduct(4)">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Item 5 -->
-            <div class="wishlist-item" data-id="5">
-                <div class="item-image">
-                    <img src="/placeholder.svg?height=250&width=280" alt="Smart Fitness Tracker">
-                    <button class="remove-wishlist" onclick="removeFromWishlist(5)">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="item-details">
-                    <h3 class="item-title">Smart Fitness Tracker with Heart Rate Monitor</h3>
-                    <div class="item-rating">
-                        <div class="stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="far fa-star"></i>
-                        </div>
-                        <span class="rating-text">(4.2) 156 reviews</span>
-                    </div>
-                    <div class="stock-status out-of-stock">
-                        <i class="fas fa-times-circle"></i> Out of Stock
-                    </div>
-                    <div class="item-price">
-                        <span class="current-price">$129.99</span>
-                    </div>
-                    <div class="item-actions">
-                        <button class="btn-add-to-cart" disabled style="opacity: 0.6; cursor: not-allowed;">
-                            <i class="fas fa-bell"></i> Notify Me
-                        </button>
-                        <button class="btn-view-product" onclick="viewProduct(5)">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Item 6 -->
-            <div class="wishlist-item" data-id="6">
-                <div class="item-image">
-                    <img src="/placeholder.svg?height=250&width=280" alt="Premium Backpack">
-                    <div class="item-badge sale">25% OFF</div>
-                    <button class="remove-wishlist" onclick="removeFromWishlist(6)">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="item-details">
-                    <h3 class="item-title">Premium Travel Backpack - Water Resistant</h3>
-                    <div class="item-rating">
-                        <div class="stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <span class="rating-text">(4.8) 92 reviews</span>
-                    </div>
-                    <div class="stock-status in-stock">
-                        <i class="fas fa-check-circle"></i> In Stock
-                    </div>
-                    <div class="item-price">
-                        <span class="current-price">$89.99</span>
-                        <span class="original-price">$119.99</span>
-                        <span class="discount-percent">25% OFF</span>
-                    </div>
-                    <div class="item-actions">
-                        <button class="btn-add-to-cart" onclick="addToCart(6)">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
-                        </button>
-                        <button class="btn-view-product" onclick="viewProduct(6)">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+                <% }) %>
+            <% } %>
         </div>
 
-        <!-- Empty Wishlist State (Hidden by default) -->
-        <div class="empty-wishlist" id="emptyWishlist" style="display: none;">
-            <i class="fas fa-heart"></i>
-            <h3>Your wishlist is empty</h3>
-            <p>Save items you love by clicking the heart icon on any product</p>
-            <a href="/shop" class="btn btn-primary">Start Shopping</a>
-        </div>
-    </div>
+        <!-- Empty Wishlist State -->
+<div class="empty-wishlist" id="emptyWishlist" <% if (wishlistItems.length === 0) { %>style="display: block;"<% } else { %>style="display: none;"<% } %>>
+    <i class="fas fa-heart"></i>
+    <h3>Your wishlist is empty</h3>
+    <p>Save items you love by clicking the heart icon on any product</p>
+    <a href="/shop" class="btn btn-primary">Start Shopping</a>
+</div>
 
-    <%- include('./partials/_footer') %>
+     
+
+    <%- include('../partials/userprofile/footer') %>
 
     <script>
-        function removeFromWishlist(itemId) {
+        async function removeFromWishlist(productId) {
             swal({
                 title: "Remove from Wishlist?",
                 text: "This item will be removed from your wishlist.",
@@ -636,35 +469,50 @@
                     confirm: "Remove"
                 },
                 dangerMode: true,
-            })
-            .then((willRemove) => {
+            }).then(async (willRemove) => {
                 if (willRemove) {
-                    // Remove item from DOM
-                    const item = document.querySelector(`[data-id="${itemId}"]`);
-                    if (item) {
-                        item.style.transform = 'scale(0)';
-                        item.style.opacity = '0';
-                        setTimeout(() => {
-                            item.remove();
-                            updateStats();
-                            checkEmptyWishlist();
-                        }, 300);
+                    const response = await fetch(`/wishlist/remove/${productId}`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        const item = document.querySelector(`[data-id="${productId}"]`);
+                        if (item) {
+                            item.style.transform = 'scale(0)';
+                            item.style.opacity = '0';
+                            setTimeout(() => {
+                                item.remove();
+                                updateStats();
+                                checkEmptyWishlist();
+                            }, 300);
+                        }
+                        swal("Removed!", "Item has been removed from your wishlist.", "success");
+                    } else {
+                        swal("Error!", result.message || "Failed to remove item from wishlist.", "error");
                     }
-                    
-                    swal("Removed!", "Item has been removed from your wishlist.", "success");
                 }
             });
         }
 
-        function addToCart(itemId) {
-            swal("Added to Cart!", "Item has been added to your shopping cart.", "success");
+        async function addToCart(productId) {
+            const response = await fetch(`/cart/add/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const result = await response.json();
+            if (result.success) {
+                swal("Added to Cart!", "Item has been added to your shopping cart.", "success");
+            } else {
+                swal("Error!", result.message || "Failed to add item to cart.", "error");
+            }
         }
 
-        function viewProduct(itemId) {
-            window.location.href = `/product/${itemId}`;
+        function viewProduct(productId) {
+            window.location.href = `/product/details/${productId}`;
         }
 
-        function clearWishlist() {
+        async function clearWishlist() {
             swal({
                 title: "Clear Entire Wishlist?",
                 text: "This will remove all items from your wishlist. This action cannot be undone.",
@@ -674,17 +522,25 @@
                     confirm: "Clear All"
                 },
                 dangerMode: true,
-            })
-            .then((willClear) => {
+            }).then(async (willClear) => {
                 if (willClear) {
-                    document.getElementById('wishlistGrid').style.display = 'none';
-                    document.getElementById('emptyWishlist').style.display = 'block';
-                    swal("Wishlist Cleared!", "All items have been removed from your wishlist.", "success");
+                    const response = await fetch('/wishlist/clear', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        document.getElementById('wishlistGrid').style.display = 'none';
+                        document.getElementById('emptyWishlist').style.display = 'block';
+                        swal("Wishlist Cleared!", "All items have been removed from your wishlist.", "success");
+                    } else {
+                        swal("Error!", result.message || "Failed to clear wishlist.", "error");
+                    }
                 }
             });
         }
 
-        function addAllToCart() {
+        async function addAllToCart() {
             swal({
                 title: "Add All Items to Cart?",
                 text: "This will add all available items to your shopping cart.",
@@ -693,16 +549,23 @@
                     cancel: "Cancel",
                     confirm: "Add All"
                 }
-            })
-            .then((willAdd) => {
+            }).then(async (willAdd) => {
                 if (willAdd) {
-                    swal("Items Added!", "All available items have been added to your cart.", "success");
+                    const response = await fetch('/cart/add-all', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        swal("Items Added!", "All available items have been added to your cart.", "success");
+                    } else {
+                        swal("Error!", result.message || "Failed to add items to cart.", "error");
+                    }
                 }
             });
         }
 
         function updateStats() {
-            // Update wishlist statistics
             const items = document.querySelectorAll('.wishlist-item');
             const statItems = document.querySelector('.stat-item h4');
             if (statItems) {

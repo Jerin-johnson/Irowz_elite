@@ -1,7 +1,7 @@
 const express = require("express");
 const userRouter = express.Router();
 const {loadHomePage,pageNotFound,loadSignup,loadLogin,signUp,loadOtp,verifyOtp,ResentOtp,verifyLogin,userLogout,loadShoppingPage}=require("../controllers/user/userController.js");
-const{loadVerifyEmail,verifyEmail,loadForgetPasswordPage,loadForgetPasswordOtpPage,verifyForgetOtp,resetPassword,loadProfilePage,loadEditProflie,loadChangePassword,loadAddressPage,loadAddAddressPage,updateChangePassword,loadUpdateEmailOtp,verifyUpdateEmailOtp,updateEmail,loadUpdateEmail,resendOtpEmail} = require("../controllers/user/profileController.js")
+const{loadVerifyEmail,verifyEmail,loadForgetPasswordPage,loadForgetPasswordOtpPage,verifyForgetOtp,resetPassword,loadProfilePage,loadEditProflie,loadChangePassword,loadAddressPage,loadAddAddressPage,updateChangePassword,loadUpdateEmailOtp,verifyUpdateEmailOtp,updateEmail,loadUpdateEmail,resendOtpEmail,addAddress,loadEditAddressPage,editAddress,deleteAddress} = require("../controllers/user/profileController.js")
 const { userAuth, isUserLoggedIn, isUserLoggedOut,ensureOtpSession,checkWhetherUserIsBlocked} = require("../middleware/userMiddleWare.js")
 //google sign in
 const {passport}= require("../config/passport");
@@ -14,6 +14,16 @@ const{loadOrderPage}=require("../controllers/user/orderContoller.js");
 
 // Wallet Realted things
 const {loadWalletPage}=require("../controllers/user/walletController.js")
+
+// wishlist releted things
+const{loadWishlistPage,addToWishList,deleteWishlist}=require("../controllers/user/wishlistControlle.js")
+
+// cart releated page
+const{loadCartPage,addToCart}=require("../controllers/user/cartcontroller.js");
+
+// checkout releted things
+const{loadCheckOutPage}=require("../controllers/user/checkoutController.js")
+
 
 
 
@@ -65,9 +75,32 @@ userRouter.post("/profile/email/update",updateEmail)
 
 // address Management
 userRouter.get("/address",isUserLoggedIn,loadAddressPage);
-userRouter.get("/address/add",isUserLoggedIn,loadAddAddressPage)
+userRouter.get("/address/add",isUserLoggedIn,loadAddAddressPage);
+userRouter.post("/address/add",isUserLoggedIn,addAddress);
+// edit address
+userRouter.get("/address/edit/:id",isUserLoggedIn,loadEditAddressPage);
+userRouter.patch("/address/edit/:id",isUserLoggedIn,editAddress);
+userRouter.delete("/address/delete/:id",isUserLoggedIn,deleteAddress)
 
 
+
+
+
+// wishlist management
+
+userRouter.get("/wishlist",isUserLoggedIn,loadWishlistPage)
+userRouter.post("/wishlist/add/:id",isUserLoggedIn,addToWishList)
+userRouter.delete("/wishlist/clear",isUserLoggedIn,deleteWishlist)
+
+
+// Cart Releted things here
+userRouter.get("/cart",isUserLoggedIn,loadCartPage)
+userRouter.post("/cart/add/:id",isUserLoggedIn,addToCart)
+
+
+// const checkout related things
+
+userRouter.get("/checkout",isUserLoggedIn,loadCheckOutPage);
 
 
 

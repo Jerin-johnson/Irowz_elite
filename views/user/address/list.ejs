@@ -1,219 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Address Book - My Account | Irowz Elite</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
-    <%- include('../../partials/userprofile/style') %>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Address Book - My Account | Irowz Elite</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+  <%- include('../../partials/userprofile/style') %>
 </head>
 <body>
-   <%- include('../../partials/userprofile/header') %>
-    
-    <div class="container">
-        <div class="row" style="display: flex; gap: 20px;">
-            <!-- Sidebar -->
-            <div class="col-md-3 sidebar" style="flex: 0 0 250px;">
-                <%- include('../../partials/userprofile/sidebar') %>
-            </div>
-            
-            <!-- Main Content -->
-            <div class="col-md-9 main-content" style="flex: 1; padding: 30px;">
-                <!-- Breadcrumbs -->
-                <%- include('../../partials/userprofile/breadcrump', { currentPage: 'address' }) %>
+  <%- include('../../partials/userprofile/header') %>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                    <h2 style="margin: 0; color: #333;">Address Book</h2>
-                    <a href="/address/add" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Add New Address
-                    </a>
-                </div>
+  <div class="container">
+    <div class="row" style="display: flex; gap: 20px;">
+      <!-- Sidebar -->
+      <div class="col-md-3 sidebar" style="flex: 0 0 250px;">
+        <%- include('../../partials/userprofile/sidebar') %>
+      </div>
 
-                <!-- Address Cards -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                    <!-- Default Address -->
-                    <div class="address-card default">
-                        <div class="default-badge">Default</div>
-                        <h5 style="margin: 0 0 10px; color: #333;">John Doe</h5>
-                        <p style="margin: 5px 0; color: #666;"><strong>Phone:</strong> +1 234 567 8900</p>
-                        <p style="margin: 15px 0; color: #333; line-height: 1.5;">
-                            123 Main Street, Apt 4B<br>
-                            New York, NY 10001<br>
-                            United States
-                        </p>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <a href="/address/edit/1" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-edit"></i> Edit
-                            </a>
-                            <button class="btn btn-outline-danger btn-sm" onclick="deleteAddress(1)">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    </div>
+      <!-- Main Content -->
+      <div class="col-md-9 main-content" style="flex: 1; padding: 30px;">
+        <!-- Breadcrumbs -->
+        <%- include('../../partials/userprofile/breadcrump', { currentPage: 'address' }) %>
 
-                    <!-- Additional Address -->
-                    <div class="address-card">
-                        <h5 style="margin: 0 0 10px; color: #333;">John Doe</h5>
-                        <p style="margin: 5px 0; color: #666;"><strong>Phone:</strong> +1 234 567 8901</p>
-                        <p style="margin: 15px 0; color: #333; line-height: 1.5;">
-                            456 Oak Avenue<br>
-                            Los Angeles, CA 90210<br>
-                            United States
-                        </p>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <a href="/address/edit/2" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-edit"></i> Edit
-                            </a>
-                            <button class="btn btn-outline-success btn-sm" onclick="setDefault(2)">
-                                <i class="fas fa-star"></i> Set Default
-                            </button>
-                            <button class="btn btn-outline-danger btn-sm" onclick="deleteAddress(2)">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Work Address -->
-                    <div class="address-card">
-                        <h5 style="margin: 0 0 10px; color: #333;">John Doe (Work)</h5>
-                        <p style="margin: 5px 0; color: #666;"><strong>Phone:</strong> +1 234 567 8902</p>
-                        <p style="margin: 15px 0; color: #333; line-height: 1.5;">
-                            789 Business Plaza, Suite 100<br>
-                            Chicago, IL 60601<br>
-                            United States
-                        </p>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <a href="/address/edit/3" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-edit"></i> Edit
-                            </a>
-                            <button class="btn btn-outline-success btn-sm" onclick="setDefault(3)">
-                                <i class="fas fa-star"></i> Set Default
-                            </button>
-                            <button class="btn btn-outline-danger btn-sm" onclick="deleteAddress(3)">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Empty State (show when no addresses) -->
-                <div style="text-align: center; padding: 50px 0; display: none;" id="empty-state">
-                    <i class="fas fa-map-marker-alt" style="font-size: 48px; color: #ccc; margin-bottom: 20px;"></i>
-                    <h4 style="color: #666; margin-bottom: 10px;">No addresses found</h4>
-                    <p style="color: #999; margin-bottom: 20px;">Add your first address to get started</p>
-                    <a href="/address/add" class="btn btn-primary">Add Address</a>
-                </div>
-            </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+          <h2 style="margin: 0; color: #333;">Address Book</h2>
+          <a href="/address/add" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New Address
+          </a>
         </div>
+
+        <!-- Address Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+          <% if (addresses.length > 0) { %>
+            <% addresses.forEach(address => { %>
+              <div class="address-card <%= address.isDefault ? 'default' : '' %>">
+                <% if (address.isDefault) { %>
+                  <div class="default-badge">Default</div>
+                <% } %>
+                <h5 style="margin: 0 0 10px; color: #333;">
+                  <%= address.firstName %> <%= address.lastName %>
+                  <% if (address.addressType === 'work') { %> (Work) <% } %>
+                </h5>
+                <p style="margin: 5px 0; color: #666;"><strong>Phone:</strong> <%= address.phone %></p>
+                <p style="margin: 15px 0; color: #333; line-height: 1.5;">
+                  <%= address.address %><br>
+                  <%= address.state %>, <%= address.pinCode %><br>
+                  <%= address.country %>
+                </p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                  <a href="/address/edit/<%= address._id %>" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                
+                  <button class="btn btn-outline-danger btn-sm" onclick="deleteAddress('<%= address._id %>')">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <!-- Empty State -->
+            <div style="text-align: center; padding: 50px 0;" id="empty-state">
+              <i class="fas fa-map-marker-alt" style="font-size: 48px; color: #ccc; margin-bottom: 20px;"></i>
+              <h4 style="color: #666; margin-bottom: 10px;">No addresses found</h4>
+              <p style="color: #999; margin-bottom: 20px;">Add your first address to get started</p>
+              <a href="/address/add" class="btn btn-primary">Add Address</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
     </div>
+  </div>
 
-   <%- include('../../partials/userprofile/footer') %>
-    <script>
-        function deleteAddress(id) {
-            swal({
-                title: "Are you sure?",
-                text: "This address will be permanently deleted.",
-                icon: "warning",
-                buttons: {
-                    cancel: {
-                        text: "Cancel",
-                        value: null,
-                        visible: true,
-                        className: "",
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: "Delete",
-                        value: true,
-                        visible: true,
-                        className: "",
-                        closeModal: true
-                    }
-                },
-                dangerMode: true,
-            })
-            .then((willDelete) => {
-                if (willDelete) {
-                    // Add delete functionality here
-                    console.log('Delete address:', id);
-                    swal("Address deleted successfully!", {
-                        icon: "success",
-                    });
-                }
-            });
+  <%- include('../../partials/userprofile/footer') %>
+
+  <script>
+    function deleteAddress(id) {
+      swal({
+        title: "Are you sure?",
+        text: "This address will be permanently deleted.",
+        icon: "warning",
+        buttons: {
+          cancel: {
+            text: "Cancel",
+            visible: true,
+            closeModal: true
+          },
+          confirm: {
+            text: "Delete",
+            visible: true,
+            closeModal: true
+          }
+        },
+        dangerMode: true,
+      }).then((willDelete) => {
+        if (willDelete) {
+          fetch(`/address/delete/${id}`, {
+            method: 'DELETE'
+          }).then(res => res.json()).then(data => {
+            if (data.success) {
+              location.reload();
+            } else {
+              swal("Failed to delete address!", { icon: "error" });
+            }
+          });
         }
+      });
+    }
 
-        function setDefault(id) {
-            swal({
-                title: "Set as default address?",
-                text: "This will be used as your primary shipping address.",
-                icon: "info",
-                buttons: {
-                    cancel: {
-                        text: "Cancel",
-                        value: null,
-                        visible: true,
-                        className: "",
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: "Set Default",
-                        value: true,
-                        visible: true,
-                        className: "",
-                        closeModal: true
-                    }
-                },
-            })
-            .then((willSet) => {
-                if (willSet) {
-                    // Add set default functionality here
-                    console.log('Set default address:', id);
-                    swal("Default address updated!", {
-                        icon: "success",
-                    });
-                }
-            });
+    function setDefault(id) {
+      swal({
+        title: "Set as default address?",
+        text: "This will be used as your primary shipping address.",
+        icon: "info",
+        buttons: {
+          cancel: {
+            text: "Cancel",
+            visible: true,
+            closeModal: true
+          },
+          confirm: {
+            text: "Set Default",
+            visible: true,
+            closeModal: true
+          }
+        },
+      }).then((willSet) => {
+        if (willSet) {
+          fetch(`/address/default/${id}`, {
+            method: 'PATCH'
+          }).then(res => res.json()).then(data => {
+            if (data.success) {
+              location.reload();
+            } else {
+              swal("Failed to set default!", { icon: "error" });
+            }
+          });
         }
+      });
+    }
 
-        function confirmLogout(event) {
-            event.preventDefault();
-            swal({
-                title: "Are you sure?",
-                text: "You will be logged out of your account.",
-                icon: "warning",
-                buttons: {
-                    cancel: {
-                        text: "Cancel",
-                        value: null,
-                        visible: true,
-                        className: "",
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: "Logout",
-                        value: true,
-                        visible: true,
-                        className: "",
-                        closeModal: true
-                    }
-                },
-                dangerMode: true,
-            })
-            .then((willLogout) => {
-                if (willLogout) {
-                    window.location.href = '/logout';
-                }
-            });
-        }
-
-        // Mobile Menu Toggle
-        document.querySelector('.canvas__open').addEventListener('click', () => {
-            document.querySelector('.header__menu').classList.toggle('active');
-        });
-    </script>
+    document.querySelector('.canvas__open')?.addEventListener('click', () => {
+      document.querySelector('.header__menu')?.classList.toggle('active');
+    });
+  </script>
 </body>
 </html>

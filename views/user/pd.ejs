@@ -897,15 +897,31 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Product added to cart!');
+                        swal({
+                            title: "Success!",
+                            text: "Product added to cart successfully!",
+                            icon: "success",
+                            button: "Continue Shopping",
+                        });
                     } else {
-                        window.location.href = '/shop';
-                        alert(data.message || 'Product is unavailable.');
+                        swal({
+                            title: "Oops!",
+                            text: data.message || "Product is currently unavailable.",
+                            icon: "error",
+                            button: "Go to Shop",
+                        }).then(() => {
+                            window.location.href = '/shop';
+                        });
                     }
                 })
                 .catch(error => {
                     console.error('Error adding to cart:', error);
-                    alert('An error occurred. Please try again.');
+                    swal({
+                        title: "Error!",
+                        text: "An error occurred. Please try again.",
+                        icon: "error",
+                        button: "OK",
+                    });
                 });
         }
 
@@ -914,18 +930,36 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Product added to wishlist!');
+                        swal({
+                            title: "Added to Wishlist!",
+                            text: "Product has been saved to your wishlist.",
+                            icon: "success",
+                            button: "View Wishlist",
+                        }).then(() => {
+                            // Optionally redirect to wishlist page
+                            // window.location.href = '/wishlist';
+                        });
                     } else {
-                        alert(data.message || 'Failed to add to wishlist.');
+                        swal({
+                            title: "Failed!",
+                            text: data.message || "Failed to add to wishlist.",
+                            icon: "error",
+                            button: "close",
+                        });
                     }
                 })
                 .catch(error => {
                     console.error('Error adding to wishlist:', error);
-                    alert('An error occurred. Please try again.');
+                    swal({
+                        title: "Error!",
+                        text: "An error occurred. Please try again.",
+                        icon: "error",
+                        button: "OK",
+                    });
                 });
         }
 
-        function confirmLogout(event) {
+       function confirmLogout(event) {
             event.preventDefault();
             swal({
                 title: "Are you sure?",

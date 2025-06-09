@@ -23,12 +23,6 @@ const addressSchema = new Schema({
       required: true,
       match: [/^\d{10}$/, 'Phone number must be 10 digits']
     },
-    email: {
-      type: String,
-      required: true,
-      trim: true,
-      lowercase: true
-    },
     address: {
       type: String,
       required: true,
@@ -42,20 +36,16 @@ const addressSchema = new Schema({
       type: String,
       required: true
     },
-    district: {
+    country: {
       type: String,
       required: true
-    },
-    landmark: {
-      type: String,
-      required: false,
-      trim: true
     },
     addressType: {
       type: String,
-      enum: ['HOME', 'WORK'],
+      enum: ['home', 'work'],
       required: true
     },
+    isDefault: { type: Boolean, default: false },
     createdAt: {
       type: Date,
       default: Date.now

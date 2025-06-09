@@ -9,6 +9,7 @@ const {
   securePassword,
 } = require("../../helpers/helper");
 const passport = require("passport");
+const { Address } = require("../../models/addressSchema");
 
 const loadVerifyEmail = (req, res) => {
   try {
@@ -140,56 +141,160 @@ const updateChangePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
 
-    if(!currentPassword || !newPassword || !confirmPassword)
-    {
-      return res.status(400).json({success:false,message:"All fields are required"});
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
     }
 
     const user = await User.findById(req.session.user);
-    if(!user)
-    {
+    if (!user) {
       return res.status(400).redirect("/login");
     }
 
-    
-    const isMatch = await bcrypt.compare(currentPassword,user.password);
-    if(!isMatch)
-    {
-      return res.status(400).json({success:false,message:"Password doesn't match"});
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Password doesn't match" });
     }
 
-    if( newPassword !== confirmPassword)
-    {
-      return res.status(400).json({ success: false, message: "New password and confirm password do not match" });
-
-    };
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New password and confirm password do not match",
+      });
+    }
 
     const hashedPassword = await securePassword(newPassword);
 
-    const updatedPassworduser = await User.findByIdAndUpdate(req.session.user,{$set:{password:hashedPassword}});
+    const updatedPassworduser = await User.findByIdAndUpdate(req.session.user, {
+      $set: { password: hashedPassword },
+    });
 
     await updatedPassworduser.save();
 
-    return res.status(200).json({success:true,message:"The password updated successfully"});
-
-
-
+    return res
+      .status(200)
+      .json({ success: true, message: "The password updated successfully" });
   } catch (error) {
     console.log(error.message);
-    res.redirect("/error-404")
+    res.redirect("/error-404");
   }
 };
 
+// address management
+
 const loadAddressPage = async (req, res) => {
   try {
-    res.render("user/address/list");
-  } catch (error) {}
+    if (!req.session.user) {
+      return res.redirect("/login");
+    }
+    const user = await User.findById(req.session.user);
+
+    const address = await Address.findOne({ userId: user._id });
+
+    res.render("user/address/list", {
+      user,
+      addresses: address?.addresses || [],
+    });
+  } catch (error) {
+    console.error(error.message);
+    return res.redirect("/error-404");
+  }
 };
 
 const loadAddAddressPage = async (req, res) => {
   try {
-    res.render("user/address/add");
-  } catch (error) {}
+    if (!req.session.user) {
+      return res.redirect("/login");
+    }
+
+    const user = await User.findById(req.session.user);
+    res.render("user/address/add", { user });
+  } catch (error) {
+    console.log(error.message);
+    return res.redirect("/error-404");
+  }
+};
+
+const addAddress = async (req, res) => {
+  try {
+    if (!req.session.user) {
+      throw new Error("Please login First");
+    }
+
+    const {
+      firstName,
+      lastName,
+      phone,
+      address,
+      city,
+      state,
+      pincode,
+      country,
+      addressType,
+      isDefault,
+    } = req.body;
+
+    if (
+      !firstName ||
+      !lastName ||
+      !phone ||
+      !address ||
+      !city ||
+      !state ||
+      !pincode ||
+      !country ||
+      !addressType
+    ) {
+      throw new Error("All fields are required");
+    }
+
+    const user = await User.findById(req.session.user);
+    let addressDocs = await Address.findOne({ userId: user._id });
+
+    let newAddress = {
+      firstName,
+      lastName,
+      isDefault: !!isDefault,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      addressType,
+      state,
+      pinCode: pincode,
+      country,
+      address,
+      phone,
+    };
+
+    const checkuserWithPhone = await User.findOne({ phone: phone });
+
+    if (checkuserWithPhone) {
+      throw new Error("User With this phone no already exists");
+    }
+
+    if (addressDocs) {
+      if (isDefault) {
+        addressDocs.addresses.forEach((addr) => (addr.isDefault = false));
+      }
+      addressDocs.addresses.push(newAddress);
+      await addressDocs.save();
+    } else {
+      addressDocs = new Address({
+        userId: req.session.user,
+        addresses: [newAddress],
+      });
+      await addressDocs.save();
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Address Added successfully" });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(400).json({ success: false, message: error.message });
+  }
 };
 
 // verifying and updataing the email
@@ -223,7 +328,6 @@ const loadUpdateEmailOtp = async (req, res) => {
     res.redirect("/error-404");
   }
 };
-
 
 const verifyUpdateEmailOtp = async (req, res) => {
   try {
@@ -263,8 +367,7 @@ const loadUpdateEmail = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Email doesn't found in session" });
 
-    if(!req.session?.otpVerified)
-    {
+    if (!req.session?.otpVerified) {
       return res.redirect("/");
     }
     req.session.otpVerified = false;
@@ -332,7 +435,6 @@ const updateEmail = async (req, res) => {
   }
 };
 
-
 const resendOtpEmail = async (req, res) => {
   try {
     if (!req.session.userData || !req.session.userData.email) {
@@ -362,6 +464,210 @@ const resendOtpEmail = async (req, res) => {
   }
 };
 
+// edit Address Logic
+
+const loadEditAddressPage = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    if (!userId) {
+      throw new Error("please login");
+    }
+    const addressId = req.params.id;
+
+    if (!addressId) {
+      throw new Error("Invalid request");
+    }
+
+    const UserAddress = await Address.findOne(
+      { userId, "addresses._id": addressId },
+      { addresses: { $elemMatch: { _id: addressId } } }
+    );
+
+    if (
+      !UserAddress ||
+      !UserAddress.addresses ||
+      UserAddress.addresses.length === 0
+    ) {
+      throw new Error("Address not found");
+    }
+
+    const user = await User.findById(userId);
+
+    // console.log("To check what is this",UserAddress);
+
+    res.render("user/address/edit", {
+      user,
+      address: UserAddress.addresses?.[0],
+    });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const editAddress = async (req, res) => {
+  try {
+    if (!req.session.user) {
+      throw new Error("Please login First");
+    }
+
+    const {
+      firstName,
+      lastName,
+      phone,
+      address,
+      city,
+      state,
+      pincode,
+      country,
+      addressType,
+      isDefault,
+    } = req.body;
+
+    if (
+      !firstName ||
+      !lastName ||
+      !phone ||
+      !address ||
+      !city ||
+      !state ||
+      !pincode ||
+      !country ||
+      !addressType
+    ) {
+      throw new Error("All fields are required");
+    }
+
+    const user = await User.findById(req.session.user);
+
+    const userId = req.session.user;
+    const addressId = req.params.id;
+
+    if (isDefault) {
+      await Address.updateOne(
+        { userId },
+        { $set: { "addresses.$[].isDefault": false } }
+      );
+    }
+
+    const updatedAddress = await Address.updateOne(
+      { userId, "addresses._id": addressId },
+      {
+        $set: {
+          "addresses.$.firstName": firstName,
+          "addresses.$.lastName": lastName,
+          "addresses.$.phone": phone,
+          "addresses.$.address": address,
+          "addresses.$.state": state,
+          "addresses.$.pinCode": pincode,
+          "addresses.$.country": country,
+          "addresses.$.addressType": addressType,
+          "addresses.$.isDefault": !!isDefault,
+          "addresses.$.updatedAt": new Date(),
+        },
+      }
+    );
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Address Updated successfully" });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// const deleteAddress = async(req,res)=>{
+//   try {
+
+//     const userId = req.session.user;
+//     if(!userId)
+//     {
+//       throw new Error("Please Login")
+//     }
+
+//     const addressId = req.params.id;
+//     if(!addressId) throw new Error("Invalid request");
+
+//     const deleteAddress = await Address.findOne({userId,"addresses._id":addressId},
+//       {addresses:{$elemMatch:{_id:addressId}}}
+//     )
+
+//     if(deleteAddress.addresses[0].isDefault)
+//     {
+//       const update = await Address.updateOne({userId,"addresses._id":{$ne:addressId}},{$set:{"addresses[0].isDefault":true}})
+//     }
+
+//     await Address.updateOne({userId,"addresses._id":addressId},
+//       {$pull:{addresses:{_id:addressId}}}
+//     )
+
+//     return res.status(200).json({success:true,message:"Deleted Successfully"})
+
+    
+    
+//   } catch (error) {
+
+//     console.log(error.message);
+//     return res.status(400).json({success:false,message:error.message});
+    
+//   }
+// }
+
+const deleteAddress = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    if (!userId) {
+      throw new Error("Please login to delete an address");
+    }
+
+    const addressId = req.params.id;
+    if (!addressId) {
+      throw new Error("Invalid address ID");
+    }
+
+    // Find the address to check if it exists and is default
+    const addressDoc = await Address.findOne(
+      { userId, "addresses._id": addressId },
+      { addresses: { $elemMatch: { _id: addressId } } }
+    );
+
+    if (!addressDoc || !addressDoc.addresses || addressDoc.addresses.length === 0) {
+      throw new Error("Address not found");
+    }
+
+    const isDefault = addressDoc.addresses[0].isDefault;
+
+    // Delete the address
+    const deleteResult = await Address.updateOne(
+      { userId },
+      { $pull: { addresses: { _id: addressId } } }
+    );
+
+    if (deleteResult.modifiedCount === 0) {
+      throw new Error("Failed to delete address");
+    }
+
+    // If it was default, set the first remaining address as default
+    if (isDefault) {
+      const updatedDoc = await Address.findOne({ userId });
+      if (updatedDoc && updatedDoc.addresses && updatedDoc.addresses.length > 0) {
+        await Address.updateOne(
+          { userId, "addresses._id": updatedDoc.addresses[0]._id },
+          { $set: { "addresses.$.isDefault": true } }
+        );
+      }
+    }
+
+    return res.status(200).json({ success: true, message: "Deleted Successfully" });
+
+  } catch (error) {
+    console.error("Error deleting address:", error.message);
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+
 module.exports = {
   loadVerifyEmail,
   verifyEmail,
@@ -380,4 +686,8 @@ module.exports = {
   updateEmail,
   loadUpdateEmail,
   resendOtpEmail,
+  addAddress,
+  loadEditAddressPage,
+  editAddress,
+  deleteAddress
 };
