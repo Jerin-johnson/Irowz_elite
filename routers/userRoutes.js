@@ -19,7 +19,7 @@ const {loadWalletPage}=require("../controllers/user/walletController.js")
 const{loadWishlistPage,addToWishList,deleteWishlist}=require("../controllers/user/wishlistControlle.js")
 
 // cart releated page
-const{loadCartPage,addToCart}=require("../controllers/user/cartcontroller.js");
+const{loadCartPage,addToCart,updateCartQuantity,deleteCartItem,clearCart}=require("../controllers/user/cartcontroller.js");
 
 // checkout releted things
 const{loadCheckOutPage}=require("../controllers/user/checkoutController.js")
@@ -90,12 +90,15 @@ userRouter.delete("/address/delete/:id",isUserLoggedIn,deleteAddress)
 
 userRouter.get("/wishlist",isUserLoggedIn,loadWishlistPage)
 userRouter.post("/wishlist/add/:id",isUserLoggedIn,addToWishList)
-userRouter.delete("/wishlist/clear",isUserLoggedIn,deleteWishlist)
+userRouter.delete("/wishlist/clear",isUserLoggedIn,deleteWishlist);
 
 
 // Cart Releted things here
 userRouter.get("/cart",isUserLoggedIn,loadCartPage)
-userRouter.post("/cart/add/:id",isUserLoggedIn,addToCart)
+userRouter.post("/cart/add/:id",isUserLoggedIn,addToCart);
+userRouter.put("/cart/update",isUserLoggedIn,updateCartQuantity);
+userRouter.delete("/cart/remove",isUserLoggedIn,deleteCartItem);
+userRouter.delete("/cart/clear",isUserLoggedIn,clearCart)
 
 
 // const checkout related things
