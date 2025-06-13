@@ -10,7 +10,9 @@ const{loadProductDetailedPage}=require("../controllers/user/productController.js
 const {User} = require("../models/userSchema.js");
 
 // orderController
-const{loadOrderPage}=require("../controllers/user/orderContoller.js");
+const{loadOrderPage,loadOrderDetailedPage}=require("../controllers/user/orderContoller.js");
+// order managenemt user;
+const{cancelOrderItem}=require("../controllers/user/orderContoller.js")
 
 // Wallet Realted things
 const {loadWalletPage}=require("../controllers/user/walletController.js")
@@ -22,7 +24,7 @@ const{loadWishlistPage,addToWishList,deleteWishlist}=require("../controllers/use
 const{loadCartPage,addToCart,updateCartQuantity,deleteCartItem,clearCart}=require("../controllers/user/cartcontroller.js");
 
 // checkout releted things
-const{loadCheckOutPage}=require("../controllers/user/checkoutController.js")
+const{loadCheckOutPage,placeOrder,loadOrderSuccessPage}=require("../controllers/user/checkoutController.js")
 
 
 
@@ -104,12 +106,20 @@ userRouter.delete("/cart/clear",isUserLoggedIn,clearCart)
 // const checkout related things
 
 userRouter.get("/checkout",isUserLoggedIn,loadCheckOutPage);
+userRouter.post('/checkout/placeorder', isUserLoggedIn,placeOrder);
+
+// order-managment
+userRouter.get("/order/success",isUserLoggedIn,loadOrderSuccessPage);
+
+
 
 
 
 
 // Order management
-userRouter.get("/orders",loadOrderPage);
+userRouter.get("/orders",isUserLoggedIn,loadOrderPage);
+userRouter.get("/orders/:orderId",isUserLoggedIn,loadOrderDetailedPage);
+userRouter.post("/orders/:orderId/cancel/:productId",isUserLoggedIn,cancelOrderItem)
 
 
 

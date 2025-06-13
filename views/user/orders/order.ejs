@@ -10,61 +10,164 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
     <%- include('../../partials/userprofile/style') %>
     <style>
+        .orders-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .orders-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 300px;
+            outline: none;
+        }
+        
+        .search-input:focus {
+            border-color: #b4883e;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #b4883e;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #8e6b2f;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: #b4883e;
+            border: 1px solid #b4883e;
+        }
+        
+        .btn-outline:hover {
+            background: #b4883e;
+            color: white;
+        }
+        
         .order-card {
             background: white;
-            border-radius: 8px;
+            border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
             overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
         }
         
         .order-header {
             background: #f8f9fa;
-            padding: 15px 20px;
+            padding: 20px;
             border-bottom: 1px solid #e9ecef;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
         }
         
-        .order-id {
-            font-weight: 700;
+        .order-info {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .order-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .order-label {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .order-value {
+            font-weight: 600;
             color: #333;
         }
         
-        .order-date {
-            color: #666;
-            font-size: 14px;
-        }
-        
         .order-status {
-            padding: 5px 10px;
+            padding: 8px 16px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 0.85rem;
             font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        .status-delivered {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        
-        .status-processing {
-            background-color: #fff3cd;
+        .status-pending {
+            background: #fff3cd;
             color: #856404;
         }
         
-        .status-shipped {
-            background-color: #cce5ff;
+        .status-processing {
+            background: #cce5ff;
             color: #004085;
         }
         
+        .status-shipped {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-delivered {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
         .status-cancelled {
-            background-color: #f8d7da;
+            background: #f8d7da;
             color: #721c24;
+        }
+        
+        .status-return-requested {
+            background: #ffeaa7;
+            color: #6c5ce7;
+        }
+        
+        .status-returned {
+            background: #e2e3e5;
+            color: #383d41;
         }
         
         .order-body {
@@ -72,28 +175,29 @@
         }
         
         .order-items {
+            display: flex;
+            gap: 15px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         
         .order-item {
             display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .order-item:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 250px;
         }
         
         .item-image {
-            width: 80px;
-            height: 80px;
-            border-radius: 4px;
+            width: 50px;
+            height: 50px;
+            border-radius: 6px;
             overflow: hidden;
+            flex-shrink: 0;
         }
         
         .item-image img {
@@ -109,34 +213,13 @@
         .item-name {
             font-weight: 600;
             color: #333;
-            margin: 0 0 5px;
-        }
-        
-        .item-price {
-            color: #b4883e;
-            font-weight: 600;
-            margin: 0 0 5px;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
         }
         
         .item-quantity {
             color: #666;
-            font-size: 14px;
-        }
-        
-        .order-summary {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .order-total {
-            font-size: 18px;
-            font-weight: 700;
-            color: #333;
+            font-size: 0.8rem;
         }
         
         .order-actions {
@@ -145,208 +228,384 @@
             flex-wrap: wrap;
         }
         
-        .filter-tabs {
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .pagination {
             display: flex;
+            justify-content: center;
+            align-items: center;
             gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
+            margin-top: 40px;
         }
         
-        .filter-tab {
-            padding: 10px 20px;
+        .pagination a, .pagination span {
+            padding: 10px 15px;
             border: 1px solid #ddd;
-            border-radius: 20px;
-            background: white;
-            color: #666;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            border-radius: 6px;
             text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
         }
         
-        .filter-tab.active {
+        .pagination a:hover {
             background: #b4883e;
             color: white;
             border-color: #b4883e;
         }
         
-        .filter-tab:hover:not(.active) {
-            background: #f8f9fa;
-            color: #333;
+        .pagination .current {
+            background: #b4883e;
+            color: white;
+            border-color: #b4883e;
         }
         
-        .empty-state {
+        .empty-orders {
             text-align: center;
-            padding: 50px 20px;
+            padding: 60px 20px;
             color: #666;
         }
         
-        .empty-state i {
-            font-size: 48px;
-            color: #ccc;
+        .empty-orders i {
+            font-size: 64px;
+            color: #ddd;
             margin-bottom: 20px;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+        }
+        
+        .form-control:focus {
+            border-color: #b4883e;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .orders-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-container {
+                justify-content: center;
+            }
+            
+            .search-input {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .order-header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            
+            .order-info {
+                justify-content: center;
+            }
+            
+            .order-items {
+                flex-direction: column;
+            }
+            
+            .order-item {
+                min-width: auto;
+            }
+            
+            .order-actions {
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
     <%- include('../../partials/userprofile/header') %>
 
+      
+              
+            
     
     <div class="container">
-        <div class="row" style="display: flex; gap: 20px;">
-            <!-- Sidebar -->
-            <div class="col-md-3 sidebar" style="flex: 0 0 250px;">
-                <%- include('../../partials/userprofile/sidebar') %>
-            </div>
-            
-            <!-- Main Content -->
-            <div class="col-md-9 main-content" style="flex: 1; padding: 30px;">
-                <!-- Breadcrumbs -->
-                <%- include('../../partials/userprofile/breadcrump', { currentPage: 'orders' }) %>
+        <!-- Breadcrumbs -->
+        <nav aria-label="breadcrumb" class="mt-4">
+            <ol class="breadcrumb" style="background: none; padding: 0; margin: 0; list-style: none; display: flex; gap: 5px;">
+                <li class="breadcrumb-item"><a href="/" style="color: #b4883e; text-decoration: none;">Home</a></li>
+                <li style="color: #666;"> > </li>
+                <li class="breadcrumb-item active" style="color: #333;">My Orders</li>
+            </ol>
+        </nav>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div class="orders-container">
+            <!-- Orders Header -->
+            <div class="orders-header">
+                <div>
                     <h2 style="margin: 0; color: #333;">My Orders</h2>
-                    <a href="/shop" class="btn btn-outline-primary">
-                        <i class="fas fa-shopping-bag"></i> Continue Shopping
+                    <p style="margin: 5px 0 0; color: #666;"><%= totalOrders %> orders found</p>
+                </div>
+
+                
+                
+                <div class="search-container">
+                    <form method="GET" style="display: flex; gap: 15px; align-items: center;">
+                        <input type="text" name="search" class="search-input" 
+                               placeholder="Search by Order ID or Status..." 
+                               value="<%= search %>">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <% if (search) { %>
+                        <a href="/orders" class="btn btn-outline">
+                            <i class="fas fa-times"></i> Clear
+                        </a>
+                        <% } %>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Orders List -->
+            <% if (orders && orders.length > 0) { %>
+                <% orders.forEach((order) => { %>
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-info">
+                            <div class="order-detail">
+                                <span class="order-label">Order ID</span>
+                                <span class="order-value">#<%= order.orderId %></span>
+                            </div>
+                            <div class="order-detail">
+                                <span class="order-label">Order Date</span>
+                                <span class="order-value">
+                                    <%= new Date(order.orderDate).toLocaleDateString('en-US', { 
+                                        month: 'short', 
+                                        day: 'numeric', 
+                                        year: 'numeric' 
+                                    }) %>
+                                </span>
+                            </div>
+                            <div class="order-detail">
+                                <span class="order-label">Total Amount</span>
+                                <span class="order-value">$<%= order.finalAmount.toFixed(2) %></span>
+                            </div>
+                            <div class="order-detail">
+                                <span class="order-label">Payment</span>
+                                <span class="order-value"><%= order.paymentMethod.toUpperCase() %></span>
+                            </div>
+                        </div>
+                        <div class="order-status status-<%= order.orderStatus.replace(/\s+/g, '-') %>">
+                            <%= order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1) %>
+                        </div>
+                    </div>
+                    
+                    <div class="order-body">
+                        <div class="order-items">
+                            <% order.items.slice(0, 3).forEach((item) => { %>
+                            <div class="order-item">
+                                <div class="item-image">
+                                    <img src="<%= item.productImage || '/placeholder.svg?height=50&width=50' %>" 
+                                         alt="<%= item.productName %>">
+                                </div>
+                                <div class="item-details">
+                                    <div class="item-name"><%= item.productName %></div>
+                                    <div class="item-quantity">Qty: <%= item.quantity %> × $<%= item.price.toFixed(2) %></div>
+                                </div>
+                            </div>
+                            <% }); %>
+                            <% if (order.items.length > 3) { %>
+                            <div class="order-item" style="justify-content: center; color: #666;">
+                                +<%= order.items.length - 3 %> more items
+                            </div>
+                            <% } %>
+                        </div>
+                        
+                        <div class="order-actions">
+                            <a href="/orders/<%= order.orderId %>" class="btn btn-primary btn-sm">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                            
+                            <button onclick="downloadInvoice('<%= order.orderId %>')" class="btn btn-outline btn-sm">
+                                <i class="fas fa-download"></i> Invoice
+                            </button>
+                            
+                            <% if (['pending', 'processing'].includes(order.orderStatus)) { %>
+                            <button onclick="cancelOrder('<%= order.orderId %>')" class="btn btn-danger btn-sm">
+                                <i class="fas fa-times"></i> Cancel Order
+                            </button>
+                            <% } %>
+                            
+                            <% if (order.orderStatus === 'delivered') { %>
+                            <button onclick="requestReturn('<%= order.orderId %>')" class="btn btn-warning btn-sm">
+                                <i class="fas fa-undo"></i> Return Order
+                            </button>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+                
+                <!-- Pagination -->
+                <% if (totalPages > 1) { %>
+                <div class="pagination">
+                    <% if (hasPrevPage) { %>
+                    <a href="?page=<%= currentPage - 1 %><%= search ? '&search=' + search : '' %>">
+                        <i class="fas fa-chevron-left"></i> Previous
                     </a>
+                    <% } %>
+                    
+                    <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
+                        <% if (i === currentPage) { %>
+                        <span class="current"><%= i %></span>
+                        <% } else { %>
+                        <a href="?page=<%= i %><%= search ? '&search=' + search : '' %>"><%= i %></a>
+                        <% } %>
+                    <% } %>
+                    
+                    <% if (hasNextPage) { %>
+                    <a href="?page=<%= currentPage + 1 %><%= search ? '&search=' + search : '' %>">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <% } %>
                 </div>
+                <% } %>
+            <% } else { %>
+            <!-- Empty Orders State -->
+            <div class="empty-orders">
+                <i class="fas fa-shopping-bag"></i>
+                <h3>No Orders Found</h3>
+                <% if (search) { %>
+                <p>No orders match your search criteria. Try adjusting your search terms.</p>
+                <a href="/orders" class="btn btn-primary">View All Orders</a>
+                <% } else { %>
+                <p>You haven't placed any orders yet. Start shopping to see your orders here.</p>
+                <a href="/shop" class="btn btn-primary">Start Shopping</a>
+                <% } %>
+            </div>
+            <% } %>
+        </div>
+    </div>
 
-                <!-- Filter Tabs -->
-                <div class="filter-tabs">
-                    <a href="#" class="filter-tab active" onclick="filterOrders('all')">All Orders</a>
-                    <a href="#" class="filter-tab" onclick="filterOrders('processing')">Processing</a>
-                    <a href="#" class="filter-tab" onclick="filterOrders('shipped')">Shipped</a>
-                    <a href="#" class="filter-tab" onclick="filterOrders('delivered')">Delivered</a>
-                    <a href="#" class="filter-tab" onclick="filterOrders('cancelled')">Cancelled</a>
-                </div>
-
-                <!-- Orders List -->
-                <div id="ordersList">
-                    <!-- Order 1 -->
-                    <div class="order-card" data-status="delivered">
-                        <div class="order-header">
-                            <div>
-                                <div class="order-id">Order #12345</div>
-                                <div class="order-date">Placed on December 15, 2024</div>
-                            </div>
-                            <div class="order-status status-delivered">Delivered</div>
-                        </div>
-                        <div class="order-body">
-                            <div class="order-items">
-                                <div class="order-item">
-                                    <div class="item-image">
-                                        <img src="/placeholder.svg?height=80&width=80" alt="Product">
-                                    </div>
-                                    <div class="item-details">
-                                        <h4 class="item-name">Premium Leather Wallet</h4>
-                                        <div class="item-price">$89.99</div>
-                                        <div class="item-quantity">Quantity: 1</div>
-                                    </div>
-                                </div>
-                                <div class="order-item">
-                                    <div class="item-image">
-                                        <img src="/placeholder.svg?height=80&width=80" alt="Product">
-                                    </div>
-                                    <div class="item-details">
-                                        <h4 class="item-name">Luxury Watch</h4>
-                                        <div class="item-price">$299.99</div>
-                                        <div class="item-quantity">Quantity: 1</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="order-summary">
-                                <div class="order-total">Total: $389.98</div>
-                                <div class="order-actions">
-                                    <a href="/orders/12345" class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-eye"></i> View Details
-                                    </a>
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="reorderItems(12345)">
-                                        <i class="fas fa-redo"></i> Reorder
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Cancel Order Modal -->
+    <div id="cancelModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Cancel Order</h3>
+                <span class="close" onclick="closeCancelModal()" style="cursor: pointer; font-size: 24px;">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="cancelForm">
+                    <input type="hidden" id="cancelOrderId">
+                    <div class="form-group">
+                        <label class="form-label">Reason for Cancellation (Optional)</label>
+                        <textarea class="form-control" id="cancelReason" rows="3" 
+                                  placeholder="Please provide a reason for cancelling this order..."></textarea>
                     </div>
-
-                    <!-- Order 2 -->
-                    <div class="order-card" data-status="processing">
-                        <div class="order-header">
-                            <div>
-                                <div class="order-id">Order #12346</div>
-                                <div class="order-date">Placed on December 20, 2024</div>
-                            </div>
-                            <div class="order-status status-processing">Processing</div>
-                        </div>
-                        <div class="order-body">
-                            <div class="order-items">
-                                <div class="order-item">
-                                    <div class="item-image">
-                                        <img src="/placeholder.svg?height=80&width=80" alt="Product">
-                                    </div>
-                                    <div class="item-details">
-                                        <h4 class="item-name">Designer Sunglasses</h4>
-                                        <div class="item-price">$159.99</div>
-                                        <div class="item-quantity">Quantity: 1</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="order-summary">
-                                <div class="order-total">Total: $159.99</div>
-                                <div class="order-actions">
-                                    <a href="/orders/12346" class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-eye"></i> View Details
-                                    </a>
-                                    <button class="btn btn-outline-danger btn-sm" onclick="cancelOrder(12346)">
-                                        <i class="fas fa-times"></i> Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    <div style="display: flex; gap: 15px; justify-content: flex-end;">
+                        <button type="button" class="btn btn-outline" onclick="closeCancelModal()">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
                     </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-                    <!-- Order 3 -->
-                    <div class="order-card" data-status="shipped">
-                        <div class="order-header">
-                            <div>
-                                <div class="order-id">Order #12347</div>
-                                <div class="order-date">Placed on December 22, 2024</div>
-                            </div>
-                            <div class="order-status status-shipped">Shipped</div>
-                        </div>
-                        <div class="order-body">
-                            <div class="order-items">
-                                <div class="order-item">
-                                    <div class="item-image">
-                                        <img src="/placeholder.svg?height=80&width=80" alt="Product">
-                                    </div>
-                                    <div class="item-details">
-                                        <h4 class="item-name">Bluetooth Headphones</h4>
-                                        <div class="item-price">$199.99</div>
-                                        <div class="item-quantity">Quantity: 1</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="order-summary">
-                                <div class="order-total">Total: $199.99</div>
-                                <div class="order-actions">
-                                    <a href="/orders/12347" class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-eye"></i> View Details
-                                    </a>
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="trackOrder(12347)">
-                                        <i class="fas fa-truck"></i> Track Package
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Return Order Modal -->
+    <div id="returnModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Return Order</h3>
+                <span class="close" onclick="closeReturnModal()" style="cursor: pointer; font-size: 24px;">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="returnForm">
+                    <input type="hidden" id="returnOrderId">
+                    <div class="form-group">
+                        <label class="form-label">Reason for Return *</label>
+                        <textarea class="form-control" id="returnReason" rows="3" required
+                                  placeholder="Please provide a detailed reason for returning this order..."></textarea>
                     </div>
-                </div>
-
-                <!-- Empty State -->
-                <div class="empty-state" id="emptyState" style="display: none;">
-                    <i class="fas fa-shopping-bag"></i>
-                    <h4>No orders found</h4>
-                    <p>You haven't placed any orders yet.</p>
-                    <a href="/shop" class="btn btn-primary">Start Shopping</a>
-                </div>
+                    <div style="display: flex; gap: 15px; justify-content: flex-end;">
+                        <button type="button" class="btn btn-outline" onclick="closeReturnModal()">Cancel</button>
+                        <button type="submit" class="btn btn-warning">Submit Return Request</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -354,150 +613,133 @@
     <%- include('../../partials/userprofile/footer') %>
 
     <script>
-        function filterOrders(status) {
-            const orderCards = document.querySelectorAll('.order-card');
-            const filterTabs = document.querySelectorAll('.filter-tab');
-            const ordersList = document.getElementById('ordersList');
-            const emptyState = document.getElementById('emptyState');
+        // Cancel Order Functions
+        function cancelOrder(orderId) {
+            document.getElementById('cancelOrderId').value = orderId;
+            document.getElementById('cancelModal').style.display = 'block';
+        }
+
+        function closeCancelModal() {
+            document.getElementById('cancelModal').style.display = 'none';
+            document.getElementById('cancelForm').reset();
+        }
+
+        document.getElementById('cancelForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            // Update active tab
-            filterTabs.forEach(tab => {
-                tab.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
+            const orderId = document.getElementById('cancelOrderId').value;
+            const reason = document.getElementById('cancelReason').value;
             
-            let visibleOrders = 0;
-            
-            orderCards.forEach(card => {
-                if (status === 'all' || card.dataset.status === status) {
-                    card.style.display = 'block';
-                    visibleOrders++;
+            try {
+                const response = await fetch(`/orders/${orderId}/cancel`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ reason })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    swal("Success", data.message, "success").then(() => {
+                        location.reload();
+                    });
                 } else {
-                    card.style.display = 'none';
+                    swal("Error", data.message, "error");
                 }
-            });
+            } catch (error) {
+                console.error('Error cancelling order:', error);
+                swal("Error", "Failed to cancel order", "error");
+            }
             
-            // Show/hide empty state
-            if (visibleOrders === 0) {
-                ordersList.style.display = 'none';
-                emptyState.style.display = 'block';
-            } else {
-                ordersList.style.display = 'block';
-                emptyState.style.display = 'none';
+            closeCancelModal();
+        });
+
+        // Return Order Functions
+        function requestReturn(orderId) {
+            document.getElementById('returnOrderId').value = orderId;
+            document.getElementById('returnModal').style.display = 'block';
+        }
+
+        function closeReturnModal() {
+            document.getElementById('returnModal').style.display = 'none';
+            document.getElementById('returnForm').reset();
+        }
+
+        document.getElementById('returnForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const orderId = document.getElementById('returnOrderId').value;
+            const reason = document.getElementById('returnReason').value;
+            
+            if (!reason.trim()) {
+                swal("Error", "Please provide a reason for return", "error");
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/orders/${orderId}/return`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ reason })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    swal("Success", data.message, "success").then(() => {
+                        location.reload();
+                    });
+                } else {
+                    swal("Error", data.message, "error");
+                }
+            } catch (error) {
+                console.error('Error requesting return:', error);
+                swal("Error", "Failed to submit return request", "error");
+            }
+            
+            closeReturnModal();
+        });
+
+        // Download Invoice
+        async function downloadInvoice(orderId) {
+            try {
+                const response = await fetch(`/orders/${orderId}/invoice`);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `invoice-${orderId}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    swal("Error", "Failed to download invoice", "error");
+                }
+            } catch (error) {
+                console.error('Error downloading invoice:', error);
+                swal("Error", "Failed to download invoice", "error");
             }
         }
-        
-        function cancelOrder(orderId) {
-            swal({
-                title: "Cancel Order?",
-                text: `Are you sure you want to cancel order #${orderId}?`,
-                icon: "warning",
-                buttons: {
-                    cancel: {
-                        text: "Keep Order",
-                        value: null,
-                        visible: true,
-                        className: "",
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: "Cancel Order",
-                        value: true,
-                        visible: true,
-                        className: "",
-                        closeModal: true
-                    }
-                },
-                dangerMode: true,
-            })
-            .then((willCancel) => {
-                if (willCancel) {
-                    swal("Order Cancelled", `Order #${orderId} has been cancelled successfully.`, "success");
-                    // Update order status in UI
-                    const orderCard = document.querySelector(`[data-status="processing"]`);
-                    if (orderCard) {
-                        orderCard.dataset.status = 'cancelled';
-                        const statusElement = orderCard.querySelector('.order-status');
-                        statusElement.className = 'order-status status-cancelled';
-                        statusElement.textContent = 'Cancelled';
-                    }
-                }
-            });
-        }
-        
-        function reorderItems(orderId) {
-            swal({
-                title: "Reorder Items?",
-                text: `Add all items from order #${orderId} to your cart?`,
-                icon: "info",
-                buttons: {
-                    cancel: {
-                        text: "Cancel",
-                        value: null,
-                        visible: true,
-                        className: "",
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: "Add to Cart",
-                        value: true,
-                        visible: true,
-                        className: "",
-                        closeModal: true
-                    }
-                },
-            })
-            .then((willReorder) => {
-                if (willReorder) {
-                    swal("Items Added!", "All items have been added to your cart.", "success");
-                }
-            });
-        }
-        
-        function trackOrder(orderId) {
-            swal({
-                title: "Track Package",
-                text: `Tracking information for order #${orderId}:\n\nTracking Number: 1Z999AA1234567890\nCarrier: UPS\nEstimated Delivery: December 25, 2024`,
-                icon: "info",
-                button: "Close",
-            });
-        }
 
-        function confirmLogout(event) {
-            event.preventDefault();
-            swal({
-                title: "Are you sure?",
-                text: "You will be logged out of your account.",
-                icon: "warning",
-                buttons: {
-                    cancel: {
-                        text: "Cancel",
-                        value: null,
-                        visible: true,
-                        className: "",
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: "Logout",
-                        value: true,
-                        visible: true,
-                        className: "",
-                        closeModal: true
-                    }
-                },
-                dangerMode: true,
-            })
-            .then((willLogout) => {
-                if (willLogout) {
-                    window.location.href = '/logout';
-                }
-            });
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const cancelModal = document.getElementById('cancelModal');
+            const returnModal = document.getElementById('returnModal');
+            
+            if (event.target === cancelModal) {
+                closeCancelModal();
+            }
+            if (event.target === returnModal) {
+                closeReturnModal();
+            }
         }
-
-        // Mobile Menu Toggle
-        document.querySelector('.canvas__open').addEventListener('click', () => {
-            document.querySelector('.header__menu').classList.toggle('active');
-        });
     </script>
 </body>
 </html>

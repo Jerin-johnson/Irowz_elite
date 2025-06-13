@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
-    <%- include('./partials/_styles') %>
+    <%- include('../../partials/userprofile/style') %>
     <style>
         .order-detail-container {
             display: grid;
@@ -301,7 +302,11 @@
             justify-content: center;
         }
         
-        /* Modal Styles */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
         .modal {
             display: none;
             position: fixed;
@@ -344,7 +349,6 @@
             font-family: inherit;
         }
         
-        /* Mobile Responsive */
         @media (max-width: 1024px) {
             .order-detail-container {
                 grid-template-columns: 1fr;
@@ -410,7 +414,7 @@
     </style>
 </head>
 <body>
-    <%- include('./partials/_header') %>
+    <%- include('../../partials/userprofile/header') %>
     
     <div class="container">
         <!-- Breadcrumbs -->
@@ -420,7 +424,7 @@
                 <li style="color: #666;"> > </li>
                 <li class="breadcrumb-item"><a href="/orders-list" style="color: #b4883e; text-decoration: none;">Orders</a></li>
                 <li style="color: #666;"> > </li>
-                <li class="breadcrumb-item active" style="color: #333;">ORD-2024-001234</li>
+                <li class="breadcrumb-item active" style="color: #333;"><%= order.orderId %></li>
             </ol>
         </nav>
 
@@ -436,21 +440,23 @@
                         <div class="order-header-info">
                             <div class="info-item">
                                 <div class="info-label">Order ID</div>
-                                <div class="info-value">ORD-2024-001234</div>
+                                <div class="info-value"><%= order.orderId %></div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Order Date</div>
-                                <div class="info-value">Dec 20, 2024</div>
+                                <div class="info-value"><%= order.orderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Status</div>
                                 <div class="info-value">
-                                    <span class="order-status status-delivered">Delivered</span>
+                                    <span class="order-status status-<%= order.orderStatus %>">
+                                        <%= order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1) %>
+                                    </span>
                                 </div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Total Amount</div>
-                                <div class="info-value">$488.12</div>
+                                <div class="info-value">$<%= order.finalAmount.toFixed(2) %></div>
                             </div>
                         </div>
                     </div>
@@ -463,60 +469,28 @@
                     </div>
                     <div class="section-content">
                         <div class="timeline">
-                            <div class="timeline-item">
-                                <div class="timeline-icon">
-                                    <i class="fas fa-check"></i>
+                            <% 
+                                const timelineEvents = [
+                                    { status: 'delivered', title: 'Order Delivered', desc: 'Your order has been successfully delivered', date: order.orderDate },
+                                    { status: 'shipped', title: 'Order Shipped', desc: 'Your order has been shipped via UPS', date: order.orderDate },
+                                    { status: 'processing', title: 'Order Processing', desc: 'Your order is being prepared for shipment', date: order.orderDate },
+                                    { status: 'pending', title: 'Order Confirmed', desc: 'Your order has been confirmed ', date: order.orderDate }
+                                ].filter(event => order.orderStatus === event.status || (event.status === 'pending' && ['pending', 'processing', 'shipped', 'delivered'].includes(order.orderStatus)));
+                            %>
+                            <% timelineEvents.forEach(event => { %>
+                                <div class="timeline-item">
+                                    <div class="timeline-icon <%= order.orderStatus === event.status ? '' : 'pending' %>">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h4><%= event.title %></h4>
+                                        <p><%= event.desc %></p>
+                                        <div class="timeline-date">
+                                            <%= event.date.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true }) %>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="timeline-content">
-                                    <h4>Order Delivered</h4>
-                                    <p>Your order has been successfully delivered</p>
-                                    <div class="timeline-date">Dec 23, 2024 at 2:30 PM</div>
-                                </div>
-                            </div>
-                            
-                            <div class="timeline-item">
-                                <div class="timeline-icon">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <h4>Out for Delivery</h4>
-                                    <p>Your order is out for delivery</p>
-                                    <div class="timeline-date">Dec 23, 2024 at 9:00 AM</div>
-                                </div>
-                            </div>
-                            
-                            <div class="timeline-item">
-                                <div class="timeline-icon">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <h4>Order Shipped</h4>
-                                    <p>Your order has been shipped via UPS</p>
-                                    <div class="timeline-date">Dec 22, 2024 at 11:30 AM</div>
-                                </div>
-                            </div>
-                            
-                            <div class="timeline-item">
-                                <div class="timeline-icon">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <h4>Order Processing</h4>
-                                    <p>Your order is being prepared for shipment</p>
-                                    <div class="timeline-date">Dec 21, 2024 at 10:00 AM</div>
-                                </div>
-                            </div>
-                            
-                            <div class="timeline-item">
-                                <div class="timeline-icon">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <h4>Order Confirmed</h4>
-                                    <p>Your order has been confirmed and payment received</p>
-                                    <div class="timeline-date">Dec 20, 2024 at 3:45 PM</div>
-                                </div>
-                            </div>
+                            <% }) %>
                         </div>
                     </div>
                 </div>
@@ -524,68 +498,35 @@
                 <!-- Order Items -->
                 <div class="detail-section">
                     <div class="section-header">
-                        <h3><i class="fas fa-shopping-bag"></i> Order Items (3 items)</h3>
+                        <h3><i class="fas fa-shopping-bag"></i> Order Items (<%= order.items.length %> items)</h3>
                     </div>
                     <div class="section-content">
-                        <div class="product-item">
-                            <div class="product-image">
-                                <img src="/placeholder.svg?height=80&width=80" alt="Premium Leather Wallet">
+                        <% order.items.forEach(item => { %>
+                            <div class="product-item">
+                                <div class="product-image">
+                                    <img src="/<%= item.productImage || '/placeholder.svg?height=80&width=80' %>" alt="<%= item.productName %>">
+                                </div>
+                                <div class="product-details">
+                                    <h4 class="product-name"><%= item.productName %></h4>
+                                    <div class="product-price">$<%= item.price.toFixed(2) %></div>
+                                    <div class="product-quantity">Quantity: <%= item.quantity %></div>
+                                </div>
+                                <div class="product-actions">
+                                    <span class="order-status status-<%= item.status %>"> <%= item.status %></span>
+                                    <div class="product-total">$<%= item.totalPrice.toFixed(2) %></div>
+                                    <% if (order.orderStatus === 'pending' || order.orderStatus === 'processing') { %>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="cancelProduct('<%= order.orderId %>', '<%= item.productId %>')">
+                                            <i class="fas fa-times"></i> Cancel Item
+                                        </button>
+                                    <% } %>
+                                    <% if (order.orderStatus === 'delivered') { %>
+                                        <button class="btn btn-outline-warning btn-sm" onclick="returnProduct('<%= order.orderId %>', '<%= item.productId %>')">
+                                            <i class="fas fa-undo"></i> Return Item
+                                        </button>
+                                    <% } %>
+                                </div>
                             </div>
-                            <div class="product-details">
-                                <h4 class="product-name">Premium Leather Wallet with RFID Protection</h4>
-                                <div class="product-price">$71.99</div>
-                                <div class="product-quantity">Quantity: 1</div>
-                            </div>
-                            <div class="product-actions">
-                                <div class="product-total">$71.99</div>
-                                <button class="btn btn-outline-primary btn-sm" onclick="cancelProduct('ORD-2024-001234', 'product1')">
-                                    <i class="fas fa-times"></i> Cancel Item
-                                </button>
-                                <button class="btn btn-outline-warning btn-sm" onclick="returnProduct('ORD-2024-001234', 'product1')">
-                                    <i class="fas fa-undo"></i> Return Item
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="product-item">
-                            <div class="product-image">
-                                <img src="/placeholder.svg?height=80&width=80" alt="Wireless Headphones">
-                            </div>
-                            <div class="product-details">
-                                <h4 class="product-name">Wireless Bluetooth Headphones - Noise Cancelling</h4>
-                                <div class="product-price">$169.99</div>
-                                <div class="product-quantity">Quantity: 2</div>
-                            </div>
-                            <div class="product-actions">
-                                <div class="product-total">$339.98</div>
-                                <button class="btn btn-outline-primary btn-sm" onclick="cancelProduct('ORD-2024-001234', 'product2')">
-                                    <i class="fas fa-times"></i> Cancel Item
-                                </button>
-                                <button class="btn btn-outline-warning btn-sm" onclick="returnProduct('ORD-2024-001234', 'product2')">
-                                    <i class="fas fa-undo"></i> Return Item
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="product-item">
-                            <div class="product-image">
-                                <img src="/placeholder.svg?height=80&width=80" alt="Premium Backpack">
-                            </div>
-                            <div class="product-details">
-                                <h4 class="product-name">Premium Travel Backpack - Water Resistant</h4>
-                                <div class="product-price">$89.99</div>
-                                <div class="product-quantity">Quantity: 1</div>
-                            </div>
-                            <div class="product-actions">
-                                <div class="product-total">$89.99</div>
-                                <button class="btn btn-outline-primary btn-sm" onclick="cancelProduct('ORD-2024-001234', 'product3')">
-                                    <i class="fas fa-times"></i> Cancel Item
-                                </button>
-                                <button class="btn btn-outline-warning btn-sm" onclick="returnProduct('ORD-2024-001234', 'product3')">
-                                    <i class="fas fa-undo"></i> Return Item
-                                </button>
-                            </div>
-                        </div>
+                        <% }) %>
                     </div>
                 </div>
 
@@ -596,9 +537,13 @@
                     </div>
                     <div class="section-content">
                         <div class="address-info">
-                            <h4>John Doe</h4>
-                            <p><strong>Phone:</strong> (234) 567-8900</p>
-                            <p>123 Main Street, Apt 4B<br>New York, NY 10001<br>United States</p>
+                            <h4><%= order.address.firstName %> <%= order.address.lastName %></h4>
+                            <p><strong>Phone:</strong> <%= order.address.phone %></p>
+                            <p>
+                                <%= order.address.address %><br>
+                                <%= order.address.state %>, <%= order.address.pinCode %><br>
+                                <%= order.address.country %>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -611,12 +556,14 @@
                     <div class="section-content">
                         <div class="payment-info">
                             <div class="payment-icon">
-                                <i class="fas fa-money-bill-wave"></i>
+                                <i class="fas fa-<%= order.paymentMethod === 'cod' ? 'money-bill-wave' : 'credit-card' %>"></i>
                             </div>
                             <div class="payment-details">
-                                <h4>Cash on Delivery</h4>
-                                <p>Payment will be collected upon delivery</p>
-                                <p><strong>Status:</strong> <span style="color: #28a745;">Completed</span></p>
+                                <h4><%= order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment' %></h4>
+                                <p><%= order.paymentMethod === 'cod' ? 'Payment will be collected upon delivery' : 'Payment processed online' %></p>
+                                <p><strong>Status:</strong> <span style="color: <%= order.paymentStatus === 'completed' ? '#28a745' : '#856404' %>;">
+                                    <%= order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1) %>
+                                </span></p>
                             </div>
                         </div>
                     </div>
@@ -628,44 +575,50 @@
                 <h3 style="margin: 0 0 20px; color: #333;">Order Summary</h3>
                 
                 <div class="summary-row">
-                    <span class="summary-label">Subtotal (3 items)</span>
-                    <span class="summary-value">$501.96</span>
+                    <span class="summary-label">Subtotal (<%= order.items.length %> items)</span>
+                    <span class="summary-value">$<%= order.totalAmount.toFixed(2) %></span>
                 </div>
                 
                 <div class="summary-row">
                     <span class="summary-label">Discount</span>
-                    <span class="summary-value" style="color: #28a745;">-$50.00</span>
+                    <span class="summary-value" style="color: #28a745;">-<%= order.discount ? '$' + order.discount.toFixed(2) : '$0.00' %></span>
                 </div>
                 
                 <div class="summary-row">
                     <span class="summary-label">Shipping</span>
-                    <span class="summary-value" style="color: #28a745;">Free</span>
+                    <span class="summary-value" style="color: #28a745;"><%= order.shipping ? '$' + order.shipping.toFixed(2) : 'Free' %></span>
                 </div>
                 
                 <div class="summary-row">
-                    <span class="summary-label">Tax (8%)</span>
-                    <span class="summary-value">$36.16</span>
+                    <span class="summary-label">Tax<%= order.tax ? ' (8%)' : '' %></span>
+                    <span class="summary-value">$<%= order.tax.toFixed(2) %></span>
                 </div>
                 
                 <div class="summary-row total">
                     <span>Total Amount</span>
-                    <span>$488.12</span>
+                    <span>$<%= order.finalAmount.toFixed(2) %></span>
                 </div>
                 
                 <div class="action-buttons">
-                    <a href="/orders-list" class="btn btn-outline-secondary btn-full">
+                    <button class="btn btn-outline-secondary btn-full" >
+                        <a href="/orders-list" style="text-decoration: none;">
                         <i class="fas fa-arrow-left"></i> Back to Orders
                     </a>
-                    <button class="btn btn-outline-success btn-full" onclick="downloadInvoice('ORD-2024-001234')">
-                        <i class="fas fa-download"></i> Download Invoice
                     </button>
-                    <button class="btn btn-outline-primary btn-full" onclick="reorderItems('ORD-2024-001234')">
+                    <% if (order.orderStatus === 'delivered') { %>
+                        <button class="btn btn-outline-success btn-full" onclick="downloadInvoice('<%= order.orderId %>')">
+                            <i class="fas fa-download"></i> Download Invoice
+                        </button>
+                    <% } %>
+                    <button class="btn btn-outline-primary btn-full" onclick="reorderItems('<%= order.orderId %>')">
                         <i class="fas fa-redo"></i> Reorder Items
                     </button>
-                    <button class="btn btn-outline-warning btn-full" onclick="returnOrder('ORD-2024-001234')">
-                        <i class="fas fa-undo"></i> Return Order
-                    </button>
-                    <button class="btn btn-outline-secondary btn-full" onclick="contactSupport('ORD-2024-001234')">
+                    <% if (order.orderStatus === 'delivered') { %>
+                        <button class="btn btn-outline-warning btn-full" onclick="returnOrder('<%= order.orderId %>')">
+                            <i class="fas fa-undo"></i> Return Order
+                        </button>
+                    <% } %>
+                    <button class="btn btn-outline-secondary btn-full" onclick="contactSupport('<%= order.orderId %>')">
                         <i class="fas fa-headset"></i> Contact Support
                     </button>
                 </div>
@@ -678,7 +631,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Cancel Product</h3>
-                <span class="close" onclick="closeCancelProductModal()">&times;</span>
+                <span class="close" onclick="closeCancelProductModal()">×</span>
             </div>
             <div class="modal-body">
                 <p>Are you sure you want to cancel this product from your order?</p>
@@ -699,7 +652,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Return Product</h3>
-                <span class="close" onclick="closeReturnProductModal()">&times;</span>
+                <span class="close" onclick="closeReturnProductModal()">×</span>
             </div>
             <div class="modal-body">
                 <p>Please provide a reason for returning this product:</p>
@@ -724,7 +677,7 @@
         </div>
     </div>
 
-    <%- include('./partials/_footer') %>
+    <%- include('../../partials/userprofile/footer') %>
 
     <script>
         let currentOrderId = null;
@@ -747,16 +700,32 @@
             const reason = document.getElementById('cancelProductReason').value;
             
             const cancelData = {
-                orderId: currentOrderId,
-                productId: currentProductId,
                 reason: reason || 'No reason provided'
             };
             
-            console.log('Cancel product:', cancelData);
-            
-            swal("Product Cancelled", "The product has been cancelled successfully. Stock has been updated.", "success").then(() => {
-                closeCancelProductModal();
-                // Here you would update the UI to reflect the cancellation
+            // Fixed: Match backend route - /orders/:orderId/cancel/:productId
+            fetch(`/orders/${currentOrderId}/cancel/${currentProductId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cancelData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    swal("Product Cancelled", "The product has been cancelled successfully. Stock has been updated.", "success").then(() => {
+                        closeCancelProductModal();
+                        if(data.allItemsCancelled)
+                        {
+                            window.location.href ="/orders"
+                        }
+                        window.location.reload();
+                    });
+                } else {
+                    swal("Error", data.message, "error");
+                }
+            })
+            .catch(error => {
+                swal("Error", "Failed to cancel product.", "error");
             });
         }
 
@@ -784,16 +753,29 @@
             }
             
             const returnData = {
-                orderId: currentOrderId,
                 productId: currentProductId,
-                reason: reasonSelect,
-                details: reasonText
+                reason: `${reasonSelect}: ${reasonText}`
             };
             
-            console.log('Return product:', returnData);
-            
-            swal("Return Request Submitted", "Return request for the product has been submitted successfully.", "success").then(() => {
-                closeReturnProductModal();
+            // Fixed: Match backend route - /orders/:orderId/return
+            fetch(`/orders/${currentOrderId}/return`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(returnData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    swal("Return Request Submitted", "Return request for the product has been submitted successfully.", "success").then(() => {
+                        closeReturnProductModal();
+                        window.location.reload();
+                    });
+                } else {
+                    swal("Error", data.message, "error");
+                }
+            })
+            .catch(error => {
+                swal("Error", "Failed to submit return request.", "error");
             });
         }
 
@@ -808,16 +790,57 @@
                 }
             }).then((willReturn) => {
                 if (willReturn) {
-                    // Redirect to return form or show return modal
-                    window.location.href = `/orders/${orderId}/return`;
+                    // Prompt for return reason
+                    swal({
+                        title: "Return Reason",
+                        content: {
+                            element: "input",
+                            attributes: {
+                                placeholder: "Please provide a reason for returning this order",
+                                type: "text",
+                            },
+                        },
+                        buttons: {
+                            cancel: "Cancel",
+                            confirm: "Submit Return Request"
+                        }
+                    }).then((reason) => {
+                        if (reason && reason.trim()) {
+                            const returnData = {
+                                reason: reason.trim()
+                            };
+                            
+                            // Fixed: Match backend route - /orders/:orderId/return
+                            fetch(`/orders/${orderId}/return`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(returnData)
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    swal("Return Request Submitted", "Return request for the entire order has been submitted successfully.", "success").then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    swal("Error", data.message, "error");
+                                }
+                            })
+                            .catch(error => {
+                                swal("Error", "Failed to submit return request.", "error");
+                            });
+                        } else if (reason !== null) {
+                            swal("Error", "Please provide a reason for the return.", "error");
+                        }
+                    });
                 }
             });
         }
 
         function downloadInvoice(orderId) {
             swal("Downloading Invoice", `Invoice for order ${orderId} is being downloaded...`, "success");
-            // Here you would trigger the actual PDF download
-            // window.open(`/orders/${orderId}/invoice.pdf`, '_blank');
+            // Fixed: Match backend route - /orders/:orderId/invoice (GET request)
+            window.open(`/orders/${orderId}/invoice`, '_blank');
         }
 
         function reorderItems(orderId) {
@@ -831,7 +854,23 @@
                 }
             }).then((willReorder) => {
                 if (willReorder) {
-                    swal("Items Added!", "All items have been added to your cart.", "success");
+                    // Note: This route doesn't exist in your backend routes
+                    // You'll need to add this route or modify this function
+                    fetch(`/orders/${orderId}/reorder`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            swal("Items Added!", "All items have been added to your cart.", "success");
+                        } else {
+                            swal("Error", data.message, "error");
+                        }
+                    })
+                    .catch(error => {
+                        swal("Error", "Failed to reorder items.", "error");
+                    });
                 }
             });
         }
@@ -840,7 +879,6 @@
             window.location.href = `/support?order=${orderId}`;
         }
 
-        // Close modals when clicking outside
         window.onclick = function(event) {
             const cancelModal = document.getElementById('cancelProductModal');
             const returnModal = document.getElementById('returnProductModal');
@@ -853,10 +891,10 @@
             }
         }
 
-        // Mobile Menu Toggle
         document.querySelector('.canvas__open').addEventListener('click', () => {
             document.querySelector('.header__menu').classList.toggle('active');
         });
     </script>
+
 </body>
 </html>

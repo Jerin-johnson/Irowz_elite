@@ -4,14 +4,8 @@ const { Category } = require("../../models/categorySchema");
 const { Cart } = require("../../models/cartSchema");
 const { Wishlist } = require("../../models/wishListSchema");
 
-// Optional helper functions
-const calculateDiscount = (subtotal) => {
-  return subtotal >= 1000 ? subtotal * 0.1 : 0; // 10% off if subtotal >= 1000
-};
-
-const calculateTax = (amount) => {
-  return amount * 0.05; // 5% GST
-};
+//  helper functions
+const {calculateDiscount,calculateTax} = require("../../helpers/helper")
 
 
 

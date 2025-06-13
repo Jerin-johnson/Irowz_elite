@@ -46,8 +46,19 @@ async function securePassword(password) {
   return hashedPassword;
 }
 
+const calculateDiscount = (subtotal) => {
+  return subtotal >= 1000 ? subtotal * 0.1 : 0; // 10% off if subtotal >= 1000
+};
+
+const calculateTax = (amount) => {
+  return amount * 0.05; // 5% GST
+};
+
+
 module.exports ={
     generateOtp,
     sendVerficationEmail,
-    securePassword
+    securePassword,
+    calculateDiscount,
+    calculateTax
 }

@@ -191,15 +191,6 @@
             color: #333;
         }
         
-        .summary-label {
-            color: #666;
-        }
-        
-        .summary-value {
-            color: #333;
-            font-weight: 600;
-        }
-        
         .payment-method {
             display: flex;
             align-items: center;
@@ -232,17 +223,6 @@
             color: #b4883e;
         }
         
-        .payment-info h4 {
-            margin: 0 0 5px;
-            color: #333;
-        }
-        
-        .payment-info p {
-            margin: 0;
-            color: #666;
-            font-size: 14px;
-        }
-        
         .place-order-btn {
             width: 100%;
             background: #b4883e;
@@ -257,7 +237,7 @@
             margin-top: 20px;
         }
         
-        .place-order-btn:hover {
+        .place-order-btn:hover:not(:disabled) {
             background: #8e6b2f;
         }
         
@@ -266,70 +246,39 @@
             cursor: not-allowed;
         }
         
-        .security-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #666;
-            font-size: 14px;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .security-info i {
-            color: #28a745;
-        }
-        
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 0;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-header h3 {
-            margin: 0;
-            color: #333;
-        }
-        
-        .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
         
-        .close:hover {
-            color: #000;
+        .btn-primary {
+            background: #b4883e;
+            color: white;
         }
         
-        .modal-body {
-            padding: 20px;
+        .btn-primary:hover {
+            background: #8e6b2f;
+        }
+        
+        .btn-outline-primary {
+            background: transparent;
+            color: #b4883e;
+            border: 1px solid #b4883e;
+        }
+        
+        .btn-outline-danger {
+            background: transparent;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
         }
         
         /* Mobile Responsive */
@@ -342,44 +291,6 @@
             .order-summary {
                 position: static;
                 order: -1;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .checkout-item {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .item-image {
-                width: 100px;
-                height: 100px;
-                margin: 0 auto;
-            }
-            
-            .address-actions {
-                justify-content: center;
-            }
-            
-            .payment-method {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .section-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .address-card {
-                text-align: center;
-            }
-            
-            .checkout-item {
-                padding: 20px 0;
             }
         }
     </style>
@@ -413,32 +324,27 @@
                         </button>
                     </div>
                     <div class="section-content">
-                        <!-- Existing Addresses -->
-                        <div class="address-card selected" onclick="selectAddress(1)" data-address-id="1">
-                            <div class="address-info">
-                                <h4>John Doe (Home)</h4>
-                                <p><strong>Phone:</strong> (234) 567-8900</p>
-                                <p>123 Main Street, Apt 4B<br>New York, NY 10001<br>United States</p>
+                        <% if (addresses && addresses.length > 0) { %>
+                            <% addresses.forEach((address, index) => { %>
+                            <div class="address-card <%= address.isDefault ? 'selected' : '' %>" 
+                                 onclick="selectAddress('<%= address._id %>')" 
+                                 data-address-id="<%= address._id %>">
+                                <div class="address-info">
+                                    <h4><%= address.firstName %> <%= address.lastName %> (<%= address.addressType.charAt(0).toUpperCase() + address.addressType.slice(1) %>)</h4>
+                                    <p><strong>Phone:</strong> <%= address.phone %></p>
+                                    <p><%= address.address %><br><%= address.state %>, <%= address.pinCode %><br><%= address.country %></p>
+                                </div>
+                                <div class="address-actions">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="editAddress('<%= address._id %>', event)">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteAddress('<%= address._id %>', event)">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
                             </div>
-                            <div class="address-actions">
-                                <button class="btn btn-outline-primary btn-sm" onclick="editAddress(1, event)">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="address-card" onclick="selectAddress(2)" data-address-id="2">
-                            <div class="address-info">
-                                <h4>John Doe (Work)</h4>
-                                <p><strong>Phone:</strong> (234) 567-8902</p>
-                                <p>789 Business Plaza, Suite 100<br>Chicago, IL 60601<br>United States</p>
-                            </div>
-                            <div class="address-actions">
-                                <button class="btn btn-outline-primary btn-sm" onclick="editAddress(2, event)">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                            </div>
-                        </div>
+                            <% }); %>
+                        <% } %>
 
                         <!-- Add New Address Card -->
                         <div class="add-address-card" onclick="openAddressModal()">
@@ -481,7 +387,7 @@
                             </div>
                             <div class="payment-info">
                                 <h4>Wallet Payment</h4>
-                                <p>Pay from your wallet balance: $245.50</p>
+                                <p>Pay from your wallet balance (Coming Soon)</p>
                             </div>
                         </div>
                     </div>
@@ -490,41 +396,22 @@
                 <!-- Order Items Section -->
                 <div class="checkout-section">
                     <div class="section-header">
-                        <h3><i class="fas fa-shopping-bag"></i> Order Items (3 items)</h3>
+                        <h3><i class="fas fa-shopping-bag"></i> Order Items (<%= itemCount %> items)</h3>
                     </div>
                     <div class="section-content">
+                        <% cart.forEach((item) => { %>
                         <div class="checkout-item">
                             <div class="item-image">
-                                <img src="/placeholder.svg?height=80&width=80" alt="Premium Leather Wallet">
+                                <img src="<%= item.productId.productImage && item.productId.productImage.length > 0 ? item.productId.productImage[0].path : '/placeholder.svg?height=80&width=80' %>" 
+                                     alt="<%= item.productId.productName %>">
                             </div>
                             <div class="item-details">
-                                <h4 class="item-name">Premium Leather Wallet with RFID Protection</h4>
-                                <div class="item-quantity">Quantity: 1</div>
-                                <div class="item-price">$71.99</div>
+                                <h4 class="item-name"><%= item.productId.productName %></h4>
+                                <div class="item-quantity">Quantity: <%= item.quantity %></div>
+                                <div class="item-price">$<%= (item.price * item.quantity).toFixed(2) %></div>
                             </div>
                         </div>
-
-                        <div class="checkout-item">
-                            <div class="item-image">
-                                <img src="/placeholder.svg?height=80&width=80" alt="Wireless Headphones">
-                            </div>
-                            <div class="item-details">
-                                <h4 class="item-name">Wireless Bluetooth Headphones</h4>
-                                <div class="item-quantity">Quantity: 2</div>
-                                <div class="item-price">$339.98</div>
-                            </div>
-                        </div>
-
-                        <div class="checkout-item">
-                            <div class="item-image">
-                                <img src="/placeholder.svg?height=80&width=80" alt="Premium Backpack">
-                            </div>
-                            <div class="item-details">
-                                <h4 class="item-name">Premium Travel Backpack</h4>
-                                <div class="item-quantity">Quantity: 1</div>
-                                <div class="item-price">$89.99</div>
-                            </div>
-                        </div>
+                        <% }); %>
                     </div>
                 </div>
             </div>
@@ -534,115 +421,42 @@
                 <h3 style="margin: 0 0 20px; color: #333;">Order Summary</h3>
                 
                 <div class="summary-row">
-                    <span class="summary-label">Subtotal (3 items)</span>
-                    <span class="summary-value">$501.96</span>
+                    <span class="summary-label">Subtotal (<%= itemCount %> items)</span>
+                    <span class="summary-value">$<%= subtotal %></span>
                 </div>
                 
+                <% if (parseFloat(discount) > 0) { %>
                 <div class="summary-row">
                     <span class="summary-label">Discount</span>
-                    <span class="summary-value" style="color: #28a745;">-$50.00</span>
+                    <span class="summary-value" style="color: #28a745;">-$<%= discount %></span>
                 </div>
+                <% } %>
                 
                 <div class="summary-row">
                     <span class="summary-label">Shipping</span>
-                    <span class="summary-value" style="color: #28a745;">Free</span>
+                    <span class="summary-value" style="color:<%= parseFloat(shipping) === 0 ? '#28a745' : '#333' %>">
+                        <%= parseFloat(shipping) === 0 ? 'Free' : '$' + shipping %>
+                    </span>
                 </div>
                 
                 <div class="summary-row">
                     <span class="summary-label">Tax (8%)</span>
-                    <span class="summary-value">$36.16</span>
+                    <span class="summary-value">$<%= tax %></span>
                 </div>
                 
                 <div class="summary-row total">
                     <span>Total Amount</span>
-                    <span>$488.12</span>
+                    <span>$<%= total %></span>
                 </div>
                 
                 <button class="place-order-btn" onclick="placeOrder()" id="placeOrderBtn">
                     <i class="fas fa-lock"></i> Place Order
                 </button>
                 
-                <div class="security-info">
-                    <i class="fas fa-shield-alt"></i>
+                <div class="security-info" style="display: flex; align-items: center; gap: 10px; color: #666; font-size: 14px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e9ecef;">
+                    <i class="fas fa-shield-alt" style="color: #28a745;"></i>
                     <span>Your order information is secure and encrypted</span>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Address Modal -->
-    <div id="addressModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Add New Address</h3>
-                <span class="close" onclick="closeAddressModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="addressForm">
-                    <input type="hidden" id="addressId" name="addressId">
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                        <div>
-                            <label class="form-label">First Name *</label>
-                            <input type="text" class="form-control" id="firstName" name="firstName" required>
-                        </div>
-                        <div>
-                            <label class="form-label">Last Name *</label>
-                            <input type="text" class="form-control" id="lastName" name="lastName" required>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 15px;">
-                        <label class="form-label">Phone Number *</label>
-                        <input type="tel" class="form-control" id="phone" name="phone" required>
-                    </div>
-
-                    <div style="margin-bottom: 15px;">
-                        <label class="form-label">Address Line 1 *</label>
-                        <input type="text" class="form-control" id="addressLine1" name="addressLine1" required>
-                    </div>
-
-                    <div style="margin-bottom: 15px;">
-                        <label class="form-label">Address Line 2</label>
-                        <input type="text" class="form-control" id="addressLine2" name="addressLine2">
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                        <div>
-                            <label class="form-label">City *</label>
-                            <input type="text" class="form-control" id="city" name="city" required>
-                        </div>
-                        <div>
-                            <label class="form-label">State *</label>
-                            <select class="form-select" id="state" name="state" required>
-                                <option value="">Select State</option>
-                                <option value="NY">New York</option>
-                                <option value="CA">California</option>
-                                <option value="TX">Texas</option>
-                                <!-- Add more states -->
-                            </select>
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                        <div>
-                            <label class="form-label">ZIP Code *</label>
-                            <input type="text" class="form-control" id="zipCode" name="zipCode" required>
-                        </div>
-                        <div>
-                            <label class="form-label">Country *</label>
-                            <select class="form-select" id="country" name="country" required>
-                                <option value="US" selected>United States</option>
-                                <option value="CA">Canada</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; gap: 15px;">
-                        <button type="button" class="btn btn-outline-secondary" onclick="closeAddressModal()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Address</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
@@ -650,33 +464,28 @@
      <%- include('../partials/userprofile/footer') %>
 
     <script>
-        let selectedAddressId = 1;
+        let selectedAddressId = '<%= addresses.find(addr => addr.isDefault)?._id || (addresses.length > 0 ? addresses[0]._id : "") %>';
         let selectedPaymentMethod = 'cod';
 
         function selectAddress(addressId) {
-            // Remove selected class from all address cards
             document.querySelectorAll('.address-card').forEach(card => {
                 card.classList.remove('selected');
             });
             
-            // Add selected class to clicked address
             document.querySelector(`[data-address-id="${addressId}"]`).classList.add('selected');
             selectedAddressId = addressId;
         }
 
         function selectPayment(paymentMethod) {
-            // Remove selected class from all payment methods
             document.querySelectorAll('.payment-method').forEach(method => {
                 method.classList.remove('selected');
             });
             
-            // Add selected class to clicked payment method
             document.querySelector(`[data-payment="${paymentMethod}"]`).classList.add('selected');
             selectedPaymentMethod = paymentMethod;
             
-            // Enable/disable place order button based on payment method
             const placeOrderBtn = document.getElementById('placeOrderBtn');
-            if (paymentMethod === 'card') {
+            if (paymentMethod === 'card' || paymentMethod === 'wallet') {
                 placeOrderBtn.disabled = true;
                 placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Coming Soon';
             } else {
@@ -686,38 +495,55 @@
         }
 
         function openAddressModal() {
-            document.getElementById('modalTitle').textContent = 'Add New Address';
-            document.getElementById('addressForm').reset();
-            document.getElementById('addressId').value = '';
-            document.getElementById('addressModal').style.display = 'block';
+            window.location.href = "/address/add";
         }
 
-        function editAddress(addressId, event) {
+        async function editAddress(addressId, event) {
             event.stopPropagation();
-            document.getElementById('modalTitle').textContent = 'Edit Address';
-            document.getElementById('addressId').value = addressId;
+            window.location.href = `/address/edit/${addressId}`;
+        }
+
+        async function deleteAddress(addressId, event) {
+            event.stopPropagation();
             
-            // Pre-fill form with existing address data (this would come from backend)
-            if (addressId === 1) {
-                document.getElementById('firstName').value = 'John';
-                document.getElementById('lastName').value = 'Doe';
-                document.getElementById('phone').value = '(234) 567-8900';
-                document.getElementById('addressLine1').value = '123 Main Street';
-                document.getElementById('addressLine2').value = 'Apt 4B';
-                document.getElementById('city').value = 'New York';
-                document.getElementById('state').value = 'NY';
-                document.getElementById('zipCode').value = '10001';
-                document.getElementById('country').value = 'US';
+            const result = await swal({
+                title: "Delete Address?",
+                text: "This address will be permanently deleted.",
+                icon: "warning",
+                buttons: {
+                    cancel: "Cancel",
+                    confirm: "Delete"
+                },
+                dangerMode: true,
+            });
+            
+            if (result) {
+                try {
+                    const response = await fetch(`/address/delete/${addressId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        swal("Deleted!", "Address has been deleted.", "success")
+                        .then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        swal("Error", data.message, "error");
+                    }
+                } catch (error) {
+                    console.error('Error deleting address:', error);
+                    swal("Error", "Failed to delete address", "error");
+                }
             }
-            
-            document.getElementById('addressModal').style.display = 'block';
         }
 
-        function closeAddressModal() {
-            document.getElementById('addressModal').style.display = 'none';
-        }
-
-        function placeOrder() {
+        async function placeOrder() {
             if (!selectedAddressId) {
                 swal("Error", "Please select a shipping address", "error");
                 return;
@@ -728,46 +554,41 @@
                 return;
             }
 
-            // Show loading state
             const btn = document.getElementById('placeOrderBtn');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             btn.disabled = true;
 
-            // Simulate order processing
-            setTimeout(() => {
-                // Redirect to order success page
-                window.location.href = '/order-success?orderId=ORD-' + Date.now();
-            }, 2000);
-        }
+            try {
+                const response = await fetch('/checkout/placeorder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        addressId: selectedAddressId,
+                        paymentMethod: selectedPaymentMethod
+                    })
+                });
 
-        // Handle address form submission
-        document.getElementById('addressForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const addressData = Object.fromEntries(formData);
-            
-            // Here you would send the data to your backend
-            console.log('Address data:', addressData);
-            
-            swal("Success", "Address saved successfully!", "success").then(() => {
-                closeAddressModal();
-                // Refresh the address list or add the new address to the DOM
-            });
-        });
+                const data = await response.json();
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('addressModal');
-            if (event.target === modal) {
-                closeAddressModal();
+                if (data.success) {
+                    swal("Order Placed!", `Your order has been placed successfully. Order ID: ${data.orderId}`, "success")
+                    .then(() => {
+                        window.location.href = `/order/success?orderId=${data.orderId}`;
+                    });
+                } else {
+                    swal("Error", data.message, "error");
+                    btn.innerHTML = '<i class="fas fa-lock"></i> Place Order';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error placing order:', error);
+                swal("Error", "Failed to place order", "error");
+                btn.innerHTML = '<i class="fas fa-lock"></i> Place Order';
+                btn.disabled = false;
             }
         }
-
-        // Mobile Menu Toggle
-        document.querySelector('.canvas__open').addEventListener('click', () => {
-            document.querySelector('.header__menu').classList.toggle('active');
-        });
     </script>
 </body>
 </html>

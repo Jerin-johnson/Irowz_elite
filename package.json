@@ -18,7 +18,8 @@
     "postcss": "^8.5.3",
     "session": "^0.1.0",
     "sharp": "^0.34.2",
-    "tailwindcss": "^4.1.7"
+    "tailwindcss": "^4.1.7",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "eslint": "^9.27.0",
