@@ -498,7 +498,7 @@
                     <div class="total-row">
                         <span>Shipping:</span>
                         <span style="color: <%= order.totalPrice > 75 ? '#28a745' : '#333' %>;">
-                            <%= order.totalPrice > 75? 'Free' : '$' + ((order.finalAmount - order.totalAmount + order.discount) * 0.07).toFixed(2) %>
+                            <%= order.shipping %>
                         </span>
                     </div>
                     <div class="total-row final">

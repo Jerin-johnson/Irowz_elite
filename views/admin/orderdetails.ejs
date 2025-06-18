@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Details - <%= order.orderId %></title>
+    <link rel="stylesheet" href="/css/admin/customer.css" />
+    <link rel="stylesheet" href="/css/admin/admin.css" />
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .order-details-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .order-info-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card-header h3 {
+            color: #1a202c;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .info-value {
+            color: #1a202c;
+            font-weight: 400;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .items-table th {
+            background: #f8fafc;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .product-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background: #4b5563;
+        }
+
+        .status-update-section {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .amount-summary {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .final-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .order-details-container {
+                grid-template-columns: 1fr;
+            }
+
+            .info-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .product-info {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/admin/header') %>
+
+    <div class="dashboard-container">
+        <a href="/admin/orders" class="back-btn">← Back to Orders</a>
+
+        <div class="header">
+            <h1>ORDER DETAILS - <%= order.orderId %></h1>
+        </div>
+
+        <div class="order-details-container">
+            <!-- Left Column - Order Information -->
+            <div>
+                <!-- Order Summary Card -->
+                <div class="order-info-card">
+                    <div class="card-header">
+                        <h3>Order Information</h3>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Order ID:</span>
+                        <span class="info-value"><strong><%= order.orderId %></strong></span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Order Date:</span>
+                        <span class="info-value"><%= new Date(order.orderDate).toLocaleString() %></span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Payment Method:</span>
+                        <span class="info-value" style="text-transform: uppercase;"><%= order.paymentMethod %></span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Payment Status:</span>
+                        <span class="info-value" style="text-transform: capitalize;"><%= order.paymentStatus %></span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Order Status:</span>
+                        <span class="info-value">
+                            <%
+                              let style = 'padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; text-transform: capitalize;';
+                              if (order.orderStatus === 'pending') {
+                                style += ' background: #fef3c7; color: #d97706;';
+                              } else if (order.orderStatus === 'processing') {
+                                style += ' background: #dbeafe; color: #2563eb;';
+                              } else if (order.orderStatus === 'shipped') {
+                                style += ' background: #e0e7ff; color: #5b21b6;';
+                              } else if (order.orderStatus === 'delivered') {
+                                style += ' background: #d1fae5; color: #059669;';
+                              } else if (order.orderStatus === 'cancelled') {
+                                style += ' background: #fee2e2; color: #dc2626;';
+                              }
+                            %>
+                            <span style="<%= style %>"><%= order.orderStatus %></span>
+                        </span>
+                    </div>
+
+                    <% if (order.couponApplied) { %>
+                        <div class="info-row">
+                            <span class="info-label">Coupon Applied:</span>
+                            <span class="info-value">Yes</span>
+                        </div>
+                    <% } %>
+
+                    <% if (order.cancelledAt) { %>
+                        <div class="info-row">
+                            <span class="info-label">Cancelled At:</span>
+                            <span class="info-value"><%= new Date(order.cancelledAt).toLocaleString() %></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Cancelled By:</span>
+                            <span class="info-value" style="text-transform: capitalize;"><%= order.cancelledBy %></span>
+                        </div>
+                        <% if (order.cancellationReason) { %>
+                            <div class="info-row">
+                                <span class="info-label">Cancellation Reason:</span>
+                                <span class="info-value"><%= order.cancellationReason %></span>
+                            </div>
+                        <% } %>
+                    <% } %>
+                </div>
+
+                <!-- Customer Information Card -->
+                <div class="order-info-card">
+                    <div class="card-header">
+                        <h3>Customer Information</h3>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Name:</span>
+                        <span class="info-value"><%= order.userId?.fullName || order.userId?.name || "Unknown User" %></span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value"><%= order.userId?.email || "Unknown Email" %></span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value"><%= order.userId?.phone || "Unknown Phone" %></span>
+                    </div>
+                </div>
+
+                <!-- Shipping Address Card -->
+                <div class="order-info-card">
+                    <div class="card-header">
+                        <h3>Shipping Address</h3>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Full Name:</span>
+                        <span class="info-value"><%= order.address.firstName %> <%= order.address.lastName %></span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value"><%= order.address.phone %></span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Address:</span>
+                        <span class="info-value"><%= order.address.address %></span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">State:</span>
+                        <span class="info-value"><%= order.address.state %></span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">PIN Code:</span>
+                        <span class="info-value"><%= order.address.pinCode %></span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Country:</span>
+                        <span class="info-value"><%= order.address.country %></span>
+                    </div>
+                </div>
+
+                <!-- Order Items Card -->
+                <div class="order-info-card">
+                    <div class="card-header">
+                        <h3>Order Items</h3>
+                    </div>
+
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% order.items.forEach(item => { %>
+                                <tr>
+                                    <td>
+                                        <div class="product-info">
+                                            <% if (item.productImage) { %>
+                                                <img src="/<%= item.productImage %>" alt="<%= item.productName %>" class="product-image" />
+                                            <% } %>
+                                            <div>
+                                                <div><%= item.productName %></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><%= item.quantity %></td>
+                                    <td>₹<%= item.price.toFixed(2) %></td>
+                                    <td><strong>₹<%= item.totalPrice.toFixed(2) %></strong></td>
+                                    <td>
+                                        <%
+                                          let statusStyle = '';
+                                          if (item.status === 'active') {
+                                            statusStyle = 'background: #d1fae5; color: #059669;';
+                                          } else if (item.status === 'cancelled') {
+                                            statusStyle = 'background: #fee2e2; color: #dc2626;';
+                                          } else if (item.status === 'returned') {
+                                            statusStyle = 'background: #f3e8ff; color: #7c3aed;';
+                                          } else if (item.status === 'return requested') {
+                                            statusStyle = 'background: #fef3c7; color: #d97706;';
+                                          }
+                                        %>
+                                        <span style="padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; text-transform: capitalize; <%= statusStyle %>">
+                                            <%= item.status %>
+                                        </span>
+                                        <% if (item.status === 'return requested' && item.cancellationReason) { %>
+                                            <div style="font-size: 10px; color: #6b7280; margin-top: 4px;">
+                                                Reason: <%= item.cancellationReason %>
+                                            </div>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (item.status === 'return requested') { %>
+                                            <div style="display: flex; gap: 5px; flex-direction: column;">
+                                                <button class="action-btn" style="background: #10b981; color: white;" 
+                                                        onclick="handleItemReturnRequest('<%= order._id %>', '<%= item.productId %>', 'approve')">Approve</button>
+                                                <button class="action-btn" style="background: #ef4444; color: white;" 
+                                                        onclick="handleItemReturnRequest('<%= order._id %>', '<%= item.productId %>', 'reject')">Reject</button>
+                                            </div>
+                                        <% } else if (!['cancelled', 'returned'].includes(item.status) && !['delivered', 'cancelled'].includes(order.orderStatus)) { %>
+                                            <select onchange="updateItemStatus('<%= order._id %>', '<%= item._id %>', this.value)" 
+                                                    style="padding: 4px; font-size: 11px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                                                <option value="">Update Status</option>
+                                                <option value="active" <%= item.status === 'active' ? 'selected' : '' %>>Active</option>
+                                                <option value="cancelled" <%= item.status === 'cancelled' ? 'selected' : '' %>>Cancel</option>
+                                            </select>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right Column - Actions and Summary -->
+            <div>
+                <!-- Status Update Card -->
+                <% if (!['delivered', 'cancelled'].includes(order.orderStatus)) { %>
+                    <div class="order-info-card">
+                        <div class="card-header">
+                            <h3>Update Order Status</h3>
+                        </div>
+
+                        <div class="status-update-section">
+                            <select id="statusSelect" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 10px;">
+                                <option value="">Select Status</option>
+                                <% if (order.orderStatus === 'pending') { %>
+                                    <option value="processing">Processing</option>
+                                    <option value="cancelled">Cancelled</option>
+                                <% } else if (order.orderStatus === 'processing') { %>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="cancelled">Cancelled</option>
+                                <% } else if (order.orderStatus === 'shipped') { %>
+                                    <option value="delivered">Delivered</option>
+                                <% } %>
+                            </select>
+
+                            <button class="action-btn" style="background: #3b82f6; color: white; width: 100%; padding: 10px;" 
+                                    onclick="updateOrderStatus()">Update Status</button>
+                        </div>
+                    </div>
+                <% } %>
+
+                <!-- Order Summary Card -->
+                <div class="order-info-card">
+                    <div class="card-header">
+                        <h3>Order Summary</h3>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Subtotal:</span>
+                        <span class="info-value">₹<%= order.totalAmount.toFixed(2) %></span>
+                    </div>
+
+                    <% if (order.discount > 0) { %>
+                        <div class="info-row">
+                            <span class="info-label">Discount:</span>
+                            <span class="info-value" style="color: #059669;">-₹<%= order.discount.toFixed(2) %></span>
+                        </div>
+                    <% } %>
+
+                    <% if (order.tax > 0) { %>
+                        <div class="info-row">
+                            <span class="info-label">Tax:</span>
+                            <span class="info-value">₹<%= order.tax.toFixed(2) %></span>
+                        </div>
+                    <% } %>
+
+                    <% if (order.shipping > 0) { %>
+                        <div class="info-row">
+                            <span class="info-label">Shipping:</span>
+                            <span class="info-value">₹<%= order.shipping.toFixed(2) %></span>
+                        </div>
+                    <% } %>
+
+                    <div class="amount-summary">
+                        <div class="info-row" style="border: none; font-size: 16px;">
+                            <span class="info-label"><strong>Final Amount:</strong></span>
+                            <span class="final-amount">₹<%= order.finalAmount.toFixed(2) %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Refund Information -->
+                <% if (order.items.some(item => item.refundStatus !== 'not initiated')) { %>
+                    <div class="order-info-card">
+                        <div class="card-header">
+                            <h3>Refund Information</h3>
+                        </div>
+                        <% order.items.forEach(item => { %>
+                            <% if (item.refundStatus !== 'not initiated') { %>
+                                <div class="info-row">
+                                    <span class="info-label">Item:</span>
+                                    <span class="info-value"><%= item.productName %></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Refund Status:</span>
+                                    <span class="info-value" style="text-transform: capitalize;"><%= item.refundStatus %></span>
+                                </div>
+                                <% if (item.refundMethod) { %>
+                                    <div class="info-row">
+                                        <span class="info-label">Refund Method:</span>
+                                        <span class="info-value" style="text-transform: capitalize;"><%= item.refundMethod %></span>
+                                    </div>
+                                <% } %>
+                                <% if (item.refundDate) { %>
+                                    <div class="info-row">
+                                        <span class="info-label">Refund Date:</span>
+                                        <span class="info-value"><%= new Date(item.refundDate).toLocaleString() %></span>
+                                    </div>
+                                <% } %>
+                                <div style="border-bottom: 1px solid #e2e8f0; margin: 10px 0;"></div>
+                            <% } %>
+                        <% }) %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/admin/adminNav.js"></script>
+
+    <script>
+        // Update order status function
+        function updateOrderStatus() {
+            const statusSelect = document.getElementById('statusSelect');
+            const newStatus = statusSelect.value;
+
+            if (!newStatus) {
+                Swal.fire('Error!', 'Please select a status to update.', 'error');
+                return;
+            }
+
+            if (newStatus === '<%= order.orderStatus %>') {
+                Swal.fire('Info!', 'Order is already in this status.', 'info');
+                return;
+            }
+
+            // Validate status transitions
+            const validTransitions = {
+                'pending': ['processing', 'cancelled'],
+                'processing': ['shipped', 'cancelled'],
+                'shipped': ['delivered']
+            };
+            const currentStatus = '<%= order.orderStatus %>';
+            if (!validTransitions[currentStatus]?.includes(newStatus)) {
+                Swal.fire('Error!', 'Invalid status transition.', 'error');
+                return;
+            }
+
+            Swal.fire({
+                title: 'Update Order Status',
+                text: `Are you sure you want to update this order status to ${newStatus}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3b82f6',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, Update',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/orders/<%= order._id %>/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire('Updated!', 'Order status has been updated successfully.', 'success')
+                                    .then(() => location.reload());
+                            } else {
+                                Swal.fire('Error!', data.message || 'Failed to update order status.', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
+                        });
+                }
+            });
+        }
+
+        // Handle individual item return request
+        function handleItemReturnRequest(orderId, itemId, action) {
+            const actionText = action === 'approve' ? 'approve' : 'reject';
+            const actionColor = action === 'approve' ? '#10b981' : '#ef4444';
+
+            Swal.fire({
+                title: `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} Item Return`,
+                text: `Are you sure you want to ${actionText} this item return request?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: actionColor,
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: `Yes, ${actionText.charAt(0).toUpperCase() + actionText.slice(1)}`,
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/orders/${orderId}/items/${itemId}/return`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ action: action })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire('Success!', `Item return request has been ${action}ed successfully.`, 'success')
+                                    .then(() => location.reload());
+                            } else {
+                                Swal.fire('Error!', data.message || `Failed to ${action} item return request.`, 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
+                        });
+                }
+            });
+        }
+
+        // Update individual item status
+        function updateItemStatus(orderId, itemId, newStatus) {
+            if (!newStatus) {
+                return;
+            }
+
+            Swal.fire({
+                title: 'Update Item Status',
+                text: `Are you sure you want to update this item status to ${newStatus}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3b82f6',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, Update',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/orders/${orderId}/items/${itemId}/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire('Updated!', 'Item status has been updated successfully.', 'success')
+                                    .then(() => location.reload());
+                            } else {
+                                Swal.fire('Error!', data.message || 'Failed to update item status.', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
+                        });
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

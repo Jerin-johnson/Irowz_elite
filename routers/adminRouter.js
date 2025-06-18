@@ -6,9 +6,12 @@ const{loadCustomer,blockUser,unblockUser} = require("../controllers/admin/custom
 const {loadCategory,addCategory,loadAddCategory,listCategory,unlistCategory,loadEditCategory,editCategory}= require("../controllers/admin/categoryContoller")
 const {loadProductPage,loadAddProductPage,addProduct,editProduct,loadEditProduct,blockProduct,unBlockProduct} = require("../controllers/admin/productController");
 const {upload} = require("../middleware/multerMiddleWare")
-const {loadBrandPage,addBrand,changeStatus} = require("../controllers/admin/brandController")
+const {loadBrandPage,addBrand,changeStatus} = require("../controllers/admin/brandController");
+
+const{loadOrderListingPage,loadOrderDetailedPage,changeOrderStatus}= require("../controllers/admin/orderController");
 
 
+const {approveOrRejectReturnRequest} = require("../controllers/admin/orderController")
 
 adminRouter.get("/login",isAdminLoggedOut,loadLoginAdmin)
 adminRouter.post("/login",verifyAdminLogin)
@@ -63,9 +66,22 @@ adminRouter.get("/product/unblock",adminAuth,unBlockProduct)
 
 adminRouter.get("/brand",adminAuth,loadBrandPage)
 adminRouter.post("/brand",adminAuth,upload.single('brandImage'),addBrand);
-adminRouter.patch("/brand/:id",adminAuth,changeStatus)
+adminRouter.patch("/brand/:id",adminAuth,changeStatus);
 
 
+
+// Order Management Admin
+
+adminRouter.get("/orders",adminAuth,loadOrderListingPage);
+adminRouter.get("/orders/:orderId",adminAuth,loadOrderDetailedPage);
+
+// change OrderStatus
+
+adminRouter.patch("/orders/:orderId/status",adminAuth,changeOrderStatus)
+
+
+// approve or reject return request
+adminRouter.patch("/orders/:orderId/items/:productId/return",adminAuth,approveOrRejectReturnRequest)
 
 
 // admin logout

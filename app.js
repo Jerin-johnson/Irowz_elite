@@ -18,6 +18,10 @@ connectDB()
 
 
 
+
+app.use(express.json());
+app.use(express.urlencoded({extended:true}))
+
 // Using express session
 
 app.use(session({
@@ -40,8 +44,7 @@ app.use(passport.session());
 
 
 
-app.use(express.json());
-app.use(express.urlencoded({extended:true}))
+
 
 
 

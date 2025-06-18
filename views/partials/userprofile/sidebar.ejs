@@ -1,7 +1,10 @@
 <div class="profile-sidebar">
     <div class="user-info">
         <div class="user-avatar">
-            <i class="fas fa-user-circle fa-3x"></i>
+            <img src="/<%= user.profilePic %>" alt="Profile Image" 
+     style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+
+            <!-- <i class="fas fa-user-circle fa-3x"></i> -->
         </div>
         <% if (typeof user !== 'undefined' && user) { %>
         <h4>Welcome, <%= user.fullName.split(" ")[0] %>!</h4>

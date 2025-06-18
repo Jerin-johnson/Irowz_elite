@@ -13,37 +13,47 @@ const orderSchema = new Schema({
     ref: "User",
     required: true
   },
+
   items: [
-  {
-    productId: {
-      type: Schema.Types.ObjectId,
-      ref: "Product",
-      required: true
-    },
-    productName: String,
-    quantity: Number,
-    price: Number,
-    totalPrice: Number,
-    productImage: String,
-    status: {
+    {
+      productId: {
+        type: Schema.Types.ObjectId,
+        ref: "Product",
+        required: true
+      },
+      productName: String,
+      quantity: Number,
+      price: Number,
+      totalPrice: Number,
+      productImage: String,
+        
+      status: {
       type: String,
-      enum: ['active', 'cancelled', 'returned'],
+      enum: ['active', 'processing','cancelled', 'shipped', 'delivered', 'return requested', 'returned','return rejected'],
       default: "active"
     },
-    cancellationReason: String,
-    refundStatus: {
-      type: String,
-      enum: ['not initiated', 'processing', 'refunded', 'failed'],
-      default: 'not initiated'
-    },
-    refundMethod: {
-      type: String // 'wallet', 'razorpay', etc.
-    },
-    refundDate: {
-      type: Date
+     deliveredAt: Date, 
+    shippedAt: Date, 
+
+      cancellationReason: String,
+
+      returnRequestedAt: Date,
+      returnCompletedAt: Date,
+      returnReason:String,
+
+      refundStatus: {
+        type: String,
+        enum: ['not initiated', 'processing', 'refunded', 'failed'],
+        default: 'not initiated'
+      },
+      refundMethod: {
+        type: String // 'wallet', 'razorpay', etc.
+      },
+      refundDate: Date,
+  
     }
-  }
-] ,
+  ],
+
   totalAmount: {
     type: Number,
     required: true
@@ -52,6 +62,7 @@ const orderSchema = new Schema({
     type: Number,
     default: 0
   },
+   deliveredAt: Date, 
   tax: {
     type: Number,
     default: 0
@@ -64,6 +75,7 @@ const orderSchema = new Schema({
     type: Number,
     required: true
   },
+
   address: {
     firstName: String,
     lastName: String,
@@ -74,6 +86,7 @@ const orderSchema = new Schema({
     country: String,
     addressType: String
   },
+
   paymentMethod: {
     type: String,
     enum: ["cod", "online"],
@@ -84,56 +97,43 @@ const orderSchema = new Schema({
     enum: ["pending", "completed"],
     default: "pending"
   },
+
   orderStatus: {
     type: String,
-    enum: ["pending", "processing", "shipped", "delivered", "cancelled", "return requested", "returned"],
+    enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
     default: "pending"
   },
+
   orderDate: {
     type: Date,
     default: Date.now
   },
-    createdOn: {
+
+  createdOn: {
     type: Date,
     default: Date.now,
     required: true
   },
-    invoiceDate: {
-    type: Date
-  },
+
+  invoiceDate: Date,
+
   couponApplied: {
     type: Boolean,
     default: false
   },
-  cancelledAt: {
-  type: Date
-},
-cancelledBy: {
-  type: String, // 'user' or 'admin'
-  enum: ['user', 'admin'],
-},
-cancellationReason: {
-  type: String
-},
-refundStatus: {
-  type: String,
-  enum: ['not initiated', 'processing', 'refunded', 'failed'],
-  default: 'not initiated'
-},
-refundDate: {
-  type: Date
-},
-refundMethod: {
-  type: String, // e.g., 'wallet', 'razorpay', 'stripe'
-},
-fraudScore: {
-  type: Number,
-  default: 0
-}
 
+  cancelledAt: Date,
+  cancelledBy: {
+    type: String,
+    enum: ['user', 'admin']
+  },
+  cancellationReason: String,
+
+  fraudScore: {
+    type: Number,
+    default: 0
+  }
 });
 
-
 const Order = mongoose.model("Order", orderSchema);
-
-module.exports = {Order};
+module.exports = { Order };

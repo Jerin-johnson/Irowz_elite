@@ -1,4 +1,10 @@
 const { User } = require("../../models/userSchema");
+const{Order}=require("../../models/orderSchema");
+const{ Wishlist}=require("../../models/wishListSchema");
+const mongoose = require("mongoose");
+
+
+
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const env = require("dotenv").config();
@@ -108,21 +114,64 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// const loadProfilePage = async (req, res) => {
+//   try {
+//     const user = req.session.user;
+//     const userData = await User.findOne({ _id: user });
+//     const order = await Order.aggregate([{$match:{userId :user}},{$unwind:"$items"},{$group:{_id:null,totalOrder:{$sum:1}}}])
+//     const wishlist = await Wishlist.findOne({userId:user})
+
+//     console.log("The Order and the wishlist",order)
+
+//     res.render("user/profile/profile", { user: userData,wishlist:wishlist. products.length || 0,order : order.totalOrder ||0 });
+//   } catch (error) {
+//     res.send("Some error while loading the profile page", error);
+//     res.redirect("/error-404");
+//   }
+// };
+
 const loadProfilePage = async (req, res) => {
   try {
     const user = req.session.user;
+
     const userData = await User.findOne({ _id: user });
 
-    res.render("user/profile/profile", { user: userData, stats: null });
+    // Get total number of ordered items
+    const orderAgg = await Order.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(user) } },
+      { $unwind: "$items" },
+      { $group: { _id: null, totalOrder: { $sum: 1 } } }
+    ]);
+
+    const totalOrderItems = orderAgg[0]?.totalOrder || 0;
+
+    // Get wishlist
+    const wishlist = await Wishlist.findOne({ userId: user });
+    const wishlistCount = wishlist?.products?.length || 0;
+
+    const address = await Address.findOne({userId :user})
+
+    console.log("Total Order Items:", totalOrderItems, "Wishlist Count:", wishlistCount);
+
+    res.render("user/profile/profile", {
+      user: userData,
+      wishlist: wishlistCount,
+      order: totalOrderItems,
+      address: address?.addresses?.length || 0
+    });
+
   } catch (error) {
-    res.send("Some error while loading the profile page", error);
+    console.error("Error loading profile:", error);
     res.redirect("/error-404");
   }
 };
 
+
 const loadEditProflie = async (req, res) => {
   try {
-    res.render("user/profile/editprofile");
+    const userId = req.session.user;
+    const user = await User.findById(userId)
+    res.render("user/profile/editprofile",{user});
   } catch (error) {}
 };
 
@@ -130,7 +179,9 @@ const loadEditProflie = async (req, res) => {
 
 const loadChangePassword = async (req, res) => {
   try {
-    res.render("user/profile/changepass");
+    const userId = req.session.user;
+    const user = await User.findById(userId);
+    res.render("user/profile/changepass",{user});
   } catch (error) {
     console.error(error.message);
     res.redirect("/error-404");
@@ -147,32 +198,57 @@ const updateChangePassword = async (req, res) => {
         .json({ success: false, message: "All fields are required" });
     }
 
+    console.log(currentPassword,newPassword,confirmPassword)
+    // Check if new password matches confirm password
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Google signined User doesn't have changne password option",
+      });
+    }
+
     const user = await User.findById(req.session.user);
     if (!user) {
       return res.status(400).redirect("/login");
     }
 
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Password doesn't match" });
+
+    // Handle passwordless users
+    if (!user.password) {
+      if (currentPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Your loginined with google",
+        });
+      }
+      
+    } else {
+      // Verify current password for users with a password
+      if (!currentPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Current password is required",
+        });
+      }
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({
+          success: false,
+          message: "Current password is incorrect",
+        });
+      }
     }
 
-    if (newPassword !== confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "New password and confirm password do not match",
-      });
-    }
+  
+    
 
     const hashedPassword = await securePassword(newPassword);
 
-    const updatedPassworduser = await User.findByIdAndUpdate(req.session.user, {
+     await User.findByIdAndUpdate(req.session.user, {
       $set: { password: hashedPassword },
     });
 
-    await updatedPassworduser.save();
+    
 
     return res
       .status(200)
@@ -668,6 +744,36 @@ const deleteAddress = async (req, res) => {
 };
 
 
+const updateProfile = async(req,res)=>{
+  try {
+    console.log(req.body,req.file);
+    const {firstName,lastName,dob} = req.body;
+
+    const userId = req.session.user;
+
+    const user = await User.findById(userId);
+  
+    user.fullName =`${firstName} ${lastName}`;
+    user.dateOfBirth =dob;
+    user.profilePic = (req.file)?`uploads/images/${req.file.filename}`: user.profilePic;
+
+      if (!user.profilePic) {
+      user.profilePic = 'uploads/images/product-1749097756066-p15q7l7zp09.jpeg'; // fallback
+    }
+    await user.save()
+    
+     
+
+    return res.status(200).json({success:true,message:"Updated Successfully"})
+    
+  } catch (error) {
+    console.log(error);
+    return res.json({success:false,message:error.message})
+    
+  }
+}
+
+
 module.exports = {
   loadVerifyEmail,
   verifyEmail,
@@ -689,5 +795,6 @@ module.exports = {
   addAddress,
   loadEditAddressPage,
   editAddress,
-  deleteAddress
+  deleteAddress,
+  updateProfile
 };

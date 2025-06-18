@@ -1,18 +1,21 @@
 const express = require("express");
 const userRouter = express.Router();
 const {loadHomePage,pageNotFound,loadSignup,loadLogin,signUp,loadOtp,verifyOtp,ResentOtp,verifyLogin,userLogout,loadShoppingPage}=require("../controllers/user/userController.js");
-const{loadVerifyEmail,verifyEmail,loadForgetPasswordPage,loadForgetPasswordOtpPage,verifyForgetOtp,resetPassword,loadProfilePage,loadEditProflie,loadChangePassword,loadAddressPage,loadAddAddressPage,updateChangePassword,loadUpdateEmailOtp,verifyUpdateEmailOtp,updateEmail,loadUpdateEmail,resendOtpEmail,addAddress,loadEditAddressPage,editAddress,deleteAddress} = require("../controllers/user/profileController.js")
+const{loadVerifyEmail,verifyEmail,loadForgetPasswordPage,loadForgetPasswordOtpPage,verifyForgetOtp,resetPassword,loadProfilePage,loadEditProflie,loadChangePassword,loadAddressPage,loadAddAddressPage,updateChangePassword,updateProfile,loadUpdateEmailOtp,verifyUpdateEmailOtp,updateEmail,loadUpdateEmail,resendOtpEmail,addAddress,loadEditAddressPage,editAddress,deleteAddress} = require("../controllers/user/profileController.js")
 const { userAuth, isUserLoggedIn, isUserLoggedOut,ensureOtpSession,checkWhetherUserIsBlocked} = require("../middleware/userMiddleWare.js")
 //google sign in
 const {passport}= require("../config/passport");
 const{preventAccessingOtp,preventGoBackToVerifyEmail}=require("../middleware/profileMiddleware.js");
 const{loadProductDetailedPage}=require("../controllers/user/productController.js");
+const {upload} = require("../middleware/multerMiddleWare")
 const {User} = require("../models/userSchema.js");
 
 // orderController
 const{loadOrderPage,loadOrderDetailedPage}=require("../controllers/user/orderContoller.js");
 // order managenemt user;
-const{cancelOrderItem}=require("../controllers/user/orderContoller.js")
+const{cancelOrderItem,cancelEntireOrder,downloadInvoice}=require("../controllers/user/orderContoller.js");
+// return order management
+const{sendReturnOrderRequest}= require("../controllers/user/orderContoller.js")
 
 // Wallet Realted things
 const {loadWalletPage}=require("../controllers/user/walletController.js")
@@ -66,6 +69,7 @@ userRouter.get("/profile",isUserLoggedIn,loadProfilePage);
 userRouter.get("/profile/edit",isUserLoggedIn,loadEditProflie);
 userRouter.get("/profile/password/edit",isUserLoggedIn,loadChangePassword);
 userRouter.post("/profile/password/edit",updateChangePassword);
+userRouter.post("/profile/update",isUserLoggedIn,upload.single('profileImage'),updateProfile);
 
 userRouter.get("/profile/email/update/otp",isUserLoggedIn,loadUpdateEmailOtp)
 userRouter.post("/profile/email/update/otp",verifyUpdateEmailOtp)
@@ -112,14 +116,27 @@ userRouter.post('/checkout/placeorder', isUserLoggedIn,placeOrder);
 userRouter.get("/order/success",isUserLoggedIn,loadOrderSuccessPage);
 
 
-
+// download invocies
+userRouter.get("/orders/:orderId/invoice",isUserLoggedIn,downloadInvoice)
 
 
 
 // Order management
 userRouter.get("/orders",isUserLoggedIn,loadOrderPage);
 userRouter.get("/orders/:orderId",isUserLoggedIn,loadOrderDetailedPage);
-userRouter.post("/orders/:orderId/cancel/:productId",isUserLoggedIn,cancelOrderItem)
+
+
+// cancel orders
+userRouter.post("/orders/:orderId/cancel/:productId",isUserLoggedIn,cancelOrderItem);
+userRouter.patch("/orders/:orderId/cancel",isUserLoggedIn,cancelEntireOrder);
+
+// Return orders
+userRouter.post("/orders/:orderId/return",isUserLoggedIn,sendReturnOrderRequest);
+
+
+
+
+
 
 
 

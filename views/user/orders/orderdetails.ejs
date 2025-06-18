@@ -514,13 +514,13 @@
                                 <div class="product-actions">
                                     <span class="order-status status-<%= item.status %>"> <%= item.status %></span>
                                     <div class="product-total">$<%= item.totalPrice.toFixed(2) %></div>
-                                    <% if (order.orderStatus === 'pending' || order.orderStatus === 'processing') { %>
+                                    <% if ((order.orderStatus === 'pending' || order.orderStatus === 'processing') && item.status !== "cancelled") { %>
                                         <button class="btn btn-outline-primary btn-sm" onclick="cancelProduct('<%= order.orderId %>', '<%= item.productId %>')">
                                             <i class="fas fa-times"></i> Cancel Item
                                         </button>
                                     <% } %>
-                                    <% if (order.orderStatus === 'delivered') { %>
-                                        <button class="btn btn-outline-warning btn-sm" onclick="returnProduct('<%= order.orderId %>', '<%= item.productId %>')">
+                                    <% if (order.orderStatus === 'delivered' && item.status !== "return requested" && item.status !== "cancelled") { %>
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="returnProduct('<%= order.orderId %>', '<%= item.productId %>')">
                                             <i class="fas fa-undo"></i> Return Item
                                         </button>
                                     <% } %>
@@ -549,7 +549,8 @@
                 </div>
 
                 <!-- Payment Information -->
-                <div class="detail-section">
+                 <% if (order.orderStatus !=="cancelled") { %>
+                     <div class="detail-section">
                     <div class="section-header">
                         <h3><i class="fas fa-credit-card"></i> Payment Information</h3>
                     </div>
@@ -568,6 +569,9 @@
                         </div>
                     </div>
                 </div>
+                  
+                 <% } %>
+               
             </div>
 
             <!-- Right Column - Order Summary -->
@@ -600,27 +604,20 @@
                 </div>
                 
                 <div class="action-buttons">
-                    <button class="btn btn-outline-secondary btn-full" >
-                        <a href="/orders-list" style="text-decoration: none;">
-                        <i class="fas fa-arrow-left"></i> Back to Orders
-                    </a>
-                    </button>
+                    <a href="/orders" class="btn btn-outline-secondary" style="text-decoration: none;">
+                  <i class="fas fa-arrow-left"></i> Back to Orders
+                  </a>
+
                     <% if (order.orderStatus === 'delivered') { %>
                         <button class="btn btn-outline-success btn-full" onclick="downloadInvoice('<%= order.orderId %>')">
                             <i class="fas fa-download"></i> Download Invoice
                         </button>
                     <% } %>
-                    <button class="btn btn-outline-primary btn-full" onclick="reorderItems('<%= order.orderId %>')">
-                        <i class="fas fa-redo"></i> Reorder Items
-                    </button>
                     <% if (order.orderStatus === 'delivered') { %>
                         <button class="btn btn-outline-warning btn-full" onclick="returnOrder('<%= order.orderId %>')">
                             <i class="fas fa-undo"></i> Return Order
                         </button>
                     <% } %>
-                    <button class="btn btn-outline-secondary btn-full" onclick="contactSupport('<%= order.orderId %>')">
-                        <i class="fas fa-headset"></i> Contact Support
-                    </button>
                 </div>
             </div>
         </div>

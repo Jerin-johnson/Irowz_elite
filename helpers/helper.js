@@ -55,6 +55,18 @@ const calculateTax = (amount) => {
 };
 
 
+function addTransaction(wallet, amount, reason, orderId) {
+  wallet.transactions.push({
+    type: "credit",
+    amount,
+    reason,
+    orderId,
+    date: new Date()
+  });
+}
+
+
+
 module.exports ={
     generateOtp,
     sendVerficationEmail,

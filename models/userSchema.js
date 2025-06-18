@@ -26,8 +26,12 @@ const userSchema = new mongoose.Schema({
     match: [/^\d{10}$/, 'Phone number must be 10 digits'],
     default: null
   },
+   profilePic: {
+    type: String, // You can store the image URL or file path here
+    default: 'uploads/images/product-1749097756066-p15q7l7zp09.jpeg' // Set a default profile picture path if desired
+  },
   dateOfBirth: {
-    type: Date,
+    type:String
     // optional field
   },
   googleId: {

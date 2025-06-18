@@ -115,7 +115,7 @@ const addToCart = async (req, res) => {
       {
         throw new Error("Maxium limit has reached");
       }
-      if (newOty > product.stock) {
+      if (newOty >= product.stock) {
         throw new Error(`Only ${product.stock} items available in stock`);
       }
       cart.items[isProductExitIndex].quantity = newOty;

@@ -197,31 +197,27 @@
                 <div class="profile-stats">
                     <div class="stat-card">
                         <i class="fas fa-shopping-bag"></i>
-                        <h3>5</h3>
+                        <h3><%= order %></h3>
                         <p>Orders</p>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-heart"></i>
-                        <h3>12</h3>
+                        <h3><%= wishlist %></h3>
                         <p>Wishlist Items</p>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-map-marker-alt"></i>
-                        <h3>3</h3>
+                        <h3><%= address %></h3>
                         <p>Saved Addresses</p>
                     </div>
-                    <div class="stat-card">
-                        <i class="fas fa-comment"></i>
-                        <h3>8</h3>
-                        <p>Reviews</p>
-                    </div>
+            
                 </div>
 
 
                 <!-- Profile Overview -->
 <div class="profile-overview">
     <div class="profile-image">
-        <img src="<%= user?.profileImage || '/placeholder.svg?height=150&width=150' %>" alt="Profile Picture">
+        <img src="/<%= user.profilePic%>" alt="Profile Picture">
     </div>
     <div class="profile-details">
         <h2><%= user?.fullName || 'N/A' %></h2>
@@ -252,49 +248,7 @@
 
 
 
-                <!-- Recent Activity -->
-                <div class="recent-activity">
-                    <h3 style="margin-bottom: 20px; color: #333;">Recent Activity</h3>
-                    
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-shopping-bag"></i>
-                        </div>
-                        <div class="activity-details">
-                            <h4>Order #12345 Placed</h4>
-                            <p>You placed an order for 3 items totaling $156.99</p>
-                        </div>
-                        <div class="activity-time">
-                            2 days ago
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-heart"></i>
-                        </div>
-                        <div class="activity-details">
-                            <h4>Added Item to Wishlist</h4>
-                            <p>You added "Premium Leather Wallet" to your wishlist</p>
-                        </div>
-                        <div class="activity-time">
-                            5 days ago
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <div class="activity-details">
-                            <h4>Reviewed a Product</h4>
-                            <p>You gave "Luxury Watch" a 5-star rating</p>
-                        </div>
-                        <div class="activity-time">
-                            1 week ago
-                        </div>
-                    </div>
-                </div>
+              
 
                 <!-- Quick Links -->
                 <div class="quick-links">

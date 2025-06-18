@@ -6,14 +6,14 @@ const loadWishlistPage = async (req, res) => {
   try {
     const userId = req.session.user;
     
-      const wishlist = await Wishlist.findOne({userId:userId }).populate({path:"products.productId",populate:"category"});
+      let wishlist = await Wishlist.findOne({userId:userId }).populate({path:"products.productId",populate:"category"});
       const user = await User.findById(userId);
 
-    console.log(wishlist)
+      console.log(wishlist);
 
       if(!wishlist)
       {
-        return res.status(400).res.render("user/wishlist", {
+      return res.status(400).render("user/wishlist",{
       wishlistItems: [],
       totalValue: 0,
       inStockCount: 0,
@@ -33,7 +33,7 @@ const loadWishlistPage = async (req, res) => {
     }).length;
 
     return res.status(200).render("user/wishlist",{
-         wishlistItems: items,
+      wishlistItems: items,
       totalValue,
       inStockCount,
       user

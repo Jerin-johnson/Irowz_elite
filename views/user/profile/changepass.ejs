@@ -177,43 +177,55 @@
     const numberReq = document.getElementById('numberReq');
     const specialReq = document.getElementById('specialReq');
 
-    newPassword.addEventListener('input', checkPasswordStrength);
-    confirmPassword.addEventListener('input', validateForm);
+    // Initialize validation state
+    function initializeValidation() {
+        [lengthReq, uppercaseReq, lowercaseReq, numberReq, specialReq].forEach(req => {
+            req.classList.add('invalid');
+        });
+        passwordStrengthMeter.style.width = '0%';
+        passwordStrengthMeter.style.backgroundColor = '#dc3545';
+        submitBtn.disabled = true;
+    }
 
     function checkPasswordStrength() {
-        const password = newPassword.value;
-        let strength = 0;
+        const password = newPassword.value || '';
         let validCount = 0;
 
         const checks = [
-            [password.length >= 8, lengthReq],
-            [/[A-Z]/.test(password), uppercaseReq],
-            [/[a-z]/.test(password), lowercaseReq],
-            [/[0-9]/.test(password), numberReq],
-            [/[^A-Za-z0-9]/.test(password), specialReq]
+            { test: password.length >= 8, element: lengthReq },
+            { test: /[A-Z]/.test(password), element: uppercaseReq },
+            { test: /[a-z]/.test(password), element: lowercaseReq },
+            { test: /[0-9]/.test(password), element: numberReq },
+            { test: /[^A-Za-z0-9]/.test(password), element: specialReq }
         ];
 
-        for (const [valid, el] of checks) {
-            if (valid) {
-                el.classList.add('valid');
+        checks.forEach(({ test, element }) => {
+            if (test) {
+                element.classList.add('valid');
+                element.classList.remove('invalid');
                 validCount++;
             } else {
-                el.classList.remove('valid');
+                element.classList.add('invalid');
+                element.classList.remove('valid');
             }
-        }
+        });
 
-        strength = validCount * 20;
+        const strength = validCount * 20;
         passwordStrengthMeter.style.width = strength + '%';
 
-        if (strength < 40) {
+        if (validCount === 0) {
             passwordStrengthMeter.style.backgroundColor = '#dc3545';
             passwordStrengthText.textContent = 'Password strength: Too weak';
             passwordStrengthText.style.color = '#dc3545';
-        } else if (strength < 60) {
+        } else if (validCount <= 2) {
+            passwordStrengthMeter.style.backgroundColor = '#dc3545';
+            passwordStrengthText.textContent = 'Password strength: Weak';
+            passwordStrengthText.style.color = '#dc3545';
+        } else if (validCount <= 3) {
             passwordStrengthMeter.style.backgroundColor = '#ffc107';
             passwordStrengthText.textContent = 'Password strength: Medium';
             passwordStrengthText.style.color = '#ffc107';
-        } else if (strength < 100) {
+        } else if (validCount <= 4) {
             passwordStrengthMeter.style.backgroundColor = '#28a745';
             passwordStrengthText.textContent = 'Password strength: Strong';
             passwordStrengthText.style.color = '#28a745';
@@ -227,26 +239,42 @@
     }
 
     function validateForm() {
-        const password = newPassword.value;
-        const confirmPwd = confirmPassword.value;
-        const currentPwd = currentPassword.value;
+        const password = newPassword.value || '';
+        const confirmPwd = confirmPassword.value || '';
+        const currentPwd = currentPassword.value || '';
 
-        const meetsRequirements =
+        const meetsRequirements = 
             password.length >= 8 &&
             /[A-Z]/.test(password) &&
             /[a-z]/.test(password) &&
             /[0-9]/.test(password) &&
             /[^A-Za-z0-9]/.test(password);
 
-        const passwordsMatch = password === confirmPwd;
+        const passwordsMatch = password === confirmPwd && password.length > 0;
+        const hasCurrentPassword = currentPwd.length > 0;
 
-        submitBtn.disabled = !(meetsRequirements && passwordsMatch && currentPwd);
+        submitBtn.disabled = !(meetsRequirements && passwordsMatch && hasCurrentPassword);
 
-        confirmPassword.style.borderColor = confirmPwd && !passwordsMatch ? '#dc3545' : '';
+        if (confirmPwd.length > 0) {
+            confirmPassword.style.borderColor = passwordsMatch ? '' : '#dc3545';
+        } else {
+            confirmPassword.style.borderColor = '';
+        }
     }
+
+    // Event listeners
+    newPassword.addEventListener('input', checkPasswordStrength);
+    confirmPassword.addEventListener('input', validateForm);
+    currentPassword.addEventListener('input', validateForm);
+
+    // Initialize form state
+    initializeValidation();
 
     document.getElementById('changePasswordForm').addEventListener('submit', async function (e) {
         e.preventDefault();
+
+        // Double-check validation before submission
+        if (submitBtn.disabled) return;
 
         const payload = {
             currentPassword: currentPassword.value,
@@ -259,26 +287,41 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify(payload)
             });
 
-            const result = await response.json();
+            let result;
+            try {
+                result = await response.json();
+            } catch (e) {
+                throw new Error('Invalid server response');
+            }
 
             if (response.ok) {
-                swal({
+                await swal({
                     title: "Password Updated!",
                     text: result.message || "Your password has been changed successfully.",
                     icon: "success",
                     button: "Continue",
-                }).then(() => {
-                    window.location.href = '/profile';
                 });
+                window.location.href = '/profile';
             } else {
-                swal("Error", result.message || "Something went wrong. Please try again.", "error");
+                await swal({
+                    title: "Error",
+                    text: result.message || "Failed to update password. Please try again.",
+                    icon: "error",
+                    button: "OK"
+                });
             }
         } catch (error) {
-            swal("Error", "Server error. Please try again later.", "error");
+            await swal({
+                title: "Error",
+                text: error.message || "Server error. Please try again later.",
+                icon: "error",
+                button: "OK"
+            });
         }
     });
 
@@ -303,7 +346,5 @@
         document.querySelector('.header__menu').classList.toggle('active');
     });
 </script>
-
-
 </body>
 </html>

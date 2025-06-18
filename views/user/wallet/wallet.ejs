@@ -8,10 +8,7 @@
     <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
-   
     <%- include('../../partials/userprofile/style') %>
-</head>
-
     <style>
         .wallet-balance-card {
             background: linear-gradient(135deg, #b4883e 0%, #8e6b2f 100%);
@@ -162,13 +159,13 @@
     </style>
 </head>
 <body>
-     <%- include('../../partials/userprofile/header') %>
+    <%- include('../../partials/userprofile/header') %>
     
     <div class="container">
         <div class="row" style="display: flex; gap: 20px;">
             <!-- Sidebar -->
             <div class="col-md-3 sidebar" style="flex: 0 0 250px;">
-                 <%- include('../../partials/userprofile/sidebar') %>
+                <%- include('../../partials/userprofile/sidebar') %>
             </div>
             
             <!-- Main Content -->
@@ -183,8 +180,8 @@
                 <!-- Wallet Balance Card -->
                 <div class="wallet-balance-card">
                     <h3 style="margin: 0; opacity: 0.9;">Available Balance</h3>
-                    <div class="balance-amount">$245.50</div>
-                    <p style="margin: 0; opacity: 0.8;">Last updated: Today at 2:30 PM</p>
+                    <div class="balance-amount" id="walletBalance">$<%= walletData.balance %></div>
+                    <p style="margin: 0; opacity: 0.8;">Last updated: <%= walletData.lastUpdated %></p>
                     
                     <div class="wallet-actions">
                         <a href="#" class="wallet-action-btn" onclick="addMoney()">
@@ -229,86 +226,27 @@
                 <!-- Recent Transactions -->
                 <div class="transaction-card">
                     <h3 style="margin: 0 0 20px; color: #333;">Recent Transactions</h3>
-                    
-                    <div class="transaction-item">
-                        <div class="transaction-info">
-                            <div class="transaction-icon credit">
-                                <i class="fas fa-plus"></i>
+                    <% if (walletData.transactions.length) { %>
+                        <% walletData.transactions.forEach(tx => { %>
+                            <div class="transaction-item">
+                                <div class="transaction-info">
+                                    <div class="transaction-icon <%= tx.type %>">
+                                        <i class="fas fa-<%= tx.icon %>"></i>
+                                    </div>
+                                    <div class="transaction-details">
+                                        <h4><%= tx.reason %></h4>
+                                        <p><%= tx.orderId ? `Order #${tx.orderId}` : 'Wallet Transaction' %></p>
+                                        <p><%= tx.date %></p>
+                                    </div>
+                                </div>
+                                <div class="transaction-amount">
+                                    <div class="amount <%= tx.type %>"><%= tx.type === 'credit' ? '+' : '-' %>$<%= tx.amount %></div>
+                                </div>
                             </div>
-                            <div class="transaction-details">
-                                <h4>Money Added</h4>
-                                <p>From Bank Account •••• 1234</p>
-                                <p>Dec 25, 2024 at 10:30 AM</p>
-                            </div>
-                        </div>
-                        <div class="transaction-amount">
-                            <div class="amount credit">+$100.00</div>
-                        </div>
-                    </div>
-                    
-                    <div class="transaction-item">
-                        <div class="transaction-info">
-                            <div class="transaction-icon debit">
-                                <i class="fas fa-shopping-bag"></i>
-                            </div>
-                            <div class="transaction-details">
-                                <h4>Order Payment</h4>
-                                <p>Order #12347 - Bluetooth Headphones</p>
-                                <p>Dec 22, 2024 at 3:15 PM</p>
-                            </div>
-                        </div>
-                        <div class="transaction-amount">
-                            <div class="amount debit">-$199.99</div>
-                        </div>
-                    </div>
-                    
-                    <div class="transaction-item">
-                        <div class="transaction-info">
-                            <div class="transaction-icon credit">
-                                <i class="fas fa-gift"></i>
-                            </div>
-                            <div class="transaction-details">
-                                <h4>Cashback Received</h4>
-                                <p>From Order #12345</p>
-                                <p>Dec 20, 2024 at 5:45 PM</p>
-                            </div>
-                        </div>
-                        <div class="transaction-amount">
-                            <div class="amount credit">+$15.50</div>
-                        </div>
-                    </div>
-                    
-                    <div class="transaction-item">
-                        <div class="transaction-info">
-                            <div class="transaction-icon debit">
-                                <i class="fas fa-shopping-bag"></i>
-                            </div>
-                            <div class="transaction-details">
-                                <h4>Order Payment</h4>
-                                <p>Order #12346 - Designer Sunglasses</p>
-                                <p>Dec 18, 2024 at 2:20 PM</p>
-                            </div>
-                        </div>
-                        <div class="transaction-amount">
-                            <div class="amount debit">-$159.99</div>
-                        </div>
-                    </div>
-                    
-                    <div class="transaction-item">
-                        <div class="transaction-info">
-                            <div class="transaction-icon credit">
-                                <i class="fas fa-plus"></i>
-                            </div>
-                            <div class="transaction-details">
-                                <h4>Refund Received</h4>
-                                <p>Order #12340 - Cancelled Item</p>
-                                <p>Dec 15, 2024 at 11:00 AM</p>
-                            </div>
-                        </div>
-                        <div class="transaction-amount">
-                            <div class="amount credit">+$89.99</div>
-                        </div>
-                    </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p>No transactions found.</p>
+                    <% } %>
                 </div>
 
                 <!-- View All Transactions -->
@@ -341,14 +279,70 @@
                     cancel: "Cancel",
                     confirm: "Add Money"
                 }
-            }).then((amount) => {
-                if (amount && amount > 0) {
-                    swal("Money Added!", `$${amount} has been added to your wallet successfully.`, "success");
+            }).then(async (amount) => {
+                if (amount && amount >= 10 && amount <= 5000) {
+                    try {
+                        const response = await fetch("/wallet/add", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Accept": "application/json",
+                            },
+                            body: JSON.stringify({ amount }),
+                        });
+
+                        if (response.redirected) {
+                            if (response.url.includes("/login")) {
+                                await swal({
+                                    title: "Session Expired",
+                                    text: "Please log in to continue",
+                                    icon: "warning",
+                                    button: "OK",
+                                });
+                                window.location.href = "/login";
+                                return;
+                            }
+                            throw new Error("Unexpected redirect");
+                        }
+
+                        const result = await response.json();
+                        if (response.ok) {
+                            await swal({
+                                title: "Money Added!",
+                                text: result.message,
+                                icon: "success",
+                                button: "OK",
+                            });
+                            window.location.reload();
+                        } else {
+                            await swal({
+                                title: "Error",
+                                text: result.message || "Failed to add money",
+                                icon: "error",
+                                button: "OK",
+                            });
+                        }
+                    } catch (error) {
+                        await swal({
+                            title: "Error",
+                            text: error.message || "Server error. Please try again later.",
+                            icon: "error",
+                            button: "OK",
+                        });
+                    }
+                } else if (amount) {
+                    await swal({
+                        title: "Invalid Amount",
+                        text: "Amount must be between $10 and $5000",
+                        icon: "error",
+                        button: "OK",
+                    });
                 }
             });
         }
-        
+
         function withdrawMoney() {
+            const walletBalance = parseFloat(document.getElementById('walletBalance').textContent.replace('$', ''));
             swal({
                 title: "Withdraw Money",
                 text: "Enter the amount you want to withdraw:",
@@ -358,16 +352,71 @@
                         placeholder: "Enter amount (e.g., 50)",
                         type: "number",
                         min: "10",
-                        max: "245"
+                        max: walletBalance.toString(),
                     },
                 },
                 buttons: {
                     cancel: "Cancel",
                     confirm: "Withdraw"
                 }
-            }).then((amount) => {
-                if (amount && amount > 0) {
-                    swal("Withdrawal Initiated!", `$${amount} withdrawal request has been submitted. It will be processed within 2-3 business days.`, "success");
+            }).then(async (amount) => {
+                if (amount && amount >= 10 && amount <= walletBalance) {
+                    try {
+                        const response = await fetch("/wallet/withdraw", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Accept": "application/json",
+                            },
+                            body: JSON.stringify({ amount }),
+                        });
+
+                        if (response.redirected) {
+                            if (response.url.includes("/login")) {
+                                await swal({
+                                    title: "Session Expired",
+                                    text: "Please log in to continue",
+                                    icon: "warning",
+                                    button: "OK",
+                                });
+                                window.location.href = "/login";
+                                return;
+                            }
+                            throw new Error("Unexpected redirect");
+                        }
+
+                        const result = await response.json();
+                        if (response.ok) {
+                            await swal({
+                                title: "Withdrawal Initiated!",
+                                text: result.message,
+                                icon: "success",
+                                button: "OK",
+                            });
+                            window.location.reload();
+                        } else {
+                            await swal({
+                                title: "Error",
+                                text: result.message || "Failed to withdraw money",
+                                icon: "error",
+                                button: "OK",
+                            });
+                        }
+                    } catch (error) {
+                        await swal({
+                            title: "Error",
+                            text: error.message || "Server error. Please try again later.",
+                            icon: "error",
+                            button: "OK",
+                        });
+                    }
+                } else if (amount) {
+                    await swal({
+                        title: "Invalid Amount",
+                        text: `Amount must be between $10 and $${walletBalance.toFixed(2)}`,
+                        icon: "error",
+                        button: "OK",
+                    });
                 }
             });
         }

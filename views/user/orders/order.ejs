@@ -501,9 +501,11 @@
                                 <i class="fas fa-eye"></i> View Details
                             </a>
                             
-                            <button onclick="downloadInvoice('<%= order.orderId %>')" class="btn btn-outline btn-sm">
+                            <% if (order.orderStatus === "delivered") { %>
+                                <button onclick="downloadInvoice('<%= order.orderId %>')" class="btn btn-outline btn-sm">
                                 <i class="fas fa-download"></i> Invoice
                             </button>
+                            <% } %>
                             
                             <% if (['pending', 'processing'].includes(order.orderStatus)) { %>
                             <button onclick="cancelOrder('<%= order.orderId %>')" class="btn btn-danger btn-sm">
@@ -511,11 +513,7 @@
                             </button>
                             <% } %>
                             
-                            <% if (order.orderStatus === 'delivered') { %>
-                            <button onclick="requestReturn('<%= order.orderId %>')" class="btn btn-warning btn-sm">
-                                <i class="fas fa-undo"></i> Return Order
-                            </button>
-                            <% } %>
+                         
                         </div>
                     </div>
                 </div>
@@ -632,10 +630,11 @@
             
             try {
                 const response = await fetch(`/orders/${orderId}/cancel`, {
-                    method: 'POST',
+                    method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
                     },
+                     credentials: 'include', // only if your backend uses session
                     body: JSON.stringify({ reason })
                 });
                 

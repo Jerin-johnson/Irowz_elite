@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Management</title>
+  <link rel="stylesheet" href="/css/admin/customer.css" />
+  <link rel="stylesheet" href="/css/admin/admin.css" />
+  <!-- SweetAlert2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <%- include('../partials/admin/header') %>
+
+  <div class="dashboard-container">
+    <div class="header">
+      <h1>ORDER MANAGEMENT</h1>
+
+      <!-- Filter and Search Form -->
+      <form method="GET" action="/admin/orders" class="filter-search" id="filterForm">
+        <div class="filter">
+          <select name="status" onchange="this.form.submit()">
+            <option value="">All Status</option>
+            <option value="pending" <%= status === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="processing" <%= status === 'processing' ? 'selected' : '' %>>Processing</option>
+            <option value="shipped" <%= status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+            <option value="delivered" <%= status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+            <option value="cancelled" <%= status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+          </select>
+        </div>
+        
+        <div class="filter">
+          <select name="paymentMethod" onchange="this.form.submit()">
+            <option value="">All Payment</option>
+            <option value="cod" <%= paymentMethod === 'cod' ? 'selected' : '' %>>COD</option>
+            <option value="online" <%= paymentMethod === 'online' ? 'selected' : '' %>>Online</option>
+          </select>
+        </div>
+        
+        <div class="filter">
+          <select name="sort" onchange="this.form.submit()">
+            <option value="date_desc" <%= sort === 'date_desc' ? 'selected' : '' %>>Latest First</option>
+            <option value="date_asc" <%= sort === 'date_asc' ? 'selected' : '' %>>Oldest First</option>
+            <option value="amount_desc" <%= sort === 'amount_desc' ? 'selected' : '' %>>Amount High to Low</option>
+            <option value="amount_asc" <%= sort === 'amount_asc' ? 'selected' : '' %>>Amount Low to High</option>
+          </select>
+        </div>
+        
+        <div class="search">
+          <input type="text" name="search" value="<%= search || '' %>" placeholder="Search Order ID, User Name..."/>
+        </div>
+        <button type="submit">Apply</button>
+        <a href="/admin/orders">
+          <button type="button">Reset</button>
+        </a>
+      </form>
+    </div>
+
+    <!-- Orders Table -->
+    <table>
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Order ID</th>
+          <th>Date</th>
+          <th>User Details</th>
+          <th>Items</th>
+          <th>Amount</th>
+          <th>Payment</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (orders && orders.length > 0) { %>
+          <% orders.forEach((order, index) => { %>
+            <tr>
+              <td><%= (currentPage - 1) * limit + index + 1 %></td>
+              <td><strong><%= order.orderId %></strong></td>
+              <td>
+                <div><%= new Date(order.orderDate).toLocaleDateString() %></div>
+                <small style="color: #6b7280;"><%= new Date(order.orderDate).toLocaleTimeString() %></small>
+              </td>
+              <td>
+                <div><%= order.userId?.fullName || order.userId?.name || "Unknown User" %></div>
+                <small style="color: #6b7280;"><%= order.userId?.email || "Unknown Email" %></small>
+                <div><%= order.userId?.phone || "Unknown Phone" %></div>
+              </td>
+              <td>
+                <%= order.items.length %> item(s)
+                <div style="font-size: 14px; color: #6b7280;">
+                  <% order.items.forEach(item => { %>
+                    <div>
+                      <span><%= item.productName %></span>: 
+                      <span style="<%= item.status === 'return requested' ? 'color: #d97706; font-weight: bold;' : 'color: rgb(149, 0, 67);' %>"> <%= item.status %></span>
+                    </div>
+                  <% }) %>
+                </div>
+              </td>
+              <td>
+                <strong style="color: #1f2937;">₹<%= order.finalAmount.toFixed(2) %></strong>
+              </td>
+              <td>
+                <span style="text-transform: uppercase; font-size: 12px; padding: 4px 8px; border-radius: 12px; 
+                  <%= order.paymentMethod === 'cod' ? 'background: #fef3c7; color: #d97706;' : 'background: #dbeafe; color: #2563eb;' %>">
+                  <%= order.paymentMethod === 'cod' ? 'COD' : 'Online' %>
+                </span>
+              </td>
+              <td>
+                <%
+  let style = '';
+  switch (order.orderStatus) {
+    case 'pending':
+      style = 'background: #fef3c7; color: #d97706;';
+      break;
+    case 'processing':
+      style = 'background: #dbeafe; color: #2563eb;';
+      break;
+    case 'shipped':
+      style = 'background: #e0e7ff; color: #5b21b6;';
+      break;
+    case 'delivered':
+      style = 'background: #d1fae5; color: #059669;';
+      break;
+    case 'cancelled':
+      style = 'background: #fee2e2; color: #dc2626;';
+      break;
+  }
+%>
+<span style="padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; text-transform: capitalize; <%= style %>">
+  <%= order.orderStatus %>
+</span>
+              </td>
+              <td>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <a href="/admin/orders/<%= order._id %>" style="text-decoration: none;">
+                    <button class="action-btn" style="background: #3b82f6; color: white;">View</button>
+                  </a>
+                  
+                  <% if (!['delivered', 'cancelled'].includes(order.orderStatus)) { %>
+                    <select onchange="updateOrderStatus('<%= order.orderId %>', this.value, '<%= order.orderStatus %>','<%= order.userId?._id%>')" 
+                            style="padding: 4px; font-size: 11px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                      <option value="">Update Status</option>
+                      <% if (order.orderStatus === 'pending') { %>
+                        <option value="processing">Processing</option>
+                        <option value="cancelled">Cancelled</option>
+                      <% } else if (order.orderStatus === 'processing') { %>
+                        <option value="shipped">Shipped</option>
+                        <option value="cancelled">Cancelled</option>
+                      <% } else if (order.orderStatus === 'shipped') { %>
+                        <option value="delivered">Delivered</option>
+                      <% } %>
+                    </select>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 40px; color: #6b7280;">
+              No orders found
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+      <div class="pagination">
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <% 
+            const params = new URLSearchParams();
+            if (status) params.append('status', status);
+            if (paymentMethod) params.append('paymentMethod', paymentMethod);
+            if (sort) params.append('sort', sort);
+            if (search) params.append('search', search);
+            params.append('page', i);
+          %>
+          <a href="/admin/orders?<%= params.toString() %>">
+            <button class="<%= i === currentPage ? 'active' : '' %>"><%= i %></button>
+          </a>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+
+  <script src="/js/admin/adminNav.js"></script>
+
+  <script>
+    const form = document.getElementById('filterForm');
+    
+    // Auto-submit form on filter changes
+    form.addEventListener('change', (e) => {
+      if (e.target.type === 'select-one') {
+        form.submit();
+      }
+    });
+
+    // Update order status function with transition validation
+    function updateOrderStatus(orderId, status, currentStatus,userId) {
+      if (!status) return;
+
+      // Basic frontend validation for status transitions
+      const validTransitions = {
+        'pending': ['processing', 'cancelled'],
+        'processing': ['shipped', 'cancelled'],
+        'shipped': ['delivered']
+      };
+      if (!validTransitions[currentStatus]?.includes(status)) {
+        Swal.fire('Error!', 'Invalid status transition.', 'error');
+        return;
+      }
+      
+      Swal.fire({
+        title: 'Update Order Status',
+        text: `Are you sure you want to update this order status to ${status}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Update',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/admin/orders/${orderId}/status`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: status,
+              userId:userId
+             })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Updated!', 'Order status has been updated.', 'success')
+                .then(() => location.reload());
+            } else {
+              Swal.fire('Error!', data.message || 'Failed to update order status.', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error!', 'Something went wrong.', 'error');
+          });
+        }
+      });
+    }
+  </script>
+</body>
+</html>
