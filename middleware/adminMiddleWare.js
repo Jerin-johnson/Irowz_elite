@@ -1,21 +1,5 @@
 const {User} = require("../models/userSchema");
 
-// const adminAuth = async (req, res, next) => {
-//     try {
-//         const adminId = req.session.admin;
-//         if (!adminId) return res.redirect("/admin/login");
-
-//         const admin = await User.findById(adminId);
-//         if (admin && admin.isAdmin) {
-//             return next();
-//         } else {
-//             return res.redirect("/admin/login");
-//         }
-//     } catch (error) {
-//         console.log("Error in admin middleware:", error.message);
-//         res.status(500).send("Server error in admin authentication");
-//     }
-// };
 
 const adminAuth = async (req, res, next) => {
   try {

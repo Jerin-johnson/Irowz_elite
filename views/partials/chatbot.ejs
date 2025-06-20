@@ -1,0 +1,324 @@
+<style>
+.chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.chat-toggle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #007bff;
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.chat-toggle:hover {
+    background: #0056b3;
+    transform: scale(1.1);
+}
+
+.chat-window {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 350px;
+    height: 450px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-header {
+    background: #6e5ed4;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-header h3 {
+    margin: 0;
+       color: white;
+    font-size: 16px;
+}
+
+.clear-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.clear-btn:hover {
+    opacity: 1;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message {
+    padding: 10px 12px;
+    border-radius: 12px;
+    max-width: 80%;
+    word-wrap: break-word;
+}
+
+.user-message {
+    background: #007bff;
+    color: white;
+    align-self: flex-end;
+}
+
+.bot-message {
+    background: #f1f3f4;
+    color: #333;
+    align-self: flex-start;
+}
+
+.chat-input-container {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+}
+
+#chat-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+}
+
+#chat-input:focus {
+    border-color: #007bff;
+}
+
+.send-btn {
+    background:#6e5ed4;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.send-btn:hover {
+    background: #0056b3;
+}
+
+.send-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.typing-indicator {
+    padding: 10px 12px;
+    background: #f1f3f4;
+    border-radius: 12px;
+    align-self: flex-start;
+    color: #666;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .chat-window {
+        width: 300px;
+        height: 400px;
+    }
+}
+</style>
+  <title>Document</title>
+</head>
+<body>
+  
+  
+<div id="chatbot-container" class="chatbot-container">
+    <!-- Chat Toggle Button -->
+    <button id="chat-toggle" class="chat-toggle">
+        <span class="chat-icon">💬</span>
+        <span class="close-icon" style="display: none;">✕</span>
+    </button>
+
+    <!-- Chat Window -->
+    <div id="chat-window" class="chat-window" style="display: none;">
+        <div class="chat-header">
+            <h3>Shopping Assistant</h3>
+            <button id="clear-chat" class="clear-btn">Clear</button>
+        </div>
+        
+        <div id="chat-messages" class="chat-messages">
+            <div class="message bot-message">
+                Hello! I'm your shopping assistant. How can I help you today?
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <input type="text" id="chat-input" placeholder="Type your message..." />
+            <button id="send-message" class="send-btn">Send</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+
+<script>
+class EcommerceChatbot {
+    constructor() {
+        this.sessionId = this.generateSessionId();
+        this.isOpen = false;
+        this.init();
+    }
+
+    generateSessionId() {
+        return 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    init() {
+        this.chatToggle = document.getElementById('chat-toggle');
+        this.chatWindow = document.getElementById('chat-window');
+        this.chatMessages = document.getElementById('chat-messages');
+        this.chatInput = document.getElementById('chat-input');
+        this.sendButton = document.getElementById('send-message');
+        this.clearButton = document.getElementById('clear-chat');
+
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        this.chatToggle.addEventListener('click', () => this.toggleChat());
+        this.sendButton.addEventListener('click', () => this.sendMessage());
+        this.clearButton.addEventListener('click', () => this.clearChat());
+        
+        this.chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.sendMessage();
+            }
+        });
+    }
+
+    toggleChat() {
+        this.isOpen = !this.isOpen;
+        
+        if (this.isOpen) {
+            this.chatWindow.style.display = 'flex';
+            this.chatToggle.querySelector('.chat-icon').style.display = 'none';
+            this.chatToggle.querySelector('.close-icon').style.display = 'block';
+            this.chatInput.focus();
+        } else {
+            this.chatWindow.style.display = 'none';
+            this.chatToggle.querySelector('.chat-icon').style.display = 'block';
+            this.chatToggle.querySelector('.close-icon').style.display = 'none';
+        }
+    }
+
+    async sendMessage() {
+        const message = this.chatInput.value.trim();
+        if (!message) return;
+
+        // Add user message
+        this.addMessage(message, 'user');
+        this.chatInput.value = '';
+        this.sendButton.disabled = true;
+
+        // Show typing indicator
+        const typingDiv = this.addTypingIndicator();
+
+        try {
+            const response = await fetch('/chat/message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    sessionId: this.sessionId
+                })
+            });
+
+            const data = await response.json();
+            
+            // Remove typing indicator
+            typingDiv.remove();
+
+            if (data.success) {
+                this.addMessage(data.response, 'bot');
+            } else {
+                this.addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            typingDiv.remove();
+            this.addMessage('Sorry, I couldn\'t connect. Please check your internet connection.', 'bot');
+        } finally {
+            this.sendButton.disabled = false;
+        }
+    }
+
+    addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
+        messageDiv.textContent = text;
+        
+        this.chatMessages.appendChild(messageDiv);
+        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+        
+        return messageDiv;
+    }
+
+    addTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+        typingDiv.textContent = 'Assistant is typing...';
+        
+        this.chatMessages.appendChild(typingDiv);
+        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+        
+        return typingDiv;
+    }
+
+    async clearChat() {
+        try {
+            await fetch(`/chat/session/${this.sessionId}`, {
+                method: 'DELETE'
+            });
+            
+            this.chatMessages.innerHTML = `
+                <div class="message bot-message">
+                    Hello! I'm your shopping assistant. How can I help you today?
+                </div>
+            `;
+            
+            this.sessionId = this.generateSessionId();
+        } catch (error) {
+            console.error('Error clearing chat:', error);
+        }
+    }
+}
+
+// Initialize chatbot when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new EcommerceChatbot();
+});
+</script>

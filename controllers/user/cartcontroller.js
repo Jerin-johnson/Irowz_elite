@@ -93,6 +93,11 @@ const addToCart = async (req, res) => {
       throw new Error("The product is currently unavailable");
     }
 
+    if(product.stock <= 0)
+    {
+      throw new Error("The product is currently out of stock")
+    }
+
     let cart = await Cart.findOne({ userId });
 
     if (!cart) {

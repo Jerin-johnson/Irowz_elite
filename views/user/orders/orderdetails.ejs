@@ -456,7 +456,7 @@
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Total Amount</div>
-                                <div class="info-value">$<%= order.finalAmount.toFixed(2) %></div>
+                                <div class="info-value">₹<%= order.finalAmount.toFixed(2) %></div>
                             </div>
                         </div>
                     </div>
@@ -508,12 +508,12 @@
                                 </div>
                                 <div class="product-details">
                                     <h4 class="product-name"><%= item.productName %></h4>
-                                    <div class="product-price">$<%= item.price.toFixed(2) %></div>
+                                    <div class="product-price">₹<%= item.price.toFixed(2) %></div>
                                     <div class="product-quantity">Quantity: <%= item.quantity %></div>
                                 </div>
                                 <div class="product-actions">
                                     <span class="order-status status-<%= item.status %>"> <%= item.status %></span>
-                                    <div class="product-total">$<%= item.totalPrice.toFixed(2) %></div>
+                                    <div class="product-total">₹<%= item.totalPrice.toFixed(2) %></div>
                                     <% if ((order.orderStatus === 'pending' || order.orderStatus === 'processing') && item.status !== "cancelled") { %>
                                         <button class="btn btn-outline-primary btn-sm" onclick="cancelProduct('<%= order.orderId %>', '<%= item.productId %>')">
                                             <i class="fas fa-times"></i> Cancel Item
@@ -580,27 +580,27 @@
                 
                 <div class="summary-row">
                     <span class="summary-label">Subtotal (<%= order.items.length %> items)</span>
-                    <span class="summary-value">$<%= order.totalAmount.toFixed(2) %></span>
+                    <span class="summary-value">₹<%= order.totalAmount.toFixed(2) %></span>
                 </div>
                 
                 <div class="summary-row">
                     <span class="summary-label">Discount</span>
-                    <span class="summary-value" style="color: #28a745;">-<%= order.discount ? '$' + order.discount.toFixed(2) : '$0.00' %></span>
+                    <span class="summary-value" style="color: #28a745;">-<%= order.discount ? '₹' + order.discount.toFixed(2) : '₹0.00' %></span>
                 </div>
                 
                 <div class="summary-row">
                     <span class="summary-label">Shipping</span>
-                    <span class="summary-value" style="color: #28a745;"><%= order.shipping ? '$' + order.shipping.toFixed(2) : 'Free' %></span>
+                    <span class="summary-value" style="color: #28a745;"><%= order.shipping ? '₹' + order.shipping.toFixed(2) : 'Free' %></span>
                 </div>
                 
                 <div class="summary-row">
                     <span class="summary-label">Tax<%= order.tax ? ' (8%)' : '' %></span>
-                    <span class="summary-value">$<%= order.tax.toFixed(2) %></span>
+                    <span class="summary-value">₹<%= order.tax.toFixed(2) %></span>
                 </div>
                 
                 <div class="summary-row total">
                     <span>Total Amount</span>
-                    <span>$<%= order.finalAmount.toFixed(2) %></span>
+                    <span>₹<%= order.finalAmount.toFixed(2) %></span>
                 </div>
                 
                 <div class="action-buttons">

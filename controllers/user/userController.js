@@ -12,7 +12,8 @@ const {
 } = require("../../helpers/helper");
 const mongoose = require('mongoose');
 
-const { PAGINATION, SORT_OPTIONS, PRICE_RANGES } = require("../../constants/constant")
+const { PAGINATION, SORT_OPTIONS, PRICE_RANGES } = require("../../constants/constant");
+const { Cart } = require("../../models/cartSchema");
 
 // For loading Homepage
 
@@ -33,8 +34,14 @@ const loadHomePage = async (req, res) => {
     
     if (userId) {
       const findUser = await User.findById(userId);
+      let cart = await Cart.findOne({userId});
+      if(!cart)
+      {
+        cart = new Cart({userId,items:[]});
+        await cart.save();
+      }
       console.log("The Load Home page", findUser);
-      return res.render("user/home", { user: findUser, products: productData });
+      return res.render("user/home", { user: findUser, products: productData ,cart:cart.items.length});
     }
 
     return res.render("user/home", { user: null, products: productData });
@@ -281,6 +288,7 @@ const loadShoppingPage = async (req, res) => {
   try {
     const { search, category, brand, price, sort, page = 1 } = req.query;
     const currentPage = parseInt(page) || 1;
+    const userId = req.session.user;
 
     if (isNaN(currentPage) || currentPage < 1) {
       return res.redirect("/shop?page=1");
@@ -342,7 +350,13 @@ const loadShoppingPage = async (req, res) => {
 
     const categories = await Category.find({ isListed: true });
     const brands = await Brand.find({ isListed: true, isBlocked: false });
-    const user = await User.findById(req.session.user);
+    const user = await User.findById(userId);
+    let cart = await Cart.findOne({userId});
+    if(!cart)
+    {
+      cart = new Cart({userId,items:[]});
+      await cart.save();
+    }
 
     res.render("user/shop", {
       user,
@@ -355,6 +369,7 @@ const loadShoppingPage = async (req, res) => {
       priceRanges: PRICE_RANGES,
       limit,
       req,
+      cart:cart.items.length
     });
   } catch (error) {
     console.error("Error in /shop route:", error);

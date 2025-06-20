@@ -2,7 +2,7 @@ const {User} = require("../../models/userSchema")
 
 
 
-// Assume this is your controller function rendering the customer dashboard
+
 const loadCustomer = async (req, res) => {
   try {
     const filter = req.query.filter || ''

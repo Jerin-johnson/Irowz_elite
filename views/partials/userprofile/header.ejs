@@ -24,7 +24,7 @@
                     <li><a href="/">Home</a></li>
                     <li><a href="/shop">Shop</a></li>
                     <li><a href="/wishlist">Wishlist</a></li>
-                    <li><a href="/contact">Contacts</a></li>
+                    <!-- <li><a href="/contact">Contacts</a></li> -->
                 </ul>
             </nav>
             <div class="header__nav__option">
@@ -41,7 +41,15 @@
                 <a href="/login" class="sign-in-link">Login</a>
                 <% } %>
                 <a href="/shop" class="search-switch"><i class="fi-rs-search"></i></a>
-                <a href="/cart"><i class="fi-rs-shopping-cart"></i> <span>0</span></a>
+
+                <% if (typeof itemCount !== "undefined") { %>
+  <a href="/cart"><i class="fi-rs-shopping-cart"></i> <span><%= itemCount %></span></a>
+<% } else { %>
+  <a href="/cart"><i class="fi-rs-shopping-cart"></i> <span>0</span></a>
+<% } %>
+
+              
+
             </div>
             <div class="canvas__open"><i class="fa fa-bars"></i></div>
         </div>

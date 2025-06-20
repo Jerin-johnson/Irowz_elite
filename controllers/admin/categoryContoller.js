@@ -1,15 +1,5 @@
 const { Category } = require("../../models/categorySchema");
-//  const { User } = require("../../models/userSchema");
 
-
-
-// adminRouter.get("/category",adminAuth,loadCategory)
-// adminRouter.get("/category/add",adminAuth,loadAddCategory)
-// adminRouter.post("/category/add",adminAuth,addCategory)
-// adminRouter.get("/category/list",adminAuth,listCategory);
-// adminRouter.get("/category/unlist",adminAuth,unlistCategory);
-// adminRouter.get("/category/edit",adminAuth,loadEditCategory);
-// adminRouter.post("/category/edit/:id",adminAuth,editCategory);
 
 const loadCategory = async (req, res) => {
   try {
@@ -51,10 +41,17 @@ const addCategory = async (req, res) => {
   try {
     let { name, description } = req.body;
 
-    const existingCat = await Category.findOne({ name });
-    if (existingCat) {
-      return res.status(401).json({ message: "The Category already exist" });
+    const existingCat = await Category.find({});
+    console.log(existingCat);
+
+    for(let cat of existingCat)
+    {
+      if(cat.name.toLowerCase() === name.toLowerCase())
+      {
+        return res.status(402).json({success:false,message:"The cateogroy already exists"})
+      }
     }
+   
 
     const newCat = await new Category({
       name,
@@ -114,14 +111,19 @@ const editCategory = async (req, res) => {
   try {
     const id = req.params.id;
     const { name, description } = req.body;
-    const existCat = await Category.findOne({
-      name: name,
+    const existCat = await Category.find({
       _id: { $ne: id },
     });
 
-    if (existCat) {
-      return res.status(400).json({ message: "Category already exist" });
+    for(let cat of existCat)
+    {
+      if(cat.name.toLowerCase() === name.toLowerCase())
+      {
+        return res.status(402).json({success:false,message:"The cateogroy already exists"})
+      }
     }
+
+   
 
     const update = await Category.findByIdAndUpdate(
       id,

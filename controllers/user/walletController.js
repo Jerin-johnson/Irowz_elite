@@ -38,6 +38,8 @@ const loadWalletPage = async (req, res) => {
       })),
     };
 
+   walletData.transactions = walletData.transactions.reverse();
+
     const user = await User.findById(userId)
     res.render("user/wallet/wallet", { walletData,user});
   } catch (error) {

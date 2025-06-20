@@ -229,7 +229,8 @@ onmouseout="this.style.color='black'; this.style.transform='scale(1)';">
               /></a>
               <!-- <a href="#"><img src="img/icon/heart.png" alt=""></a> -->
               <a href="/cart"
-                ><img src="img/icon/cart.png" alt="" /> <span>6</span></a
+                ><img src="img/icon/cart.png" alt="" /> <span><%- typeof cart !== "undefined" ? cart : "" %></span>
+</span></a
               >
               <!-- <div class="price">$0.00</div> -->
             </div>

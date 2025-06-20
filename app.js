@@ -3,6 +3,7 @@ const app = express();
 const env = require("dotenv").config()
 const {connectDB}= require("./config/db.js");
 const  nocache = require("nocache");
+const chatRoutes = require('./routers/chat.js');
 
 
 app.use(nocache())
@@ -58,6 +59,10 @@ app.set('view engine', 'ejs');
 
 // Serve static files (CSS, images)
 app.use(express.static('public'));
+
+
+// ai chatbot integration
+app.use('/chat', chatRoutes);
 
 
 

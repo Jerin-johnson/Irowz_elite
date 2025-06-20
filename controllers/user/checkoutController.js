@@ -123,7 +123,7 @@ const placeOrder = async (req, res) => {
         !product.isBlocked &&
         product.category &&
         product.category.isListed &&
-        product.stock > item.quantity
+        product.stock >= item.quantity
       );
     });
 

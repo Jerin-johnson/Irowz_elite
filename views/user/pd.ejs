@@ -774,9 +774,9 @@
                         <span>(<%= product.rating %>/5)</span>
                     </div>
                     <div class="price">
-                        $<%= product.salePrice.toFixed(2) %>
+                        ₹<%= product.salePrice.toFixed(2) %>
                         <% if (product.regularPrice > product.salePrice) { %>
-                            <span class="regular-price">$<%= product.regularPrice.toFixed(2) %></span>
+                            <span class="regular-price">₹<%= product.regularPrice.toFixed(2) %></span>
                         <% } %>
                     </div>
                     <% if (product.regularPrice > product.salePrice) { %>
@@ -840,7 +840,7 @@
                         <div class="product">
                             <img src="/<%= related.productImage[0].path %>" alt="<%= related.productName %>">
                             <h3><%= related.productName %></h3>
-                            <p>$<%= related.salePrice.toFixed(2) %></p>
+                            <p>₹<%= related.salePrice.toFixed(2) %></p>
                             <a href="/product/details/<%= related._id %>" class="view-product">View Product</a>
                         </div>
                     <% }) %>

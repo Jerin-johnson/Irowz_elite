@@ -106,10 +106,40 @@ const deleteWishlist = async(req,res)=>{
     }
 }
 
+const removeFromWishlist = async(req,res)=>{
+  try {
+    const{productId} = req.params;
+    const userId = req.session.user;
+  
+    
+    const wishlist = await Wishlist.findOne({userId});
+    console.log(productId,wishlist);
+    
+    const findProductIndex = wishlist.products.findIndex((item)=> productId.toString()=== item.productId.toString() );
+
+    if(findProductIndex === -1)
+    {
+      throw new Error("The product Not found");
+    }
+
+    wishlist.products.splice(findProductIndex,1);
+   await wishlist.save();
+
+   return res.status(200).json({success:true,message:"The product removed from the wishlist successfully"})
+
+    
+  } catch (error) {
+    console.error(error);
+    return res.status(404).json({success:false,message:error.message})
+    
+  }
+}
+
 
 
 module.exports = {
   loadWishlistPage,
   addToWishList,
-  deleteWishlist
+  deleteWishlist,
+  removeFromWishlist
 };

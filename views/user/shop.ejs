@@ -1,4 +1,6 @@
 <%- include('../partials/user/header.ejs') %>
+<%- include('../partials/chatbot.ejs') %>
+
 
 <link rel="stylesheet" href="/css/shop.css">
 <!-- SweetAlert2 CDN -->
@@ -217,8 +219,8 @@
                                         <% } %>
                                     </div>
                                     <div class="shp_price">
-                                        <span class="regular-price">$<%= product.regularPrice.toFixed(2) %></span>
-                                        <h5>$<%= product.salePrice.toFixed(2) %></h5>
+                                        <span class="regular-price">₹<%= product.regularPrice.toFixed(2) %></span>
+                                        <h5>₹<%= product.salePrice.toFixed(2) %></h5>
                                     </div>
                                     <div class="shp_color_select">
                                         <% (product.colors || []).forEach((color, index) => { %>

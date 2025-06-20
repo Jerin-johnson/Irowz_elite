@@ -11,7 +11,9 @@ const {loadBrandPage,addBrand,changeStatus} = require("../controllers/admin/bran
 const{loadOrderListingPage,loadOrderDetailedPage,changeOrderStatus}= require("../controllers/admin/orderController");
 
 
-const {approveOrRejectReturnRequest} = require("../controllers/admin/orderController")
+const {approveOrRejectReturnRequest} = require("../controllers/admin/orderController");
+
+const{getStockManagementPage,updateStockQuantity}= require("../controllers/admin/stockinfoController")
 
 adminRouter.get("/login",isAdminLoggedOut,loadLoginAdmin)
 adminRouter.post("/login",verifyAdminLogin)
@@ -83,6 +85,11 @@ adminRouter.patch("/orders/:orderId/status",adminAuth,changeOrderStatus)
 // approve or reject return request
 adminRouter.patch("/orders/:orderId/items/:productId/return",adminAuth,approveOrRejectReturnRequest)
 
+
+
+// Stock management 
+adminRouter.get("/stock-alert",adminAuth,getStockManagementPage);
+adminRouter.post("/product/update/stock",adminAuth,updateStockQuantity)
 
 // admin logout
 

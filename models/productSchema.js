@@ -12,11 +12,11 @@ const productSchema = new Schema({
     required: true,
     trim: true
   },
-  // productOffer: {
-  //   type: Number,
-  //   required: true,
-  //   min: 0
-  // },
+  productOffer: {
+    type: Number,
+    required: true,
+    min: 0
+  },
   quantity: {
     type: Number,
     default: 0,
@@ -26,11 +26,6 @@ const productSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Brand',
   },
-  // color: {
-  //   type: String,
-  //   required: true,
-  //   trim: true
-  // },
   productImage: {
     type: [{
       path: { type: String, required: true }, 
@@ -51,11 +46,6 @@ const productSchema = new Schema({
     ref: 'Category',
     // required: true
   },
-  // offerId: {
-  //   type: Schema.Types.ObjectId,
-  //   ref: 'Offer',
-  //   default: null
-  // },
   stock: {
     type: Number,
     required: true,
@@ -65,7 +55,17 @@ const productSchema = new Schema({
     type: Number,
     required: true,
     min: 0
-  },
+  }
+  ,productOffer: {
+  type: Number,
+  default: 0,
+  min: 0,
+  max: 100
+},
+appliedOfferType: {
+  type: String,
+  enum: ['None', 'Product', 'Category'],
+},
   salePrice: {
     type: Number,
     required: true,

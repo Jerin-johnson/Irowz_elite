@@ -2,7 +2,7 @@ const express = require("express");
 const userRouter = express.Router();
 const {loadHomePage,pageNotFound,loadSignup,loadLogin,signUp,loadOtp,verifyOtp,ResentOtp,verifyLogin,userLogout,loadShoppingPage}=require("../controllers/user/userController.js");
 const{loadVerifyEmail,verifyEmail,loadForgetPasswordPage,loadForgetPasswordOtpPage,verifyForgetOtp,resetPassword,loadProfilePage,loadEditProflie,loadChangePassword,loadAddressPage,loadAddAddressPage,updateChangePassword,updateProfile,loadUpdateEmailOtp,verifyUpdateEmailOtp,updateEmail,loadUpdateEmail,resendOtpEmail,addAddress,loadEditAddressPage,editAddress,deleteAddress} = require("../controllers/user/profileController.js")
-const { userAuth, isUserLoggedIn, isUserLoggedOut,ensureOtpSession,checkWhetherUserIsBlocked} = require("../middleware/userMiddleWare.js")
+const { isUserLoggedIn, isUserLoggedOut,ensureOtpSession} = require("../middleware/userMiddleWare.js")
 //google sign in
 const {passport}= require("../config/passport");
 const{preventAccessingOtp,preventGoBackToVerifyEmail}=require("../middleware/profileMiddleware.js");
@@ -21,7 +21,7 @@ const{sendReturnOrderRequest}= require("../controllers/user/orderContoller.js")
 const {loadWalletPage}=require("../controllers/user/walletController.js")
 
 // wishlist releted things
-const{loadWishlistPage,addToWishList,deleteWishlist}=require("../controllers/user/wishlistControlle.js")
+const{loadWishlistPage,addToWishList,deleteWishlist,removeFromWishlist}=require("../controllers/user/wishlistControlle.js")
 
 // cart releated page
 const{loadCartPage,addToCart,updateCartQuantity,deleteCartItem,clearCart}=require("../controllers/user/cartcontroller.js");
@@ -33,8 +33,8 @@ const{loadCheckOutPage,placeOrder,loadOrderSuccessPage}=require("../controllers/
 
 
 // For Loading Home page & shopping page
-userRouter.get("/",checkWhetherUserIsBlocked,loadHomePage);
-userRouter.get("/shop",userAuth,loadShoppingPage);
+userRouter.get("/",isUserLoggedIn,loadHomePage);
+userRouter.get("/shop",isUserLoggedIn,loadShoppingPage);
 
 // get and post signup
 userRouter.get("/signup",isUserLoggedOut,loadSignup);
@@ -97,6 +97,7 @@ userRouter.delete("/address/delete/:id",isUserLoggedIn,deleteAddress)
 userRouter.get("/wishlist",isUserLoggedIn,loadWishlistPage)
 userRouter.post("/wishlist/add/:id",isUserLoggedIn,addToWishList)
 userRouter.delete("/wishlist/clear",isUserLoggedIn,deleteWishlist);
+userRouter.delete("/wishlist/remove/:productId",isUserLoggedIn,removeFromWishlist);
 
 
 // Cart Releted things here
@@ -194,16 +195,16 @@ userRouter.get("/auth/google/callback",
 
 // Wallet and related things
 
-userRouter.get("/wallet",loadWalletPage)
+userRouter.get("/wallet",isUserLoggedIn,loadWalletPage)
 
 
 // Product managememnt 
-userRouter.get("/product/details/:pid",userAuth,loadProductDetailedPage)
+userRouter.get("/product/details/:pid",isUserLoggedIn,loadProductDetailedPage)
 
 
 
 //error i.e pageNotFound Page
-userRouter.get("/error-404",pageNotFound)
+userRouter.get("/error-404",isUserLoggedIn,pageNotFound)
 
 // Logout 
 userRouter.get("/logout",isUserLoggedIn,userLogout)
