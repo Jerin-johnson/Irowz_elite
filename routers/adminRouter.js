@@ -9,11 +9,17 @@ const {upload} = require("../middleware/multerMiddleWare")
 const {loadBrandPage,addBrand,changeStatus} = require("../controllers/admin/brandController");
 
 const{loadOrderListingPage,loadOrderDetailedPage,changeOrderStatus}= require("../controllers/admin/orderController");
-
+// offer managemet
+const{addProductOffer,removeProductOfffer, addCategoryOffer, removeCategoryOffer}=require("../controllers/admin/offerManagement")
 
 const {approveOrRejectReturnRequest} = require("../controllers/admin/orderController");
 
-const{getStockManagementPage,updateStockQuantity}= require("../controllers/admin/stockinfoController")
+const{getStockManagementPage,updateStockQuantity}= require("../controllers/admin/stockinfoController");
+const { loadCouponPage, createCoupon, loadEditCouponPage, editCoupon, deleteCoupon, activateCoupon, deactivateCoupon } = require("../controllers/admin/couponController");
+const { loadSalesReportPage } = require("../controllers/admin/salereport");
+
+
+
 
 adminRouter.get("/login",isAdminLoggedOut,loadLoginAdmin)
 adminRouter.post("/login",verifyAdminLogin)
@@ -63,6 +69,16 @@ adminRouter.get("/product/unblock",adminAuth,unBlockProduct)
 
 
 
+// offer Mangement
+
+adminRouter.post("/product/addOffer",adminAuth,addProductOffer);
+adminRouter.post("/product/removeOffer",adminAuth,removeProductOfffer);
+
+// category offer
+
+adminRouter.post("/category/addoffer",adminAuth,addCategoryOffer);
+adminRouter.post("/category/removeoffer",adminAuth,removeCategoryOffer);
+
 
 // Brand Routes
 
@@ -83,8 +99,24 @@ adminRouter.patch("/orders/:orderId/status",adminAuth,changeOrderStatus)
 
 
 // approve or reject return request
-adminRouter.patch("/orders/:orderId/items/:productId/return",adminAuth,approveOrRejectReturnRequest)
+adminRouter.patch("/orders/:orderId/items/:productId/return",adminAuth,approveOrRejectReturnRequest);
 
+
+
+
+// coupon management 
+adminRouter.get("/coupon",adminAuth,loadCouponPage);
+adminRouter.post("/coupon/add",adminAuth,createCoupon);
+adminRouter.get("/coupon/edit",adminAuth,loadEditCouponPage);
+adminRouter.post("/coupon/activate",adminAuth,activateCoupon);
+adminRouter.post("/coupon/deactivate",adminAuth,deactivateCoupon);
+adminRouter.post("/coupon/edit",adminAuth,editCoupon);
+adminRouter.delete("/coupon/delete",adminAuth,deleteCoupon);
+
+
+// salesReport page
+adminRouter.get("/sales/report",adminAuth,loadSalesReportPage);
+adminRouter.get("/sales/report/download",adminAuth,loadSalesReportPage);
 
 
 // Stock management 

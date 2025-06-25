@@ -63,12 +63,12 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Order"
   }],
+  referredBy: {
+  type: String, // store the referralCode of the referrer
+  default: null,
+},
   referalCode: {
     type: String
-  },
-  redeemed: {
-    type: Boolean,
-    default: false
   },
   redeemedUser: [{
     type: mongoose.Schema.Types.ObjectId,

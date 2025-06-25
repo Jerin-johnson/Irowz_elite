@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sales Report – Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/admin/category.css" />
+    <link rel="stylesheet" href="/css/admin/admin.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Clean and Professional Styling */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+            margin: 0;
+        }
+
+        /* Filter Section */
+        .filter-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .filter-card h3 {
+            color: #333;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 20px 0;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+        }
+
+        .filter-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group select,
+        .form-group input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+            transform: translateY(-1px);
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+            transform: translateY(-1px);
+        }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+        }
+
+        .stat-card.success::before {
+            background: linear-gradient(90deg, #27ae60, #219a52);
+        }
+
+        .stat-card.warning::before {
+            background: linear-gradient(90deg, #f39c12, #e67e22);
+        }
+
+        .stat-card.danger::before {
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        /* Table Styling */
+        .table-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .table-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .table-header h3 {
+            color: #333;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .table th,
+        .table td {
+            padding: 15px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Table Cell Styling */
+        .order-id {
+            font-weight: 600;
+            color: #3498db;
+            font-size: 13px;
+        }
+
+        .customer-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .customer-name {
+            font-weight: 500;
+            color: #333;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        .customer-email {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .amount-positive {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .amount-negative {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .coupon-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .coupon-code {
+            background: #27ae60;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: capitalize;
+            display: inline-block;
+        }
+
+        .status-delivered {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-shipped {
+            background: #cce7ff;
+            color: #004085;
+        }
+
+        .status-processing {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-pending {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* No Data State */
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .no-data .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .no-data h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .no-data p {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 20px 0;
+        }
+
+        .pagination a {
+            text-decoration: none;
+        }
+
+        .pagination button {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #666;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .pagination button:hover {
+            background: #f8f9fa;
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        .pagination button.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .filter-form {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .button-group {
+                justify-content: center;
+                margin-top: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+
+            .table th,
+            .table td {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/admin/header') %>
+
+    <div class="container">
+        <div class="header">
+            <h1>SALES REPORT</h1>
+            <p>Comprehensive sales analytics and performance metrics</p>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-card">
+            <h3>📊 Report Filters</h3>
+            <form method="GET" action="/admin/sales/report" class="filter-form">
+                <div class="form-group">
+                    <label>Report Period</label>
+                    <select name="period" id="periodSelect" onchange="toggleCustomDates()">
+                        <option value="daily" <%= period === 'daily' ? 'selected' : '' %>>Today</option>
+                        <option value="weekly" <%= period === 'weekly' ? 'selected' : '' %>>This Week</option>
+                        <option value="monthly" <%= period === 'monthly' ? 'selected' : '' %>>This Month</option>
+                        <option value="yearly" <%= period === 'yearly' ? 'selected' : '' %>>This Year</option>
+                        <option value="custom" <%= period === 'custom' ? 'selected' : '' %>>Custom Range</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="startDateGroup" style="display: <%= period === 'custom' ? 'flex' : 'none' %>;">
+                    <label>Start Date</label>
+                    <input type="date" name="startDate" value="<%= startDate || '' %>">
+                </div>
+
+                <div class="form-group" id="endDateGroup" style="display: <%= period === 'custom' ? 'flex' : 'none' %>;">
+                    <label>End Date</label>
+                    <input type="date" name="endDate" value="<%= endDate || '' %>">
+                </div>
+
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">
+                            🔍 Generate Report
+                        </button>
+                        <button type="button" onclick="downloadReport('pdf')" class="btn btn-success">
+                            📄 Download PDF
+                        </button>
+                        <button type="button" onclick="downloadReport('excel')" class="btn btn-info">
+                            📊 Download Excel
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value"><%= statistics.totalSalesCount %></div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-value">₹<%= statistics.totalOrderAmount.toFixed(2) %></div>
+                <div class="stat-label">Order Amount</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-value">₹<%= (statistics.totalDiscount + statistics.totalCouponDiscount).toFixed(2) %></div>
+                <div class="stat-label">Total Discounts</div>
+            </div>
+            <div class="stat-card danger">
+                <div class="stat-value">₹<%= statistics.totalFinalAmount.toFixed(2) %></div>
+                <div class="stat-label">Final Revenue</div>
+            </div>
+        </div>
+
+        <!-- Detailed Breakdown -->
+        <div class="stats-grid">
+            <div class="stat-card warning">
+                <div class="stat-value">₹<%= statistics.totalDiscount.toFixed(2) %></div>
+                <div class="stat-label">Product Discounts</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-value">₹<%= statistics.totalCouponDiscount.toFixed(2) %></div>
+                <div class="stat-label">Coupon Discounts</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-value">₹<%= statistics.totalTax.toFixed(2) %></div>
+                <div class="stat-label">Tax Collected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">₹<%= statistics.totalShipping.toFixed(2) %></div>
+                <div class="stat-label">Shipping Charges</div>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3>📋 Order Details (<%= totalOrders %> orders found)</h3>
+            </div>
+
+            <% if (orders.length === 0) { %>
+                <div class="no-data">
+                    <div class="icon">📊</div>
+                    <h3>No orders found</h3>
+                    <p>Try adjusting your filters or date range to see results</p>
+                </div>
+            <% } else { %>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Payment</th>
+                                <th>Order Amount</th>
+                                <th>Product Discount</th>
+                                <th>Coupon Discount</th>
+                                <th>Tax</th>
+                                <th>Shipping</th>
+                                <th>Final Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% orders.forEach((order, index) => { %>
+                                <tr>
+                                    <td><%= (currentPage - 1) * 10 + index + 1 %></td>
+                                    <td>
+                                        <div class="order-id"><%= order.orderId %></div>
+                                    </td>
+                                    <td><%= new Date(order.orderDate).toLocaleDateString('en-GB') %></td>
+                                    <td>
+                                        <div class="customer-info">
+                                            <div class="customer-name"><%= order.userId?.name || order.userId?.fullName || 'N/A' %></div>
+                                            <% if (order.userId?.email) { %>
+                                                <div class="customer-email"><%= order.userId.email %></div>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td style="text-transform: uppercase; font-weight: 500;"><%= order.paymentMethod %></td>
+                                    <td class="amount-positive">₹<%= order.totalAmount.toFixed(2) %></td>
+                                    <td class="amount-negative">
+                                        <% if (order.discount > 0) { %>
+                                            -₹<%= order.discount.toFixed(2) %>
+                                        <% } else { %>
+                                            -
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (order.couponDiscount > 0) { %>
+                                            <div class="coupon-info">
+                                                <span class="amount-negative">-₹<%= order.couponDiscount.toFixed(2) %></span>
+                                                <% if (order.couponCode) { %>
+                                                    <span class="coupon-code"><%= order.couponCode %></span>
+                                                <% } %>
+                                            </div>
+                                        <% } else { %>
+                                            -
+                                        <% } %>
+                                    </td>
+                                    <td class="amount-positive">₹<%= order.tax.toFixed(2) %></td>
+                                    <td class="amount-positive">
+                                        <% if (order.shipping > 0) { %>
+                                            ₹<%= order.shipping.toFixed(2) %>
+                                        <% } else { %>
+                                            Free
+                                        <% } %>
+                                    </td>
+                                    <td class="amount-positive">
+                                        <strong>₹<%= order.finalAmount.toFixed(2) %></strong>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-<%= order.orderStatus %>">
+                                            <%= order.orderStatus %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <% if (totalPages > 1) { %>
+                    <div class="pagination">
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                            <a href="/admin/sales-report?page=<%= i %>&period=<%= period %>&startDate=<%= startDate || '' %>&endDate=<%= endDate || '' %>">
+                                <button class="<%= i === currentPage ? 'active' : '' %>"><%= i %></button>
+                            </a>
+                        <% } %>
+                    </div>
+                <% } %>
+            <% } %>
+        </div>
+    </div>
+
+    <script src="/js/admin/adminNav.js"></script>
+    <script>
+        // Toggle custom date fields
+        function toggleCustomDates() {
+            const period = document.getElementById('periodSelect').value;
+            const startDateGroup = document.getElementById('startDateGroup');
+            const endDateGroup = document.getElementById('endDateGroup');
+            
+            if (period === 'custom') {
+                startDateGroup.style.display = 'flex';
+                endDateGroup.style.display = 'flex';
+            } else {
+                startDateGroup.style.display = 'none';
+                endDateGroup.style.display = 'none';
+            }
+        }
+
+        // Download report function with proper fetch and blob handling
+        async function downloadReport(format) {
+            try {
+                const form = document.querySelector('form');
+                const formData = new FormData(form);
+                const params = new URLSearchParams();
+                
+                for (let [key, value] of formData.entries()) {
+                    if (value) params.append(key, value);
+                }
+                params.append('format', format);
+                
+                // Show loading
+                Swal.fire({
+                    title: 'Generating Report...',
+                    text: `Please wait while we prepare your ${format.toUpperCase()} download`,
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                console.log('Starting download request for:', format);
+                console.log('Request URL:', `/admin/sales-report/download?${params.toString()}`);
+                
+                // Fetch the report with proper headers
+                const response = await fetch(`/admin/sales/report/download?${params.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Server error:', errorText);
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
+                }
+                
+                // Check content type
+                const contentType = response.headers.get('content-type');
+                console.log('Content-Type:', contentType);
+                
+                // Get the blob data
+                const blob = await response.blob();
+                console.log('Blob size:', blob.size, 'bytes');
+                console.log('Blob type:', blob.type);
+                
+                if (blob.size === 0) {
+                    throw new Error('Downloaded file is empty');
+                }
+                
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                
+                // Set filename from response header or generate one
+                let filename = '';
+                const disposition = response.headers.get('content-disposition');
+                if (disposition && disposition.includes('filename=')) {
+                    filename = disposition.split('filename=')[1].replace(/"/g, '');
+                } else {
+                    // Fallback filename
+                    const now = new Date();
+                    const dateStr = now.toISOString().split('T')[0];
+                    const period = document.getElementById('periodSelect').value;
+                    filename = `sales-report-${period}-${dateStr}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+                }
+                
+                link.download = filename;
+                console.log('Download filename:', filename);
+                
+                // Trigger download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up blob URL
+                setTimeout(() => {
+                    window.URL.revokeObjectURL(url);
+                }, 100);
+                
+                // Show success
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Download Started!',
+                    text: `Your ${format.toUpperCase()} report has been downloaded successfully`,
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+                
+            } catch (error) {
+                console.error('Download error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Download Failed',
+                    text: `Error: ${error.message}. Please check the console for more details.`,
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleCustomDates();
+        });
+    </script>
+</body>
+</html>

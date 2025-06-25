@@ -2,7 +2,7 @@
 
 module.exports = {
   PAGINATION: {
-    PRODUCTS_PER_PAGE: 4,
+    PRODUCTS_PER_PAGE: 9,
   },
   SORT_OPTIONS: {
     DEFAULT: "newest",
@@ -16,11 +16,11 @@ module.exports = {
     },
   },
   PRICE_RANGES: [
-    { value: "0-50", label: "$0.00 - $50.00" },
-    { value: "50-100", label: "$50.00 - $100.00" },
-    { value: "100-150", label: "$100.00 - $150.00" },
-    { value: "150-200", label: "$150.00 - $200.00" },
-    { value: "200-250", label: "$200.00 - $250.00" },
-    { value: "250", label: "$250.00+" },
+    { value: "0-1000", label: "₹0- ₹1000" },
+    { value: "1000-2000", label: "₹1000 - ₹2000" },
+    { value: "2000-3000", label: "₹2000 - ₹3000" },
+    { value: "3000-4000", label: "₹3000 - ₹4000" },
+    { value: "4000-8000", label: "₹4000 - ₹8000" },
+    { value: "10000", label: "₹10000+" },
   ],
 };

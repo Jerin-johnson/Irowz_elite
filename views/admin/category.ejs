@@ -7,9 +7,165 @@
   <link rel="stylesheet" href="/css/admin/category.css" />
   <link rel="stylesheet" href="/css/admin/admin.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    /* Enhanced Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      overflow: auto;
+    }
+    
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 25px;
+      border: 1px solid #888;
+      width: 50%;
+      max-width: 500px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      position: absolute;
+      top: 10px;
+      right: 15px;
+    }
+    
+    .close:hover {
+      color: black;
+    }
+    
+    .modal h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 16px;
+      color: #555;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+      border-color: #3498db;
+      outline: none;
+      box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+    }
+    
+    .error {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: 5px;
+      display: none;
+    }
+    
+    .offer-status {
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 5px;
+      padding: 5px;
+      border-radius: 4px;
+    }
+    
+    .offer-active {
+      color: #27ae60;
+      background-color: rgba(39, 174, 96, 0.1);
+      border: 1px solid #27ae60;
+    }
+    
+    .offer-inactive {
+      color: #95a5a6;
+      background-color: rgba(149, 165, 166, 0.1);
+      border: 1px solid #bdc3c7;
+    }
+    
+    .btn-primary {
+      background-color: #3498db;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+    
+    .btn-primary:hover {
+      background-color: #2980b9;
+    }
+    
+    /* Action buttons styling */
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    
+    .action-buttons .btn {
+      padding: 6px 10px;
+      font-size: 14px;
+    }
+    
+    .btn-info {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    .btn-info:hover {
+      background-color: #2980b9;
+    }
+    
+    .btn-danger {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+  </style>
 </head>
 <body>
 
+  <%- include('../partials/admin/header') %>
+
+  <div class="container">
+    
   <%- include('../partials/admin/header') %>
 
   <div class="container">
@@ -46,13 +202,14 @@
             <th>S.NO</th>
             <th>NAME</th>
             <th>DESCRIPTION</th>
+            <th>OFFER STATUS</th>
             <th>ACTIONS</th>
           </tr>
         </thead>
         <tbody>
           <% if (categories.length === 0) { %>
             <tr>
-              <td colspan="4" class="no-data">
+              <td colspan="5" class="no-data">
                 <div>📂</div>
                 <h3>No categories found</h3>
                 <p>Try a different search or add a new category</p>
@@ -65,6 +222,17 @@
                 <td><%= cat.name %></td>
                 <td><%= cat.description %></td>
                 <td>
+                  <% if (cat.categoryOffer > 0) { %>
+                    <div class="offer-status offer-active">
+                      Offer: <%= cat.categoryOffer %>% <br>
+                      (<%= new Date(cat.offerStartDate).toLocaleDateString() %> - 
+                      <%= new Date(cat.offerEndDate).toLocaleDateString() %>)
+                    </div>
+                  <% } else { %>
+                    <div class="offer-status offer-inactive">No active offer</div>
+                  <% } %>
+                </td>
+                <td>
                   <div class="action-buttons">
                     <a href="/admin/category/edit?id=<%= cat._id %>">
                       <button class="btn btn-warning btn-sm">Edit</button>
@@ -73,6 +241,12 @@
                       <button class="btn btn-danger btn-sm unlist-btn" data-url="/admin/category/unlist?id=<%= cat._id %>">Unlist</button>
                     <% } else { %>
                       <button class="btn btn-success btn-sm list-btn" data-url="/admin/category/list?id=<%= cat._id %>">List</button>
+                    <% } %>
+                    <!-- Add Offer/Remove Offer buttons -->
+                    <% if (cat.categoryOffer > 0) { %>
+                      <button class="btn btn-danger btn-sm remove-offer-btn" data-id="<%= cat._id %>">Remove Offer</button>
+                    <% } else { %>
+                      <button class="btn btn-info btn-sm add-offer-btn" data-id="<%= cat._id %>">Add Offer</button>
                     <% } %>
                   </div>
                 </td>
@@ -83,7 +257,7 @@
       </table>
     </div>
 
-    <!-- Pagination generated server-side -->
+     <!-- Pagination generated server-side -->
     <div class="pagination">
       <% for (let i = 1; i <= totalPages; i++) { %>
         <a href="/admin/category?page=<%= i %>&search=<%= search || '' %>">
@@ -93,17 +267,50 @@
     </div>
   </div>
 
+  
+  </div>
+
+  <!-- Add Offer Modal -->
+  <div id="offerModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Add Category Offer</h2>
+      <form id="offerForm">
+        <input type="hidden" id="categoryId" name="id">
+        <div class="form-group">
+          <label for="offerPercentage">Offer Percentage (%)</label>
+          <input type="number" id="offerPercentage" name="offer" min="0" max="100" required>
+          <div id="offerError" class="error">Offer must be between 0 and 100</div>
+        </div>
+        <div class="form-group">
+          <label for="startDate">Start Date</label>
+          <input type="date" id="startDate" name="startDate" required>
+          <div id="startDateError" class="error">Start date cannot be in the past</div>
+        </div>
+        <div class="form-group">
+          <label for="endDate">End Date</label>
+          <input type="date" id="endDate" name="endDate" required>
+          <div id="endDateError" class="error">End date must be after start date</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Offer</button>
+      </form>
+    </div>
+  </div>
+
   <script src="/js/admin/adminNav.js"></script>
 
   <!-- SweetAlert confirmation for Unlist/List -->
   <script>
-    document.querySelectorAll('.unlist-btn, .list-btn').forEach(button => {
-      button.addEventListener('click', (e) => {
+    // Use event delegation for dynamically created buttons
+    document.addEventListener('click', function(e) {
+      // Handle unlist/list buttons
+      if (e.target.matches('.unlist-btn, .list-btn')) {
         e.preventDefault();
-
+        
+        const button = e.target;
         const url = button.getAttribute('data-url');
         const isUnlist = button.classList.contains('unlist-btn');
-
+        
         Swal.fire({
           title: isUnlist ? 'Are you sure?' : 'Confirm Listing',
           text: isUnlist
@@ -120,6 +327,215 @@
             window.location.href = url;
           }
         });
+      }
+      
+      // Handle add offer buttons
+      if (e.target.matches('.add-offer-btn')) {
+        const button = e.target;
+        const categoryId = button.getAttribute('data-id');
+        document.getElementById('categoryId').value = categoryId;
+        
+        // Reset form and errors
+        document.getElementById('offerForm').reset();
+        hideAllErrors();
+        
+        // Set minimum dates to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').min = today;
+        document.getElementById('endDate').min = today;
+        
+        // Show modal
+        document.getElementById('offerModal').style.display = 'block';
+      }
+      
+      // Handle remove offer buttons
+      if (e.target.matches('.remove-offer-btn')) {
+        const button = e.target;
+        const categoryId = button.getAttribute('data-id');
+        
+        Swal.fire({
+          title: 'Remove Offer?',
+          text: "Are you sure you want to remove this offer?",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Remove',
+          reverseButtons: true
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Make API call to remove offer
+            fetch('/admin/category/removeoffer', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ id: categoryId })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire('Removed!', data.message, 'success').then(() => {
+                  location.reload();
+                });
+              } else {
+                Swal.fire('Failed!', data.message, 'error');
+              }
+            })
+            .catch(error => {
+              Swal.fire('Error!', 'An error occurred while removing the offer.', 'error');
+              console.error('Error:', error);
+            });
+          }
+        });
+      }
+    });
+
+    // Get modal elements
+    const modal = document.getElementById('offerModal');
+    const closeBtn = document.querySelector('.close');
+    const offerForm = document.getElementById('offerForm');
+    
+    // Close modal
+    closeBtn.addEventListener('click', function() {
+      modal.style.display = 'none';
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+    
+    // Offer validation
+    document.getElementById('offerPercentage').addEventListener('input', function() {
+      const value = parseInt(this.value);
+      if (isNaN(value) || value < 0 || value > 100) {
+        showError(document.getElementById('offerError'), "Offer must be between 0 and 100");
+      } else {
+        hideError(document.getElementById('offerError'));
+      }
+    });
+    
+    // Date validation
+    document.getElementById('startDate').addEventListener('change', validateDates);
+    document.getElementById('endDate').addEventListener('change', validateDates);
+    
+    function validateDates() {
+      const startDate = new Date(document.getElementById('startDate').value);
+      const endDate = new Date(document.getElementById('endDate').value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time part
+      
+      // Validate start date
+      if (startDate < today) {
+        showError(document.getElementById('startDateError'), "Start date cannot be in the past");
+      } else {
+        hideError(document.getElementById('startDateError'));
+      }
+      
+      // Validate end date
+      if (endDate < startDate) {
+        showError(document.getElementById('endDateError'), "End date must be after start date");
+      } else {
+        hideError(document.getElementById('endDateError'));
+      }
+    }
+    
+    // Helper functions for error handling
+    function showError(element, message) {
+      if (element) {
+        element.textContent = message;
+        element.style.display = 'block';
+      }
+    }
+    
+    function hideError(element) {
+      if (element) {
+        element.style.display = 'none';
+      }
+    }
+    
+    function hideAllErrors() {
+      hideError(document.getElementById('offerError'));
+      hideError(document.getElementById('startDateError'));
+      hideError(document.getElementById('endDateError'));
+    }
+    
+    // Form submission
+    offerForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      let isValid = true;
+      
+      // Validate offer percentage
+      const offerValue = parseInt(document.getElementById('offerPercentage').value);
+      if (isNaN(offerValue)) {
+        showError(document.getElementById('offerError'), "Offer percentage is required");
+        isValid = false;
+      } else if (offerValue < 0 || offerValue > 100) {
+        showError(document.getElementById('offerError'), "Offer must be between 0 and 100");
+        isValid = false;
+      } else {
+        hideError(document.getElementById('offerError'));
+      }
+      
+      // Validate dates
+      const startDateVal = document.getElementById('startDate').value;
+      const endDateVal = document.getElementById('endDate').value;
+      const today = new Date().toISOString().split('T')[0];
+      
+      if (!startDateVal) {
+        showError(document.getElementById('startDateError'), "Start date is required");
+        isValid = false;
+      } else if (startDateVal < today) {
+        showError(document.getElementById('startDateError'), "Start date cannot be in the past");
+        isValid = false;
+      } else {
+        hideError(document.getElementById('startDateError'));
+      }
+      
+      if (!endDateVal) {
+        showError(document.getElementById('endDateError'), "End date is required");
+        isValid = false;
+      } else if (endDateVal < startDateVal) {
+        showError(document.getElementById('endDateError'), "End date must be after start date");
+        isValid = false;
+      } else {
+        hideError(document.getElementById('endDateError'));
+      }
+      
+      if (!isValid) return;
+      
+      const formData = {
+        id: document.getElementById('categoryId').value,
+        offer: offerValue,
+        startDate: startDateVal,
+        endDate: endDateVal
+      };
+      
+      // Make API call to add offer
+      fetch('/admin/category/addoffer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire('Success!', data.message, 'success').then(() => {
+            modal.style.display = 'none';
+            location.reload();
+          });
+        } else {
+          Swal.fire('Failed!', data.message, 'error');
+        }
+      })
+      .catch(error => {
+        Swal.fire('Error!', 'An error occurred while adding the offer.', 'error');
+        console.error('Error:', error);
       });
     });
   </script>

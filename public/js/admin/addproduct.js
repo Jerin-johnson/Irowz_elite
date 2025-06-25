@@ -7,18 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let currentCropper = null;
   let croppedCanvas = null;
 
-  // Real-time price validation
-  document.getElementById('salePrice').addEventListener('input', function() {
-    const regularPrice = parseFloat(document.getElementById('regularPrice').value);
-    const salePrice = parseFloat(this.value);
-    const salePriceError = document.getElementById('salePriceError');
-    if (salePrice > regularPrice && !isNaN(regularPrice)) {
-      salePriceError.textContent = 'Sale price must be less than or equal to regular price.';
-      salePriceError.style.display = 'block';
-    } else {
-      salePriceError.style.display = 'none';
-    }
-  });
+
 
   // Form Validation and Submission
   document.getElementById('addProductForm').addEventListener('submit', async (e) => {
@@ -86,14 +75,14 @@ document.addEventListener('DOMContentLoaded', function() {
       errorMessages.push(regularPriceError.textContent);
     }
 
-    const salePrice = parseFloat(document.getElementById('salePrice').value);
-    if (isNaN(salePrice) || salePrice <= 0) {
-      isValid = false;
-      const salePriceError = document.getElementById('salePriceError');
-      salePriceError.textContent = 'Sale price must be a positive number.';
-      salePriceError.style.display = 'block';
-      errorMessages.push(salePriceError.textContent);
-    }
+   const salePrice = parseFloat(document.getElementById('salePrice').value);
+if (isNaN(salePrice) || salePrice < 0 || salePrice > 100) {
+ isValid = false;
+ const salePriceError = document.getElementById('salePriceError');
+ salePriceError.textContent = 'Offer price must be a number between 0 and 100.';
+ salePriceError.style.display = 'block';
+ errorMessages.push(salePriceError.textContent);
+}
 
     if (isValid && salePrice > regularPrice) {
       isValid = false;

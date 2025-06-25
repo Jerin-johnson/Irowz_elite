@@ -17,10 +17,14 @@ const categorySchema = new Schema({
     type: Boolean,
     default: true
   },
-  categoryOffer:{
-    type:Number,
-    default:0,
-  }
+  categoryOffer: {
+  type: Number,
+  default: 0,
+  min: 0,
+  max: 100
+},
+offerStartDate: Date,
+offerEndDate: Date,
 }, { timestamps: true });
 
 const Category = mongoose.model('Category', categorySchema);

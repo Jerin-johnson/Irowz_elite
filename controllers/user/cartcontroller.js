@@ -12,6 +12,8 @@ const {calculateDiscount,calculateTax} = require("../../helpers/helper")
 const loadCartPage = async (req, res) => {
   try {
     const userId = req.session.user;
+
+    // Load cart with product and category data
     let cart = await Cart.findOne({ userId }).populate({
       path: "items.productId",
       populate: "category",
@@ -22,56 +24,70 @@ const loadCartPage = async (req, res) => {
       await cart.save();
     }
 
-    const user = await User.findById(req.session.user);
+    const user = await User.findById(userId);
 
-    //  Filter out blocked or unavailable products
-    console.log(cart.items);
+    // Filter out unavailable/blocked products
     cart.items = cart.items.filter((item) => {
       const product = item.productId;
       return (
         product &&
         !product.isBlocked &&
         product.category &&
-        product.category.isListed === true &&
+        product.category.isListed &&
         product.status?.toLowerCase() !== "out of stock"
       );
     });
 
-    console.log("FilterProduct = ", cart.items);
-
     let subtotal = 0;
+    let totalDiscount = 0;
+
+    // Recalculate prices and update cart consistency
     cart.items.forEach((item) => {
       const product = item.productId;
-      const price = product.salePrice ;
+      const regularPrice = product.regularPrice || 0;
+      const salePrice = product.salePrice ;
       const quantity = item.quantity || 1;
-      item.price = price;
-      item.totalPrice = price * quantity;
-      subtotal += item.totalPrice;
+
+      const discount = regularPrice - salePrice;
+      const totalPrice = salePrice * quantity;
+
+      // Update cart item fields with latest values
+      item.originalPrice = regularPrice;
+      item.price = salePrice;
+      item.discount = discount;
+      item.totalPrice = totalPrice;
+
+      subtotal += regularPrice * quantity;
+      totalDiscount += discount * quantity;
     });
 
-    console.log(subtotal)
+    // Save updated cart
+    await cart.save();
 
-    const discount = calculateDiscount(subtotal);
-    const tax = calculateTax(subtotal - discount);
-    const shipping = subtotal >= 1000 ? 0 : 50; // Free shipping above 1000
-    const total = subtotal - discount + tax + shipping;
+    // const tax = calculateTax(subtotal - totalDiscount); // 10% assumed
+    const tax =0;
+    const shipping = subtotal >= 1000 ? 0 : 50;
+    const total = subtotal - totalDiscount + tax + shipping;
 
-    //     // Render the cart page with all values
     res.render("user/cart", {
       user,
       cart,
       subtotal: subtotal.toFixed(2),
-      discount: discount.toFixed(2),
+      discount: totalDiscount.toFixed(2),
       tax: tax.toFixed(2),
       shipping: shipping.toFixed(2),
       total: total.toFixed(2),
       itemCount: cart.items.length,
     });
+
   } catch (error) {
-    console.error("Error fetching cart:", error);
-    res.status(500).render("error", { message: "Error loading cart" });
+    console.error("Error loading cart page:", error);
+    res.status(500).render("error", { message: "Error loading cart page" });
   }
 };
+
+module.exports = { loadCartPage };
+
 
 const maxProductLimit =10;
 
@@ -108,9 +124,23 @@ const addToCart = async (req, res) => {
       await cart.save();
     }
 
+    let wishlist = await Wishlist.findOne({userId:userId,products:{$elemMatch:{productId:productId}}});
+    console.log("The Wishlist items",wishlist);
+
+    if(wishlist)
+    {
+      await Wishlist.updateOne({userId},
+        {$pull:{products:{productId}}});
+
+    }
+
     const isProductExitIndex = cart.items.findIndex((product) => {
       return product.productId.toString() === productId;
     });
+
+       const originalPrice = product.regularPrice;
+       const salePrice = product.salePrice;
+       const discountAmount = originalPrice - salePrice;
 
     
 
@@ -124,13 +154,15 @@ const addToCart = async (req, res) => {
         throw new Error(`Only ${product.stock} items available in stock`);
       }
       cart.items[isProductExitIndex].quantity = newOty;
-      cart.items[isProductExitIndex].totalPrice = newOty * product.salePrice;
+      cart.items[isProductExitIndex].totalPrice = newOty * salePrice;
     } else {
       cart.items.push({
         productId,
-        totalPrice: product.salePrice,
-        price: product.salePrice,
         quantity: 1,
+        price: salePrice,
+        originalPrice: originalPrice,
+        discount: discountAmount,
+        totalPrice: salePrice,
       });
     }
 
@@ -194,41 +226,49 @@ const updateCartQuantity = async(req,res)=>{
 
      console.log("Check whether what comes c",product);
 
-     cart.items[itemIndex].quantity = quantity;
-     cart.items[itemIndex].price = product.salePrice;
-     cart.items[itemIndex].totalPrice = cart.items[itemIndex].quantity *  cart.items[itemIndex].price;
+ // Update quantity & prices
+    const item = cart.items[itemIndex];
+    item.quantity = quantity;
+    item.price = product.salePrice;
+    item.originalPrice = product.regularPrice;
+    item.discount = product.regularPrice - product.salePrice;
+    item.totalPrice = quantity * product.salePrice;
 
      await cart.save();
 
     
+       // Calculate summary values
+    let subtotal = 0;
+    let totalDiscount = 0;
+
+    cart.items.forEach((item) => {
+      subtotal += item.originalPrice * item.quantity;
+      totalDiscount += (item.originalPrice - item.price) * item.quantity;
+    });
+ 
+
 
  
-      // Calculate all totals 
-        let subtotal = 0
-       cart.items.forEach((item) => {
-        subtotal += item.totalPrice
-      });
-
-     const discount = calculateDiscount(subtotal);
-     const tax = calculateTax(subtotal - discount);
+    //  const tax = calculateTax(subtotal - totalDiscount);
+    const tax =0
      const shipping = subtotal >= 1000 ? 0 : 50; // Free shipping above 1000
-      const total = subtotal - discount + tax + shipping;
+      const total = subtotal - totalDiscount + tax + shipping;
 
-     res.json({
-      success: true,      
-       message: "Quantity updated successfully",
+      res.json({
+      success: true,
+      message: "Quantity updated successfully",
       itemTotal: cart.items[itemIndex].totalPrice.toFixed(2),
       subtotal: subtotal.toFixed(2),
-       discount: discount.toFixed(2),
-       tax: tax.toFixed(2),
+      discount: totalDiscount.toFixed(2),
+      tax: tax.toFixed(2),
       shipping: shipping.toFixed(2),
       total: total.toFixed(2),
-      itemCount: cart.items.length
-     })
+      itemCount: cart.items.length,
+    });
      
   } catch (error) {
     console.error(error.message);
-    return res.status(404).json({success:true,message:error.message});
+    return res.status(404).json({success:false,message:error.message});
     
   }
 }

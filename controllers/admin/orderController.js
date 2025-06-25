@@ -260,11 +260,11 @@ console.log(productIndex)
        })
         wallet.updatedOn = new Date();
 
-        order.items[productIndex].status = "returned";
-       order.items[productIndex].refundStatus ='refunded';
-       order.items[productIndex].refundMethod ='wallet';
-        order.items[productIndex].refundDate = new Date();
-        order.items[productIndex].returnCompletedAt = new Date();
+         order.items[productIndex].status = "returned";
+         order.items[productIndex].refundStatus ='refunded';
+         order.items[productIndex].refundMethod ='wallet';
+         order.items[productIndex].refundDate = new Date();
+         order.items[productIndex].returnCompletedAt = new Date();
 
         
 
@@ -297,3 +297,6 @@ module.exports={
     changeOrderStatus,
     approveOrRejectReturnRequest
 }
+
+
+

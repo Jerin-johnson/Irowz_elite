@@ -4,11 +4,14 @@
     "@tailwindcss/cli": "^4.1.7",
     "autoprefixer": "^10.4.21",
     "bcrypt": "^6.0.0",
+    "connect-flash": "^0.1.1",
     "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
+    "exceljs": "^4.4.0",
     "express": "^5.1.0",
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.18.1",
+    "method-override": "^3.0.0",
     "mongoose": "^8.15.0",
     "multer": "^2.0.0",
     "nocache": "^4.0.0",
@@ -18,10 +21,11 @@
     "password": "^0.1.1",
     "pdfkit": "^0.17.1",
     "postcss": "^8.5.3",
+    "razorpay": "^2.9.6",
     "session": "^0.1.0",
     "sharp": "^0.34.2",
     "tailwindcss": "^4.1.7",
-    "uuid": "^11.1.0"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "eslint": "^9.27.0",

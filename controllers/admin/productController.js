@@ -6,23 +6,8 @@ const mongoose = require("mongoose");
 const fs = require("fs");
 const sharp = require("sharp");
 const path = require("path");
+const{calculateOfferDetails}=require("../../helpers/calculateSalesPrice")
 
-
-
-
-// prdouct management page
-
-
-// adminRouter.get("/product",adminAuth,loadProductPage);
-
-// adminRouter.get("/product/edit",adminAuth,loadEditProduct)
-// adminRouter.post("/product/edit/:id",adminAuth,upload.array('images',5),editProduct);
-
-
-// adminRouter.get("/product/add",adminAuth,loadAddProductPage);
-// adminRouter.post("/product/add",upload.array('images',5),addProduct);
-// adminRouter.get("/product/block",adminAuth,blockProduct)
-// adminRouter.get("/product/unblock",adminAuth,unBlockProduct)
 
 
 
@@ -87,10 +72,22 @@ const addProduct = async (req, res) => {
       brand,
       stock,
       regularPrice,
-      salePrice,
+      productOffer
     } = req.body;
     const images = req.files;
-    console.log("req.body of add product page", req.body);
+  
+        if (!name || !description || !category || !brand || !stock || !regularPrice) {
+      throw new Error("All fields are required except offer");
+    }
+
+    if (parseFloat(regularPrice) <= 0) {
+      throw new Error("Regular price must be greater than 0");
+    }
+
+    if (productOffer && (productOffer < 0 || productOffer > 100)) {
+      throw new Error("Product offer must be between 0 and 100%");
+    }
+
 
     const existProduct = await Product.findOne({ productName: name });
 
@@ -109,9 +106,22 @@ const addProduct = async (req, res) => {
       throw new Error("Selected brand does not exist");
     }
 
+    const calculateDetails = await calculateOfferDetails(regularPrice,productOffer,category);
+    console.log(calculateDetails)
+    const salePrice = calculateDetails.salePrice;
+    console.log("The Product Offer is",salePrice);
+
+    const discountAmount = regularPrice - salePrice;
+
+    console.log("the discounted price",discountAmount);
+
     const imageData = images.map((file, index) => ({
       path: file.path.replace(/\\/g, "/"),
     }));
+
+
+    
+    console.log("the applied offer",calculateDetails.appliedOfferType)
 
     // Create and save product
     const product = new Product({
@@ -122,9 +132,11 @@ const addProduct = async (req, res) => {
       quantity: parseFloat(stock),
       stock: parseInt(stock),
       regularPrice: parseFloat(regularPrice),
-      salePrice: parseFloat(salePrice),
+      salePrice,
       productImage: imageData,
-      status: "Available",
+      productOffer:productOffer ||0,
+      discountAmount,
+      appliedOfferType:calculateDetails.appliedOfferType,
     });
 
     await product.save();
@@ -185,7 +197,7 @@ const editProduct = async (req, res) => {
       brand,
       stock,
       regularPrice,
-      salePrice,
+      productOffer,
       existingImages,
       removedImages,
     } = req.body;
@@ -199,8 +211,7 @@ const editProduct = async (req, res) => {
       !category ||
       !brand ||
       !stock ||
-      !regularPrice ||
-      !salePrice
+      !regularPrice
     ) {
       throw new Error("All fields are required");
     }
@@ -210,12 +221,10 @@ const editProduct = async (req, res) => {
     if (parseFloat(regularPrice) <= 0) {
       throw new Error("Regular price must be positive");
     }
-    if (parseFloat(salePrice) <= 0) {
-      throw new Error("Sale price must be positive");
-    }
-    if (parseFloat(salePrice) > parseFloat(regularPrice)) {
-      throw new Error("Sale price must not exceed regular price");
-    }
+  
+    if (productOffer && (productOffer < 0 || productOffer > 100)) {
+  throw new Error("Product offer must be between 0 and 100%");
+}
 
     // Check if product exists
     const product = await Product.findById(productId);
@@ -269,6 +278,16 @@ const editProduct = async (req, res) => {
       }
     }
 
+    const offer = parseFloat(productOffer) || 0;
+
+    const Pricedetails = await calculateOfferDetails(parseFloat(regularPrice),offer,category);
+    console.log(Pricedetails);
+
+
+    const salePrice = Pricedetails.salePrice;
+    const discountAmount = parseFloat(regularPrice) - salePrice;
+    console.log("Edit Product salePrice",salePrice);
+
     // Update product
     product.productName = name;
     product.description = description;
@@ -276,8 +295,11 @@ const editProduct = async (req, res) => {
     product.brand = brand;
     product.stock = parseInt(stock);
     product.regularPrice = parseFloat(regularPrice);
-    product.salePrice = parseFloat(salePrice);
+    product.productOffer = parseFloat(productOffer) || 0;
+    product.salePrice = salePrice;
     product.productImage = [...remainingImages, ...newImages];
+    product.discountAmount = discountAmount;
+    product.appliedOfferType = Pricedetails.appliedOfferType
 
     await product.save();
 

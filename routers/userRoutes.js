@@ -27,13 +27,15 @@ const{loadWishlistPage,addToWishList,deleteWishlist,removeFromWishlist}=require(
 const{loadCartPage,addToCart,updateCartQuantity,deleteCartItem,clearCart}=require("../controllers/user/cartcontroller.js");
 
 // checkout releted things
-const{loadCheckOutPage,placeOrder,loadOrderSuccessPage}=require("../controllers/user/checkoutController.js")
+const{loadCheckOutPage,placeOrder,loadOrderSuccessPage,loadOrderFaliurePage,verifyPayment}=require("../controllers/user/checkoutController.js")
 
 
+// apply and remove coupon
+const{applyCoupon,removeAppliedCoupon}= require("../controllers/user/couponController.js")
 
 
 // For Loading Home page & shopping page
-userRouter.get("/",isUserLoggedIn,loadHomePage);
+userRouter.get("/",loadHomePage);
 userRouter.get("/shop",isUserLoggedIn,loadShoppingPage);
 
 // get and post signup
@@ -112,14 +114,20 @@ userRouter.delete("/cart/clear",isUserLoggedIn,clearCart)
 
 userRouter.get("/checkout",isUserLoggedIn,loadCheckOutPage);
 userRouter.post('/checkout/placeorder', isUserLoggedIn,placeOrder);
+userRouter.post("/checkout/verify-payment", verifyPayment);
 
 // order-managment
 userRouter.get("/order/success",isUserLoggedIn,loadOrderSuccessPage);
+userRouter.get("/order/failure",isUserLoggedIn,loadOrderFaliurePage)
 
 
 // download invocies
 userRouter.get("/orders/:orderId/invoice",isUserLoggedIn,downloadInvoice)
 
+
+// coupon logic apply and remove
+userRouter.post("/apply/coupon",isUserLoggedIn,applyCoupon);
+userRouter.post("/remove/coupon",isUserLoggedIn,removeAppliedCoupon);
 
 
 // Order management

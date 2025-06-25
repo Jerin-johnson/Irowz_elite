@@ -1,6 +1,17 @@
 <%- include('../partials/user/header.ejs') %>
 <%- include('../partials/chatbot.ejs') %>
 
+<style>
+
+    .whishlist.active{
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+    color: #fff;
+    border-color: transparent;
+    transform: scale(1.1);
+    }
+
+</style>
+
 
 <link rel="stylesheet" href="/css/shop.css">
 <!-- SweetAlert2 CDN -->
@@ -89,7 +100,7 @@
                                     </div>
                                     <div id="shp_collapse_brands" class="collapse">
                                         <div class="shp_filter_body">
-                                            <ul>
+                                            <ul style="list-style-type: none;">
                                                 <% brands.forEach(brand => { %>
                                                     <li>
                                                         <label>
@@ -109,7 +120,7 @@
                                     </div>
                                     <div id="shp_collapse_price" class="collapse">
                                         <div class="shp_filter_body">
-                                            <ul>
+                                            <ul style="list-style-type: none;">
                                                 <% priceRanges.forEach(range => { %>
                                                     <li>
                                                         <label>
@@ -196,17 +207,14 @@
                                             <img src="<%= product.productImage[0]?.path %>" alt="<%= product.productName %>" class="default-img">
                                         </a>
                                     </div>
-                                    <% if (product.status === 'Discounted') { %>
+                                    <% if (product.productOffer > 0) { %>
                                         <span class="shp_label">
-                                            <% 
-                                                // Calculate offer percentage
-                                                const discount = ((product.regularPrice - product.salePrice) / product.regularPrice * 100).toFixed(0);
-                                            %>
-                                            <%= discount %>% Off
+                                            
+                                            <%= product.productOffer %>% Off
                                         </span>
                                     <% } %>
                                     <div class="shp_product_action_1">
-                                        <button onclick="addToWishlist('<%= product._id %>')" class="shp_action_btn hover-up" title="Add to Wishlist">
+                                        <button onclick="addToWishlist('<%= product._id %>')" id="whishlist-button" class="whishlist shp_action_btn hover-up" title="Add to Wishlist">
                                             <i class="fa fa-heart"></i>
                                         </button>
                                     </div>
@@ -290,9 +298,10 @@ async function addToWishlist(productId) {
                 timer: 1500
             });
         } else {
+             document.getElementById("whishlist-button").classList.add("active");
             Swal.fire({
-                icon: 'error',
-                title: 'Error!',
+                icon: 'caution',
+                title: 'caution!',
                 text: result.message || 'Failed to add product to wishlist.',
                 confirmButtonText: 'OK'
             });

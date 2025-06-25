@@ -56,21 +56,28 @@ const productSchema = new Schema({
     required: true,
     min: 0
   }
-  ,productOffer: {
-  type: Number,
-  default: 0,
-  min: 0,
-  max: 100
-},
+,
 appliedOfferType: {
   type: String,
   enum: ['None', 'Product', 'Category'],
+  default:"None"
 },
   salePrice: {
     type: Number,
     required: true,
     min: 0
   },
+    discountAmount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  categoryOffer: {
+  type: Number,
+  default: 0,
+  min: 0,
+  max: 100
+},
   rating: {
     type: Number,
     default: 4,

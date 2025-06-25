@@ -396,7 +396,7 @@
                             </select>
 
                             <button class="action-btn" style="background: #3b82f6; color: white; width: 100%; padding: 10px;" 
-                                    onclick="updateOrderStatus()">Update Status</button>
+                                    onclick="updateOrderStatus('<%= order.orderId %>','<%= order.userId?._id%>')">Update Status</button>
                         </div>
                     </div>
                 <% } %>
@@ -419,12 +419,20 @@
                         </div>
                     <% } %>
 
+                    <% if (order.couponApplied) { %>
+                        <div class="info-row">
+                            <span class="info-label">Coupon Discount:</span>
+                            <span class="info-value" style="color: #059669;">-₹<%= order.couponDiscount.toFixed(2) %></span>
+                        </div>
+                    <% } %>
+
                     <% if (order.tax > 0) { %>
                         <div class="info-row">
                             <span class="info-label">Tax:</span>
                             <span class="info-value">₹<%= order.tax.toFixed(2) %></span>
                         </div>
                     <% } %>
+
 
                     <% if (order.shipping > 0) { %>
                         <div class="info-row">
@@ -482,7 +490,7 @@
 
     <script>
         // Update order status function
-        function updateOrderStatus() {
+        function updateOrderStatus(orderId,userId) {
             const statusSelect = document.getElementById('statusSelect');
             const newStatus = statusSelect.value;
 
@@ -519,12 +527,12 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`/admin/orders/<%= order._id %>/status`, {
-                        method: 'PUT',
+                    fetch(`/admin/orders/${orderId}/status`, {
+                        method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ status: newStatus })
+                        body: JSON.stringify({ status: newStatus ,userId:userId})
                     })
                         .then(response => response.json())
                         .then(data => {

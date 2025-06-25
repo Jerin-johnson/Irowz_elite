@@ -4,6 +4,7 @@ const nodemailer = require("nodemailer");
 const { Product } = require("../../models/productSchema");
 const { Category } = require("../../models/categorySchema");
 const { Brand } = require("../../models/brandSchema");
+const{generateUniqueReferralCode}=require("../../helpers/userReferal")
 const env = require("dotenv").config();
 const {
   sendVerficationEmail,
@@ -12,8 +13,11 @@ const {
 } = require("../../helpers/helper");
 const mongoose = require('mongoose');
 
+const{Wallet}=require("../../models/walletSchema");
+
 const { PAGINATION, SORT_OPTIONS, PRICE_RANGES } = require("../../constants/constant");
 const { Cart } = require("../../models/cartSchema");
+const { BlockReason } = require("@google/generative-ai");
 
 // For loading Homepage
 
@@ -73,9 +77,11 @@ const loadSignup = (req, res) => {
 //posting data it from javascript as fetch
 const signUp = async (req, res) => {
   try {
-    const { fullname, email, phoneno, password } = req.body;
+    const { fullname, email, phoneno, password,referalcode} = req.body;
 
-    if (!fullname || !email || !phoneno || !password) {
+    console.log("The user side req.body",req.body)
+
+    if (!fullname || !email || !phoneno || !password ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -126,6 +132,19 @@ const signUp = async (req, res) => {
       phoneno,
     };
 
+    if(referalcode)
+    {
+      const referuser = await User.findOne({referalCode:referalcode});
+
+      if(!referuser)
+      {
+        return res.status(404).json({success:false,message:"The coupon id is not valid please reCheck that"})
+      }
+      req.session.userData.referalcode = referalcode;
+     
+    }
+
+    
     console.log(`The otp is ${otp}`);
     return res.status(201).json({ message: "Otp send Successfully" });
 
@@ -170,8 +189,10 @@ const verifyOtp = async (req, res) => {
 
     if (otp == req.session.userOtp) {
       const user = req.session.userData;
+      console.log("The user Data is ",user);
       const hashedPassword = await securePassword(user.password);
       delete req.session.userOtp;
+
 
       const saveUserData = new User({
         fullName: user.fullname,
@@ -180,6 +201,63 @@ const verifyOtp = async (req, res) => {
         phone: user.phoneno,
       });
 
+
+      if(user.referalcode)
+      {
+        console.log(user.referalcode);
+        const referUser = await User.findOne({referalCode:user.referalcode});
+        if(!referUser)
+        {
+          console.log("YOur refercal code is wrong so i skipped that fool");
+          return res.status({success:false,message:"The refercode is not valid"});
+        }
+        saveUserData.referredBy = referUser.referalCode;
+        referUser.redeemedUser.push(saveUserData._id);
+        let newUserWallet = new Wallet({
+          userId:saveUserData._id,
+          balance:100,
+          transactions:[{
+            type:"credit",
+            amount:100,
+            reason:"Referal Bonous 100rs",
+        }]
+        })
+
+        await newUserWallet.save();
+
+        let referedUserWallet = await Wallet.findOne({userId:referUser._id});
+        if(!referedUserWallet)
+        {
+          referedUserWallet = new Wallet({
+            userId:referUser._id,
+            balance:50,
+            transactions:[
+              {
+                type:"credit",
+            amount:50,
+            reason:"A new user sign in with your refercal code 50rs",
+
+            }
+          ]
+          })
+        }else{
+          referedUserWallet.balance+=50;
+          referedUserWallet.transactions.push({
+                type:"credit",
+            amount:50,
+            reason:"A new user sign in with your refercal code 50rs",
+
+            })
+        }
+
+        await referedUserWallet.save();
+
+        console.log("The wallet has been successfully updated both newuser and refereduser");
+
+        
+      }
+
+      saveUserData.referalCode = await generateUniqueReferralCode(saveUserData.fullName);
       await saveUserData.save();
       console.log(saveUserData);
       req.session.user = saveUserData._id;

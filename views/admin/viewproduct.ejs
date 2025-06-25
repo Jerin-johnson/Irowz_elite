@@ -7,6 +7,90 @@
     <link rel="stylesheet" href="/css/admin/category.css" />
     <link rel="stylesheet" href="/css/admin/admin.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      /* Modal styles for offer */
+      .offer-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      
+      .offer-modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+        max-width: 90%;
+        text-align: center;
+      }
+      
+      .offer-modal h3 {
+        margin-bottom: 20px;
+        color: #333;
+      }
+      
+      .offer-input-group {
+        margin-bottom: 20px;
+      }
+      
+      .offer-input-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        text-align: left;
+      }
+      
+      .offer-input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+      }
+      
+      .offer-input-group input:focus {
+        outline: none;
+        border-color: #007bff;
+      }
+      
+      .offer-modal-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+      
+      .offer-modal-buttons button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      
+      .offer-confirm-btn {
+        background-color: #28a745;
+        color: white;
+      }
+      
+      .offer-cancel-btn {
+        background-color: #6c757d;
+        color: white;
+      }
+      
+      .offer-error {
+        color: #dc3545;
+        font-size: 14px;
+        margin-top: 5px;
+        text-align: left;
+      }
+    </style>
   </head>
   <body>
     <%- include('../partials/admin/header') %>
@@ -29,7 +113,6 @@
             placeholder="Search products..."
           />
           <button type="submit" class="btn btn-secondary">Search</button>
-          <!-- <a href="/admin/product"> -->
           <button
             type="button"
             class="btn btn-secondary"
@@ -37,7 +120,6 @@
           >
             Reset
           </button>
-          <!-- </a> -->
         </form>
 
         <a href="/admin/product/add">
@@ -57,6 +139,8 @@
               <th>STOCK</th>
               <th>REGULAR PRICE</th>
               <th>SALE PRICE</th>
+              <th>Offer</th>
+               <th>Offer type</th>
               <th>IMAGES</th>
               <th>ACTIONS</th>
             </tr>
@@ -88,6 +172,14 @@
                 'N/A' %>
               </td>
               <td>
+                <span style="color: rgb(206, 2, 2); font-size: large;"><%= product.productOffer != null ? product.productOffer :
+                'N/A' %>%</span>
+              </td>
+               <td>
+                <span style="color: rgb(206, 2, 2); font-size: large;"><%= product.appliedOfferType != null ? product.appliedOfferType :
+                'N/A' %></span>
+              </td>
+              <td>
                 <% if (product.productImage && product.productImage.length > 0)
                 { %>
                 <img
@@ -107,6 +199,7 @@
                   <a href="/admin/product/edit?id=<%= product._id || '' %>">
                     <button class="btn btn-warning btn-sm">Edit</button>
                   </a>
+                  
                   <% if (product.isBlocked === false) { %>
                   <a
                     href="/admin/product/block?id=<%= product._id || '' %>"
@@ -117,10 +210,26 @@
                   <% } else { %>
                    <a
                     href="/admin/product/unblock?id=<%= product._id || '' %>"
-
                   >
                     <button class="btn btn-success btn-sm">Unblock</button>
                   </a>
+                  <% } %>
+                  
+                  <!-- Offer Management Buttons -->
+                  <% if (product.productOffer && product.productOffer > 0) { %>
+                    <button 
+                      class="btn btn-secondary btn-sm remove-offer-btn" 
+                      data-product-id="<%= product._id || '' %>"
+                    >
+                      Remove Offer
+                    </button>
+                  <% } else { %>
+                    <button 
+                      class="btn btn-info btn-sm add-offer-btn" 
+                      data-product-id="<%= product._id || '' %>"
+                    >
+                      Add Offer
+                    </button>
                   <% } %>
                 </div>
               </td>
@@ -143,10 +252,26 @@
       </div>
     </div>
 
+    <!-- Offer Modal -->
+    <div id="offerModal" class="offer-modal">
+      <div class="offer-modal-content">
+        <h3>Add Product Offer</h3>
+        <div class="offer-input-group">
+          <label for="offerPercentage">Offer Percentage (0-100):</label>
+          <input type="number" id="offerPercentage" min="0" max="100" step="1" placeholder="Enter percentage">
+          <div id="offerError" class="offer-error" style="display: none;"></div>
+        </div>
+        <div class="offer-modal-buttons">
+          <button class="offer-confirm-btn" id="confirmOffer">Add Offer</button>
+          <button class="offer-cancel-btn" id="cancelOffer">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <script src="/js/admin/adminNav.js"></script>
 
-    <!-- SweetAlert confirmation for Delete -->
     <script>
+      // Delete confirmation
       document.querySelectorAll(".delete-link").forEach((link) => {
         link.addEventListener("click", (e) => {
           e.preventDefault();
@@ -165,6 +290,181 @@
           });
         });
       });
+
+      // Remove offer functionality
+      document.querySelectorAll(".remove-offer-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const productId = e.target.getAttribute('data-product-id');
+          
+          Swal.fire({
+            title: "Remove Offer?",
+            text: "Are you sure you want to remove this product offer?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#28a745",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, remove offer",
+            reverseButtons: true,
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Send POST request to remove offer
+              fetch('/admin/product/removeOffer', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: productId })
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  Swal.fire({
+                    title: "Success!",
+                    text: data.message,
+                    icon: "success",
+                    confirmButtonColor: "#28a745"
+                  }).then(() => {
+                    window.location.reload();
+                  });
+                } else {
+                  Swal.fire({
+                    title: "Error!",
+                    text: data.message || "Failed to remove offer",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                  });
+                }
+              })
+              .catch(error => {
+                Swal.fire({
+                  title: "Error!",
+                  text: "Something went wrong: " + error.message,
+                  icon: "error",
+                  confirmButtonColor: "#d33"
+                });
+              });
+            }
+          });
+        });
+      });
+
+      // Offer modal functionality
+      const offerModal = document.getElementById('offerModal');
+      const offerInput = document.getElementById('offerPercentage');
+      const offerError = document.getElementById('offerError');
+      const confirmOfferBtn = document.getElementById('confirmOffer');
+      const cancelOfferBtn = document.getElementById('cancelOffer');
+      let currentProductId = null;
+
+      // Open modal when add offer button is clicked
+      document.querySelectorAll('.add-offer-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          currentProductId = e.target.getAttribute('data-product-id');
+          offerModal.style.display = 'block';
+          offerInput.focus();
+          // Reset form
+          offerInput.value = '';
+          offerError.style.display = 'none';
+        });
+      });
+
+      // Close modal when cancel is clicked
+      cancelOfferBtn.addEventListener('click', () => {
+        offerModal.style.display = 'none';
+        currentProductId = null;
+      });
+
+      // Close modal when clicking outside
+      window.addEventListener('click', (e) => {
+        if (e.target === offerModal) {
+          offerModal.style.display = 'none';
+          currentProductId = null;
+        }
+      });
+
+      // Validate and submit offer
+      confirmOfferBtn.addEventListener('click', () => {
+        const percentage = parseFloat(offerInput.value);
+        
+        // Validation
+        if (!offerInput.value.trim()) {
+          showOfferError('Please enter an offer percentage');
+          return;
+        }
+        
+        if (isNaN(percentage)) {
+          showOfferError('Please enter a valid number');
+          return;
+        }
+        
+        if (percentage < 0 || percentage > 100) {
+          showOfferError('Offer percentage must be between 0 and 100');
+          return;
+        }
+        
+        if (!Number.isInteger(percentage)) {
+          showOfferError('Please enter a whole number');
+          return;
+        }
+        
+        if (percentage === 0) {
+          showOfferError('Offer percentage must be greater than 0');
+          return;
+        }
+        
+        // If validation passes, send POST request
+        if (currentProductId) {
+          fetch('/admin/product/addOffer', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              id: currentProductId, 
+              offer: percentage 
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire({
+                title: "Success!",
+                text: data.message,
+                icon: "success",
+                confirmButtonColor: "#28a745"
+              }).then(() => {
+                offerModal.style.display = 'none';
+                window.location.reload();
+              });
+            } else {
+              showOfferError(data.message || "Failed to add offer");
+            }
+          })
+          .catch(error => {
+            showOfferError('Something went wrong: ' + error.message);
+          });
+        }
+      });
+
+      // Handle Enter key in input
+      offerInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          confirmOfferBtn.click();
+        }
+      });
+
+      // Clear error when user starts typing
+      offerInput.addEventListener('input', () => {
+        if (offerError.style.display !== 'none') {
+          offerError.style.display = 'none';
+        }
+      });
+
+      function showOfferError(message) {
+        offerError.textContent = message;
+        offerError.style.display = 'block';
+        offerInput.focus();
+      }
     </script>
   </body>
 </html>

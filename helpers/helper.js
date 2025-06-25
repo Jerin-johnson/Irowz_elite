@@ -10,31 +10,61 @@ function generateOtp() {
 }
 
 //send verfication Mail
+// async function sendVerficationEmail(email, otp) {
+//   try {
+//     const transpot = nodemailer.createTransport({
+//       service: "gmail",
+//       port: 587,
+//       secure: false,
+//       requireTLS: true,
+//       auth: {
+//         user: process.env.NODEMAILER_EMAIL,
+//         pass: process.env.NODEMAILER_PASS,
+//       },
+//     });
+
+//     const info = await transpot.sendMail({
+//       from: process.env.NODEMAILER_EMAIL,
+//       to: email,
+//       subject: "Please verify your otp",
+//       text: `Your Otp is ${otp}`,
+//       html: `<b> your Otp ${otp}</b>`,
+//     });
+//     console.log(info.accepted);
+
+//     return info.accepted.length > 0;
+//   } catch (error) {
+//     console.error("Error sending email", error.message);
+//     return false;
+//   }
+// }
+
+
 async function sendVerficationEmail(email, otp) {
   try {
-    const transpot = nodemailer.createTransport({
+    console.log("The gmail and otp is ",email+"  ",otp);
+    const transport = nodemailer.createTransport({
       service: "gmail",
-      port: 587,
-      secure: false,
-      requireTLS: true,
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.NODEMAILER_EMAIL,
         pass: process.env.NODEMAILER_PASS,
       },
     });
 
-    const info = await transpot.sendMail({
+    const info = await transport.sendMail({
       from: process.env.NODEMAILER_EMAIL,
       to: email,
-      subject: "Please verify your otp",
-      text: `Your Otp is ${otp}`,
-      html: `<b> your Otp ${otp}</b>`,
+      subject: "Please verify your OTP",
+      text: `Your OTP is ${otp}`,
+      html: `<b>Your OTP is: ${otp}</b>`,
     });
-    console.log(info.accepted);
 
+    console.log("Email sent to:", info.accepted);
     return info.accepted.length > 0;
   } catch (error) {
-    console.error("Error sending email", error.message);
+    console.error("Error sending email:", error.message);
     return false;
   }
 }

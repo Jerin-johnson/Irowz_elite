@@ -693,21 +693,7 @@
 <body>
     <!-- Header Section Begin -->
     <header class="header">
-        <div class="header__top">
-            <div class="container">
-                <div class="header__top__wrapper">
-                    <div class="header__top__left">
-                        <p>Free shipping, 30-day return or refund guarantee.</p>
-                    </div>
-                    <div class="header__top__right">
-                        <div class="header__top__links">
-                            <a href="/login">Sign in</a>
-                            <a href="#">FAQs</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+     
         <div class="container">
             <div class="header__main">
                 <div class="header__logo">
@@ -718,7 +704,6 @@
                         <li><a href="/">Home</a></li>
                         <li><a href="/shop">Shop</a></li>
                         <li><a href="/wishlist">Wishlist</a></li>
-                        <li><a href="/contact">Contacts</a></li>
                     </ul>
                 </nav>
                 <div class="header__nav__option">
@@ -734,8 +719,6 @@
                     <a href="/signup" class="sign-in-link">Sign Up</a>
                     <a href="/login" class="sign-in-link">Login</a>
                     <% } %>
-                    <a href="/shop" class="search-switch"><i class="fi-rs-search"></i></a>
-                    <a href="/cart"><i class="fi-rs-shopping-cart"></i> <span>0</span></a>
                 </div>
                 <div class="canvas__open"><i class="fa fa-bars"></i></div>
             </div>
@@ -937,13 +920,12 @@
                             button: "View Wishlist",
                         }).then(() => {
                             // Optionally redirect to wishlist page
-                            // window.location.href = '/wishlist';
+                             window.location.href = '/wishlist';
                         });
                     } else {
                         swal({
-                            title: "Failed!",
+                            title: "Caution!",
                             text: data.message || "Failed to add to wishlist.",
-                            icon: "error",
                             button: "close",
                         });
                     }

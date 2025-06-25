@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Edit Coupon – Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/admin/category.css" />
+  <link rel="stylesheet" href="/css/admin/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    .edit-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 16px;
+      color: #555;
+    }
+    
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus, .form-group select:focus {
+      border-color: #3498db;
+      outline: none;
+      box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .form-row .form-group {
+      flex: 1;
+    }
+    
+    .error {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: 5px;
+      display: none;
+    }
+    
+    .btn-container {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    
+    .btn {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      transition: background-color 0.3s;
+    }
+    
+    .btn-primary {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #2980b9;
+    }
+    
+    .btn-secondary {
+      background-color: #95a5a6;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #7f8c8d;
+    }
+    
+    .coupon-info {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      border-left: 4px solid #3498db;
+    }
+    
+    .coupon-info h3 {
+      margin: 0 0 10px 0;
+      color: #2c3e50;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      font-size: 14px;
+    }
+    
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .info-label {
+      font-weight: 500;
+      color: #555;
+    }
+    
+    .info-value {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <%- include('../partials/admin/header') %>
+
+  <div class="container">
+    <div class="header">
+      <h1>EDIT COUPON</h1>
+      <p>Update coupon details</p>
+    </div>
+
+    <div class="edit-container">
+      <!-- Coupon Info Display -->
+      <div class="coupon-info">
+        <h3>Current Coupon Information</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Code:</span>
+            <span class="info-value"><strong><%= coupon.code %></strong></span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Times Used:</span>
+            <span class="info-value"><%= coupon.usedCount %></span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Created:</span>
+            <span class="info-value"><%= new Date(coupon.createdAt).toLocaleDateString() %></span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Status:</span>
+            <span class="info-value">
+              <% if (!coupon.isActive) { %>
+                <span style="color: #e74c3c;">Inactive</span>
+              <% } else if (new Date(coupon.expiresAt) < new Date()) { %>
+                <span style="color: #95a5a6;">Expired</span>
+              <% } else { %>
+                <span style="color: #27ae60;">Active</span>
+              <% } %>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Form -->
+      <form id="editCouponForm">
+        <input type="hidden" name="id" value="<%= coupon._id %>">
+        
+        <div class="form-group">
+          <label for="code">Coupon Code *</label>
+          <input type="text" id="code" name="code" value="<%= coupon.code %>" required style="text-transform: uppercase;">
+          <div id="codeError" class="error">Coupon code is required</div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="discountPercent">Discount Percentage (%) *</label>
+            <input type="number" id="discountPercent" name="discountPercent" value="<%= coupon.discountPercent %>" min="1" max="100" required>
+            <div id="discountError" class="error">Discount must be between 1 and 100</div>
+          </div>
+          <div class="form-group">
+            <label for="maxDiscountAmount">Max Discount Amount (₹)</label>
+            <input type="number" id="maxDiscountAmount" name="maxDiscountAmount" value="<%= coupon.maxDiscountAmount || '' %>" min="0">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="minPurchaseAmount">Min Purchase Amount (₹)</label>
+            <input type="number" id="minPurchaseAmount" name="minPurchaseAmount" value="<%= coupon.minPurchaseAmount %>" min="0">
+          </div>
+          <div class="form-group">
+            <label for="expiresAt">Expiry Date *</label>
+            <input type="date" id="expiresAt" name="expiresAt" value="<%= new Date(coupon.expiresAt).toISOString().split('T')[0] %>" required>
+            <div id="expiryError" class="error">Expiry date cannot be in the past</div>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="onlyFor">Available For</label>
+            <select id="onlyFor" name="onlyFor">
+              <option value="all" <%= coupon.onlyFor === 'all' ? 'selected' : '' %>>All Users</option>
+              <option value="newUsers" <%= coupon.onlyFor === 'newUsers' ? 'selected' : '' %>>New Users Only</option>
+              <option value="vipUsers" <%= coupon.onlyFor === 'vipUsers' ? 'selected' : '' %>>VIP Users Only</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="usageLimitPerUser">Usage Limit Per User</label>
+            <input type="number" id="usageLimitPerUser" name="usageLimitPerUser" value="<%= coupon.usageLimitPerUser %>" min="1">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="totalUsageLimit">Total Usage Limit (Optional)</label>
+            <input type="number" id="totalUsageLimit" name="totalUsageLimit" value="<%= coupon.totalUsageLimit || '' %>" min="1">
+          </div>
+          <div class="form-group">
+            <label for="isActive">Status</label>
+            <select id="isActive" name="isActive">
+              <option value="true" <%= coupon.isActive ? 'selected' : '' %>>Active</option>
+              <option value="false" <%= !coupon.isActive ? 'selected' : '' %>>Inactive</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="btn-container">
+          <button type="submit" class="btn btn-primary">Update Coupon</button>
+          <a href="/admin/coupon" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/admin/adminNav.js"></script>
+  <script>
+    const editForm = document.getElementById('editCouponForm');
+    
+    // Form validation
+    document.getElementById('expiresAt').addEventListener('change', function() {
+      const selectedDate = new Date(this.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (selectedDate < today) {
+        showError(document.getElementById('expiryError'), "Expiry date cannot be in the past");
+      } else {
+        hideError(document.getElementById('expiryError'));
+      }
+    });
+    
+    document.getElementById('discountPercent').addEventListener('input', function() {
+      const value = parseInt(this.value);
+      if (isNaN(value) || value < 1 || value > 100) {
+        showError(document.getElementById('discountError'), "Discount must be between 1 and 100");
+      } else {
+        hideError(document.getElementById('discountError'));
+      }
+    });
+    
+    // Helper functions
+    function showError(element, message) {
+      if (element) {
+        element.textContent = message;
+        element.style.display = 'block';
+      }
+    }
+    
+    function hideError(element) {
+      if (element) {
+        element.style.display = 'none';
+      }
+    }
+    
+    // Form submission
+    editForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData);
+      
+      fetch('/admin/coupon/edit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire('Success!', data.message, 'success').then(() => {
+            window.location.href = '/admin/coupon';
+          });
+        } else {
+          Swal.fire('Failed!', data.message, 'error');
+        }
+      })
+      .catch(error => {
+        Swal.fire('Error!', 'An error occurred while updating the coupon.', 'error');
+        console.error('Error:', error);
+      });
+    });
+  </script>
+</body>
+</html>

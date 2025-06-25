@@ -499,7 +499,13 @@
             });
             const result = await response.json();
             if (result.success) {
-                swal("Added to Cart!", "Item has been added to your shopping cart.", "success");
+                swal("Added to Cart!", "Item has been added to your shopping cart.", "success")
+                .then(()=>{
+                    setTimeout(()=>{
+                    window.location.reload();
+                },500)
+                })
+                
             } else {
                 swal("Error!", result.message || "Failed to add item to cart.", "error");
             }

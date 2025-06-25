@@ -1,41 +1,92 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const mongoose = require('mongoose');
+const { Schema, Types } = mongoose;
 
-const couponSchema = new mongoose.Schema({
-  name: {
+const couponSchema = new Schema({
+  code: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    uppercase: true,
+    trim: true
   },
-  createdOn: {
-    type: Date,
-    default: Date.now,
-    required: true
-  },
-  expireOn: {
-    type: Date,
-    required: true
-  },
-  offerPrice: {
+
+ 
+  discountPercent: {
     type: Number,
-    required: true
+    required: true,
+    min: 1,
+    max: 100
   },
-  minimumPrice: {
+
+  // Max discount in ₹ this coupon can give (optional but useful)
+  maxDiscountAmount: {
     type: Number,
-    required: true
+    default: null // no cap by default
   },
-  isList: {
+
+  // Minimum purchase required to apply the coupon
+  minPurchaseAmount: {
+    type: Number,
+    default: 0
+  },
+
+  // Coupon status control
+  isActive: {
     type: Boolean,
     default: true
   },
-  userId: [
+
+  // Coupon expiry date
+  expiresAt: {
+    type: Date,
+    required: true
+  },
+
+  // Who can use this coupon
+  onlyFor: {
+    type: String,
+    enum: ['all', 'newUsers', 'vipUsers', 'specificUsers'],
+    default: 'all'
+  },
+
+  // If onlyFor = specificUsers, check this
+  allowedUsers: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
+      type: Types.ObjectId,
+      ref: 'User'
+    }
+  ],
+
+  // Per-user usage limit (e.g., 1 means only once per user)
+  usageLimitPerUser: {
+    type: Number,
+    default: 1
+  },
+
+  // Max usage across all users
+  totalUsageLimit: {
+    type: Number
+  },
+
+  // How many users have used this
+  usedCount: {
+    type: Number,
+    default: 0
+  },
+
+  // Users who already used it
+  usedBy: [
+    {
+      type: Types.ObjectId,
+      ref: 'User'
     }
   ]
+}, {
+  timestamps: true
 });
 
-const Coupon = mongoose.model("Coupon", couponSchema);
 
-module.exports = {Coupon};
+
+
+const Coupon = mongoose.model('Coupon', couponSchema);
+module.exports={Coupon}

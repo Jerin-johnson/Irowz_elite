@@ -287,7 +287,7 @@ const loadAddAddressPage = async (req, res) => {
     }
 
     const user = await User.findById(req.session.user);
-    res.render("user/address/add", { user });
+    res.render("user/address/add", { user ,redirectpage:req.query.page});
   } catch (error) {
     console.log(error.message);
     return res.redirect("/error-404");
@@ -300,6 +300,7 @@ const addAddress = async (req, res) => {
       throw new Error("Please login First");
     }
 
+      const redriect = req.query.page;
     const {
       firstName,
       lastName,
@@ -366,7 +367,7 @@ const addAddress = async (req, res) => {
 
     return res
       .status(200)
-      .json({ success: true, message: "Address Added successfully" });
+      .json({ success: true, message: "Address Added successfully",redriect });
   } catch (error) {
     console.error(error.message);
     return res.status(400).json({ success: false, message: error.message });
