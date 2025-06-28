@@ -1,5 +1,6 @@
 const multer = require('multer');
 const path = require('path');
+const { Category } = require('../models/categorySchema');
 
 // Configure storage
 const storage = multer.diskStorage({
@@ -16,6 +17,8 @@ const storage = multer.diskStorage({
   }
 });
 //when a category is delted => product stock that less than 5 and product price less than 1000 wants to deleted
+
+
 
 
 // File filter to allow only JPEG and PNG

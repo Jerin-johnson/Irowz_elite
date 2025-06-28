@@ -862,7 +862,7 @@
                         const rzp = new Razorpay(options);
                         
                         rzp.on('payment.failed', function (response) {
-                            console.log("❌ Razorpay payment failed:", response.error);
+                           
                             swal("Payment Failed", response.error.description, "error")
                             .then(() => {
                                 window.location.href = `/order/failure?orderId=${data.orderId}`;

@@ -39,6 +39,7 @@ const orderSchema = new Schema({
       offerType: {
         type: String,
         enum: ["Product", "Category", "None"],
+        default:'None'
       },
       isCouponApplied: {
         type: Boolean,

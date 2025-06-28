@@ -89,7 +89,9 @@ const addProduct = async (req, res) => {
     }
 
 
-    const existProduct = await Product.findOne({ productName: name });
+    const existProduct = await Product.findOne({ productName: name});
+
+
 
     if (existProduct) {
       throw new Error("The Product Name already exist");
@@ -225,6 +227,7 @@ const editProduct = async (req, res) => {
     if (productOffer && (productOffer < 0 || productOffer > 100)) {
   throw new Error("Product offer must be between 0 and 100%");
 }
+
 
     // Check if product exists
     const product = await Product.findById(productId);

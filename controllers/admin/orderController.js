@@ -237,7 +237,16 @@ console.log(productIndex)
 
      if(action === "approve")
      {
-    
+      let refundAmount =0;
+      if(order.couponApplied)
+      {
+        refundAmount = order.items[productIndex].totalPrice - order.couponDiscount;
+        order.couponApplied=false;
+        order.couponCode = null;
+        order.couponDiscount =0;
+      }else{
+        refundAmount = order.items[productIndex].totalPrice
+      }
 
        let wallet = await Wallet.findOne({userId});
        if(!wallet)
@@ -250,11 +259,11 @@ console.log(productIndex)
        
        }
 
-       wallet.balance = parseFloat((wallet.balance + order.items[productIndex].totalPrice).toFixed(2));
+       wallet.balance = parseFloat((wallet.balance + refundAmount).toFixed(2));
 
        wallet.transactions.push({
         type:"credit",
-        amount:order.items[productIndex].totalPrice,
+        amount:refundAmount,
         reason:"Refunded",
         orderId:order.orderId,
        })
@@ -265,6 +274,7 @@ console.log(productIndex)
          order.items[productIndex].refundMethod ='wallet';
          order.items[productIndex].refundDate = new Date();
          order.items[productIndex].returnCompletedAt = new Date();
+         order.totalRefundAmount += refundAmount;
 
         
 

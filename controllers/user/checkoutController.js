@@ -181,12 +181,24 @@ const loadCheckOutPage = async (req, res) => {
     const cartAmount = subtotal - totalDiscount
 
     // Get available coupons for this user
-    const availableCoupons = await Coupon.find({
+    let allCoupons= await Coupon.find({
       isActive: true,
       expiresAt: { $gt: new Date() },
       minPurchaseAmount: { $lte: cartAmount },
-    }).select("code discountPercent maxDiscountAmount minPurchaseAmount onlyFor")
+    });
 
+
+    let  availableCoupons= allCoupons.filter((each)=>{
+      let userAgeLimitPerUser = each.usedBy.filter((id)=>{
+        return id.toString() === userId.toString()
+      }).length;
+
+      return userAgeLimitPerUser <  each.usageLimitPerUser
+    })
+
+
+
+    console.log("The available coupons for the user ",availableCoupons)
     // Check applied coupon
     let appliedCoupon = null
     let couponDiscount = 0
@@ -493,7 +505,7 @@ const placeOrder = async (req, res) => {
     // Calculate amounts after product discounts
     const amountAfterDiscount = subtotal - totalDiscount
 
-    // Handle coupon discount
+    //  coupon discount
     let couponDiscount = 0
     let appliedCoupon = null
 
@@ -631,7 +643,7 @@ const placeOrder = async (req, res) => {
 const verifyPayment = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
-
+    const userId = req.session.user;
     // Validate input
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({
@@ -673,8 +685,21 @@ const verifyPayment = async (req, res) => {
       order.paymentStatus = "completed";
       await order.save();
 
+      const cart =await Cart.findOne({userId :order.userId});
+      if(cart.couponApplied)
+      {
+        await Coupon.findOneAndUpdate({code:cart.couponCode}, {
+          $inc: { usedCount: 1 },
+          $push: { usedBy: userId },
+        })
+      }
+
       // Clear user's cart
-      await Cart.findOneAndUpdate({ userId: order.userId }, { $set: { items: [] } });
+      await Cart.findOneAndUpdate({ userId: order.userId }, { $set: {
+              items: [],
+            couponApplied: false,
+            couponCode: null,
+            couponDiscount: 0,} });
 
       // Reduce stock for each product
       for (const item of order.items) {
@@ -722,9 +747,10 @@ const loadOrderSuccessPage = async (req, res) => {
   try {
     console.log(req.query);
     const { orderId } = req.query;
-    const userId = req.user.user;
+    const userId = req.session.user;
 
     const user = await User.findOne({userId});
+    console.log(user)
 
     if (!orderId) {
       return res.redirect("/");

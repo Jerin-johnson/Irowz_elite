@@ -1,5 +1,5 @@
 const { Category } = require("../../models/categorySchema");
-
+const{Product}=require("../../models/productSchema");
 
 const loadCategory = async (req, res) => {
   try {
@@ -75,14 +75,15 @@ const loadAddCategory = (req, res) => {
 const listCategory = async (req, res) => {
   try {
     let { id } = req.query;
-
-    await Category.findByIdAndUpdate(id, { isListed: true });
+  await Category.findByIdAndUpdate(id, { isListed: true });
     res.redirect("/admin/category");
   } catch (error) {
     console.error("Error unlisting category:", err);
     res.status(500).send("Internal Server Error");
   }
 };
+
+
 
 const unlistCategory = async (req, res) => {
   try {
@@ -96,6 +97,9 @@ const unlistCategory = async (req, res) => {
   }
 };
 
+
+
+
 const loadEditCategory = async (req, res) => {
   try {
     const id = req.query.id;
@@ -106,6 +110,8 @@ const loadEditCategory = async (req, res) => {
     res.send("Error in edit category page");
   }
 };
+
+
 
 const editCategory = async (req, res) => {
   try {

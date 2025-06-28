@@ -21,7 +21,9 @@ const loadWalletPage = async (req, res) => {
         minute: "2-digit",
         hour12: true,
       }),
-      transactions: wallet.transactions.slice(0, 5).map((tx) => ({
+      transactions: wallet.transactions
+      .sort((a, b) => b.date - a.date)
+       .map((tx) => ({
         type: tx.type,
         amount: tx.amount.toFixed(2),
         reason: tx.reason,
@@ -38,7 +40,6 @@ const loadWalletPage = async (req, res) => {
       })),
     };
 
-   walletData.transactions = walletData.transactions.reverse();
 
     const user = await User.findById(userId)
     res.render("user/wallet/wallet", { walletData,user});

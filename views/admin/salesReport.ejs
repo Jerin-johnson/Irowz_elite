@@ -635,7 +635,7 @@
                 <% if (totalPages > 1) { %>
                     <div class="pagination">
                         <% for (let i = 1; i <= totalPages; i++) { %>
-                            <a href="/admin/sales-report?page=<%= i %>&period=<%= period %>&startDate=<%= startDate || '' %>&endDate=<%= endDate || '' %>">
+                            <a href="/admin/sales/report?page=<%= i %>&period=<%= period %>&startDate=<%= startDate || '' %>&endDate=<%= endDate || '' %>">
                                 <button class="<%= i === currentPage ? 'active' : '' %>"><%= i %></button>
                             </a>
                         <% } %>

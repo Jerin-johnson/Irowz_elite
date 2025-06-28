@@ -16,6 +16,7 @@ const {
 } = require("../../helpers/helper");
 const passport = require("passport");
 const { Address } = require("../../models/addressSchema");
+const { generateUniqueReferralCode } = require("../../helpers/userReferal");
 
 const loadVerifyEmail = (req, res) => {
   try {
@@ -150,6 +151,13 @@ const loadProfilePage = async (req, res) => {
     const wishlistCount = wishlist?.products?.length || 0;
 
     const address = await Address.findOne({userId :user})
+
+    if(!userData.referalCode)
+    {
+      userData.referalCode = await generateUniqueReferralCode(userData.fullName);
+      await userData.save();
+      
+    }
 
     console.log("Total Order Items:", totalOrderItems, "Wishlist Count:", wishlistCount);
 

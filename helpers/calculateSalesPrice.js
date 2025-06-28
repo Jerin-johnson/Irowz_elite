@@ -2,15 +2,12 @@ const { Category } = require("../models/categorySchema");
 
 async function getCategoryOfferIfValid(categoryId) {
   const category = await Category.findById(categoryId);
-   console.log("fbhdfhdsfbh vsdbfbhds")
   if (!category || !category.categoryOffer || !category.offerStartDate || !category.offerEndDate) {
     return 0;
   }
 
-  console.log("fhdwbfhbew")
   const now = new Date();
   if (now >= category.offerStartDate && now <= category.offerEndDate) {
-    console.log("fhdwbfhbewfefewfew")
     return category.categoryOffer;
   }
   return 0;
