@@ -34,6 +34,7 @@ const applyCoupon = async(req,res)=>{
 
     console.log(cartAmount)
      // Validate minimum purchase amount
+
     if (cartAmount < coupon.minPurchaseAmount) {
       return res.json({
         success: false,
@@ -55,6 +56,12 @@ let discount = (cartAmount * coupon.discountPercent) / 100
 if (coupon.maxDiscountAmount && discount > coupon.maxDiscountAmount) {
   discount = coupon.maxDiscountAmount
 }
+
+
+     if((cartAmount-discount) <= 10)
+     {
+      return res.json({success:false,message:"This coupon cannot use for this order"})
+     }
 
 cart.couponApplied = true
 cart.couponCode = coupon.code

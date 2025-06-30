@@ -1,5 +1,4 @@
 <header class="header">
-   
     <div class="container">
         <div class="header__main">
             <div class="header__logo">
@@ -15,7 +14,7 @@
             <div class="header__nav__option">
                 <% if (typeof user !== 'undefined' && user) { %>
                 <div class="dropdown">
-                    <a class="premium-user-link"><%= user.fullName.split(" ")[0].toUpperCase() %> <i class="fas fa-chevron-down"></i></a>
+                    <!-- <a class="premium-user-link"><%= user.fullName.split(" ")[0].toUpperCase() %> <i class="fas fa-chevron-down"></i></a> -->
                     <div class="dropdown-content">
                         <a href="/profile">Profile</a>
                         <a href="/logout" onclick="confirmLogout(event)">Logout</a>
@@ -25,12 +24,244 @@
                 <a href="/signup" class="sign-in-link">Sign Up</a>
                 <a href="/login" class="sign-in-link">Login</a>
                 <% } %>
-                
-
-              
-
             </div>
             <div class="canvas__open"><i class="fa fa-bars"></i></div>
         </div>
     </div>
 </header>
+
+<style>
+.header {
+    background-color: #fff;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    position: relative;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.header__main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header__logo a {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+}
+
+.header__menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+.header__menu ul li {
+    margin-left: 20px;
+}
+
+.header__menu ul li a {
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+.header__menu ul li a:hover {
+    color: #b4883e;
+}
+
+.header__nav__option {
+    display: flex;
+    align-items: center;
+}
+
+.sign-in-link {
+    text-decoration: none;
+    color: #333;
+    margin-left: 15px;
+    font-size: 14px;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.sign-in-link:hover {
+    background-color: #b4883e;
+    color: #fff;
+    border-color: #b4883e;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.premium-user-link {
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 120px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    z-index: 1000; /* Adjusted to ensure it stays below canvas__open */
+    border-radius: 5px;
+    right: 0;
+}
+
+.dropdown-content a {
+    color: #333;
+    padding: 10px 15px;
+    text-decoration: none;
+    display: block;
+    font-size: 14px;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.canvas__open {
+    display: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #333;
+    z-index: 1001; /* Increased to ensure it appears above dropdown */
+}
+
+@media (max-width: 991px) {
+    .header__menu {
+        display: none;
+    }
+    
+    .header__menu.active {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #fff;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        padding: 10px 0;
+        z-index: 1000;
+    }
+    
+    .header__menu.active ul {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .header__menu.active ul li {
+        margin: 10px 0;
+        width: 100%;
+    }
+    
+    .header__menu.active ul li a {
+        padding: 10px 15px;
+        width: 100%;
+    }
+    
+    .canvas__open {
+        display: block;
+    }
+    
+    .header__nav__option {
+        flex-direction: column;
+        align-items: flex-end;
+    }
+    
+    .sign-in-link, .premium-user-link {
+        margin: 5px 0;
+    }
+    
+    .dropdown-content {
+        right: auto;
+        left: 0;
+        width: 100%;
+        z-index: 1000; /* Ensure it stays below canvas__open on mobile */
+    }
+}
+
+@media (max-width: 767px) {
+    .header__logo a {
+        font-size: 20px;
+    }
+    
+    .sign-in-link, .premium-user-link {
+        font-size: 13px;
+        padding: 4px 8px;
+    }
+    
+    .dropdown-content a {
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 575px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .header__logo a {
+        font-size: 18px;
+    }
+    
+    .canvas__open {
+        font-size: 18px;
+    }
+    
+    .sign-in-link, .premium-user-link {
+        font-size: 12px;
+        padding: 3px 6px;
+    }
+    
+    .dropdown-content a {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const canvasOpen = document.querySelector('.canvas__open');
+    const mobileMenu = document.querySelector('.header__menu');
+
+    if (canvasOpen && mobileMenu) {
+        canvasOpen.addEventListener('click', function() {
+            mobileMenu.classList.toggle('active');
+        });
+    }
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.header__main')) {
+            mobileMenu.classList.remove('active');
+        }
+    });
+});
+</script>

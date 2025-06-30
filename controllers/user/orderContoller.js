@@ -17,6 +17,8 @@ const loadOrderDetailedPage = async (req, res) => {
 
     const userId = req.session.user;
 
+    
+
     const user = await User.findById(userId);
     console.log(user);
 
@@ -71,6 +73,8 @@ const loadOrderPage = async (req, res) => {
         { "items.productName": { $regex: search, $options: "i" } },
       ];
     }
+
+     await Order.deleteMany({paymentMethod:"online",paymentStatus:"pending"});
 
     const orders = await Order.find(searchQuery)
       .populate({ path: "items.productId" })
@@ -192,17 +196,17 @@ const cancelOrderItem = async (req, res) => {
       0
     );
 
-    // order.tax = calculateTax(order.totalActiveAmount - order.discount);
-    order.tax = 0;
-    order.shipping =
-      order.totalActiveAmount >= 1000
-        ? 0
-        : order.totalActiveAmount > 0
-          ? 50
-          : 0;
+   
+    // order.tax = 0;
+    // order.shipping =
+    //   order.totalActiveAmount >= 1000
+    //     ? 0
+    //     : order.totalActiveAmount > 0
+    //       ? 50
+    //       : 0;
 
-    order.finalAmount =
-      order.totalActiveAmount - order.discount + order.tax + order.shipping;
+    // order.finalAmount =
+    //   order.totalActiveAmount - order.discount + order.tax + order.shipping;
 
     //  refunding online paid user
     if (
@@ -352,6 +356,7 @@ const cancelEntireOrder = async (req, res) => {
     order.cancelledAt = now;
     order.cancelledBy = "user";
     order.cancellationReason = reason || "Entire order cancelled by user";
+    order.totalCancelAmount = order.finalAmount
 
     await order.save();
 

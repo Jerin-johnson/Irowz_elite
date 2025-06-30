@@ -1,5 +1,8 @@
 const { User } = require("../../models/userSchema");
 const bcrypt = require("bcrypt");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
+
 
 
 
@@ -9,7 +12,7 @@ const bcrypt = require("bcrypt");
 const loadLoginAdmin = (req,res)=>{
 
     if(req.session.admin){
-       return res.redirect("/admin/dash")
+       return res.redirect("/admin/dashboard")
     }
 
        return res.render("admin/adminlogin",{message:null})
@@ -33,12 +36,12 @@ const verifyAdminLogin =async (req,res)=>{
           {
             req.session.admin = true;
             req.session.admin = admin._id;
-            return res.redirect("/admin/dash")
+            return res.redirect("/admin/dashboard")
           }else{
-            return res.render("admin/adminlogin",{message:"Invalid credentials"})
+            return res.render("admin/adminlogin",{message:message.INVALID_CREDENTIALS});
           }
     }else{
-        res.render("admin/adminlogin",{message:"User does Not exist"})
+        res.render("admin/adminlogin",{message:message.USER_NOT_FOUND})
     }
 
  } catch (error) {

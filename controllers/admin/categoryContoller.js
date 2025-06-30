@@ -1,5 +1,7 @@
 const { Category } = require("../../models/categorySchema");
 const{Product}=require("../../models/productSchema");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 
 const loadCategory = async (req, res) => {
   try {
@@ -33,7 +35,7 @@ const loadCategory = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching categories:", error);
-    res.status(500).send("Server Error");
+    res.status(Status.INTERNAL_SERVER_ERROR).send(message.SERVER_ERROR);
   }
 };
 
@@ -58,9 +60,9 @@ const addCategory = async (req, res) => {
       description,
     });
     await newCat.save();
-    return res.status(201).json({ message: "Category add successfully" });
+    return res.status(Status.CREATED).json({ message: "Category add successfully" });
   } catch (error) {
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(Status.INTERNAL_SERVER_ERROR).json({ message: message.SERVER_ERROR});
   }
 };
 
@@ -79,7 +81,7 @@ const listCategory = async (req, res) => {
     res.redirect("/admin/category");
   } catch (error) {
     console.error("Error unlisting category:", err);
-    res.status(500).send("Internal Server Error");
+    res.status(Status.INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 };
 
@@ -89,11 +91,14 @@ const unlistCategory = async (req, res) => {
   try {
     let { id } = req.query;
 
+
+  
+
     await Category.findByIdAndUpdate(id, { isListed: false });
     res.redirect("/admin/category");
   } catch (error) {
     console.error("Error unlisting category:", err);
-    res.status(500).send("Internal Server Error");
+    res.status(Status.INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 };
 
@@ -125,7 +130,7 @@ const editCategory = async (req, res) => {
     {
       if(cat.name.toLowerCase() === name.toLowerCase())
       {
-        return res.status(402).json({success:false,message:"The cateogroy already exists"})
+        return res.status(Status.BAD_REQUEST).json({success:false,message:"The cateogroy already exists"})
       }
     }
 
@@ -138,12 +143,12 @@ const editCategory = async (req, res) => {
     );
 
     if (update) {
-      res.status(200).json({ message: "Successfully added" });
+      res.status(Status.CREATED).json({ message: "Successfully added" });
     } else {
-      res.status(404).json({ message: "Category not found" });
+      res.status(Status.NOT_FOUND).json({ message: "Category not found" });
     }
   } catch (error) {
-    res.send("Something wrong in edit category");
+    res.send(message.SERVER_ERROR);
   }
 };
 

@@ -17,6 +17,7 @@ const {
 const passport = require("passport");
 const { Address } = require("../../models/addressSchema");
 const { generateUniqueReferralCode } = require("../../helpers/userReferal");
+const StatusCodes = require("../../utils/status");
 
 const loadVerifyEmail = (req, res) => {
   try {
@@ -189,12 +190,50 @@ const loadChangePassword = async (req, res) => {
   try {
     const userId = req.session.user;
     const user = await User.findById(userId);
-    res.render("user/profile/changepass",{user});
+    if(user.password)
+    {
+      res.render("user/profile/changepass",{user});
+    }else{
+      res.render("user/profile/googlechangepassword",{user});
+    }
   } catch (error) {
     console.error(error.message);
     res.redirect("/error-404");
   }
 };
+
+const addPasswordForGoogleUser = async(req,res)=>{
+  try {
+
+    console.log("The ldsj dsv bdvsbhdvsjhj dvsbhjdsbhj")
+    console.log(req.body)
+
+    const{newPassword,confirmPassword} = req.body;
+    const userId = req.session.user;
+
+    if(!userId)
+    {
+      console.log("The userid is not found in addPasswordForGoogleUser controller");
+      res.redirect("/login")
+    };
+
+    if(newPassword !== confirmPassword)
+    {
+      return res.status(StatusCodes.BAD_REQUEST).json({success:false,message:"password doesn't match"})
+    }
+
+    const hashedPassword = await securePassword(newPassword);
+
+    await User.findByIdAndUpdate(userId,{$set:{password:hashedPassword}});
+
+    return res.status(StatusCodes.ACCEPTED).json({success:true,message:"The password added successfully"});
+    
+  } catch (error) {
+    console.error(error.message);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).render("user/error-404");
+    
+  }
+}
 
 const updateChangePassword = async (req, res) => {
   try {
@@ -662,42 +701,7 @@ const editAddress = async (req, res) => {
   }
 };
 
-// const deleteAddress = async(req,res)=>{
-//   try {
 
-//     const userId = req.session.user;
-//     if(!userId)
-//     {
-//       throw new Error("Please Login")
-//     }
-
-//     const addressId = req.params.id;
-//     if(!addressId) throw new Error("Invalid request");
-
-//     const deleteAddress = await Address.findOne({userId,"addresses._id":addressId},
-//       {addresses:{$elemMatch:{_id:addressId}}}
-//     )
-
-//     if(deleteAddress.addresses[0].isDefault)
-//     {
-//       const update = await Address.updateOne({userId,"addresses._id":{$ne:addressId}},{$set:{"addresses[0].isDefault":true}})
-//     }
-
-//     await Address.updateOne({userId,"addresses._id":addressId},
-//       {$pull:{addresses:{_id:addressId}}}
-//     )
-
-//     return res.status(200).json({success:true,message:"Deleted Successfully"})
-
-    
-    
-//   } catch (error) {
-
-//     console.log(error.message);
-//     return res.status(400).json({success:false,message:error.message});
-    
-//   }
-// }
 
 const deleteAddress = async (req, res) => {
   try {
@@ -796,6 +800,7 @@ module.exports = {
   loadAddressPage,
   loadAddAddressPage,
   updateChangePassword,
+  addPasswordForGoogleUser,
   loadUpdateEmailOtp,
   verifyUpdateEmailOtp,
   updateEmail,

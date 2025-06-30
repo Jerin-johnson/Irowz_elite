@@ -84,8 +84,8 @@ const addProduct = async (req, res) => {
       throw new Error("Regular price must be greater than 0");
     }
 
-    if (productOffer && (productOffer < 0 || productOffer > 100)) {
-      throw new Error("Product offer must be between 0 and 100%");
+    if (productOffer && (productOffer < 0 || productOffer > 90)) {
+      throw new Error("Product offer must be between 0 and 90%");
     }
 
 
@@ -224,8 +224,8 @@ const editProduct = async (req, res) => {
       throw new Error("Regular price must be positive");
     }
   
-    if (productOffer && (productOffer < 0 || productOffer > 100)) {
-  throw new Error("Product offer must be between 0 and 100%");
+    if (productOffer && (productOffer < 0 || productOffer > 90)) {
+  throw new Error("Product offer must be between 0 and 90%");
 }
 
 

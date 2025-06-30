@@ -182,6 +182,7 @@
         display: none;
         font-size: 20px;
         cursor: pointer;
+        z-index: 1001; /* Ensure it stays above other elements */
     }
 
     /* Container */
@@ -512,6 +513,11 @@
             position: absolute;
             right: 20px;
             top: 20px;
+            z-index: 1002; /* Increased z-index to ensure it appears above dropdown */
+        }
+
+        .dropdown-content {
+            z-index: 1001; /* Adjusted to be below canvas__open but above other content */
         }
     }
 
@@ -560,3 +566,27 @@
         }
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const canvasOpen = document.querySelector('.canvas__open');
+        const headerMenu = document.querySelector('.header__menu');
+
+        if (canvasOpen && headerMenu) {
+            canvasOpen.addEventListener('click', function() {
+                headerMenu.classList.toggle('active');
+            });
+        }
+
+        // Close mobile menu and dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.header__main')) {
+                headerMenu.classList.remove('active');
+                const dropdowns = document.querySelectorAll('.dropdown-content');
+                dropdowns.forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+    });
+</script>

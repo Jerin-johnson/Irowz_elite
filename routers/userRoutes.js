@@ -1,7 +1,7 @@
 const express = require("express");
 const userRouter = express.Router();
 const {loadHomePage,pageNotFound,loadSignup,loadLogin,signUp,loadOtp,verifyOtp,ResentOtp,verifyLogin,userLogout,loadShoppingPage}=require("../controllers/user/userController.js");
-const{loadVerifyEmail,verifyEmail,loadForgetPasswordPage,loadForgetPasswordOtpPage,verifyForgetOtp,resetPassword,loadProfilePage,loadEditProflie,loadChangePassword,loadAddressPage,loadAddAddressPage,updateChangePassword,updateProfile,loadUpdateEmailOtp,verifyUpdateEmailOtp,updateEmail,loadUpdateEmail,resendOtpEmail,addAddress,loadEditAddressPage,editAddress,deleteAddress} = require("../controllers/user/profileController.js")
+const{loadVerifyEmail,verifyEmail,loadForgetPasswordPage,loadForgetPasswordOtpPage,verifyForgetOtp,resetPassword,loadProfilePage,loadEditProflie,loadChangePassword,loadAddressPage,loadAddAddressPage,updateChangePassword,updateProfile,loadUpdateEmailOtp,verifyUpdateEmailOtp,updateEmail,loadUpdateEmail,resendOtpEmail,addAddress,loadEditAddressPage,editAddress,deleteAddress,addPasswordForGoogleUser} = require("../controllers/user/profileController.js")
 const { isUserLoggedIn, isUserLoggedOut,ensureOtpSession} = require("../middleware/userMiddleWare.js")
 //google sign in
 const {passport}= require("../config/passport");
@@ -72,6 +72,7 @@ userRouter.get("/profile/edit",isUserLoggedIn,loadEditProflie);
 userRouter.get("/profile/password/edit",isUserLoggedIn,loadChangePassword);
 userRouter.post("/profile/password/edit",updateChangePassword);
 userRouter.post("/profile/update",isUserLoggedIn,upload.single('profileImage'),updateProfile);
+userRouter.post("/profile/password/add",isUserLoggedIn,addPasswordForGoogleUser)
 
 userRouter.get("/profile/email/update/otp",isUserLoggedIn,loadUpdateEmailOtp)
 userRouter.post("/profile/email/update/otp",verifyUpdateEmailOtp)

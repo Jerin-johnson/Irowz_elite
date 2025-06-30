@@ -9,7 +9,7 @@ const adminAuth = async (req, res, next) => {
     const admin = await User.findById(adminId).lean();
 
     if (!admin || !admin.isAdmin) {
-      return res.redirect("/admin/login");
+         res.redirect("/admin/login");
     }
 
     next();
@@ -25,10 +25,10 @@ const isAdminLoggedIn = async (req, res, next) => {
         if (req.session.admin) {
             const admin = await User.findById(req.session.admin);
             if (admin && admin.isAdmin) {
-                return next();
+                 next();
             }
         }
-        return res.redirect("/admin/login");
+         res.redirect("/admin/login");
     } catch (error) {
         console.log("Error in isAdminLoggedIn:", error.message);
         res.redirect("/admin/login");
@@ -41,10 +41,10 @@ const isAdminLoggedOut = async (req, res, next) => {
 
         const admin = await User.findById(req.session.admin);
         if (!admin || !admin.isAdmin) {
-            return next();
+             next();
         }
 
-        return res.redirect("/admin/dash");
+         res.redirect("/admin/dashboard");
     } catch (error) {
         console.error("Error in isAdminLoggedOut:", error.message);
         res.redirect("/admin/login");

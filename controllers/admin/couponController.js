@@ -1,4 +1,6 @@
 const { Coupon } = require("../../models/couponSchema");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 
 const loadCouponPage = async (req, res) => {
   try {
@@ -55,7 +57,7 @@ const createCoupon = async (req, res) => {
     // Check if already exists
     const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
     if (existingCoupon) {
-      return res.json({
+      return res.status(Status.BAD_REQUEST).json({
         success: false,
         message: "Coupon code already exists",
       });
@@ -67,6 +69,21 @@ const createCoupon = async (req, res) => {
         success: false,
         message: "Expiry date cannot be in the past",
       });
+    }
+
+    if(maxDiscountAmount > 10000)
+    {
+      throw new Error("The max discount should be below 10000");
+    }
+
+    if(minPurchaseAmount< 800)
+    {
+      throw new Error("The min purchase amount should be atleast 800 or above ")
+    }
+
+    if(discountPercent > 90)
+    {
+      throw new Error("The maximun discount amount should below 90% ");
     }
 
     const newCoupon = new Coupon({
@@ -81,10 +98,10 @@ const createCoupon = async (req, res) => {
     });
 
     await newCoupon.save();
-    res.json({ success: true, message: "Coupon added successfully" });
+    res.Status(Status.CREATED).json({ success: true, message: "Coupon added successfully" });
   } catch (error) {
     console.error("Error adding coupon:", error);
-    res.json({ success: false, message: "Error adding coupon" });
+    res.json({ success: false, message: error.message });
   }
 };
 
@@ -130,6 +147,22 @@ const editCoupon = async (req, res) => {
       return res.json({ success: false, message: 'Coupon code already exists' });
     }
 
+
+      if(maxDiscountAmount > 10000)
+    {
+      throw new Error("The max discount should be below 10000");
+    }
+
+    if(minPurchaseAmount < 800)
+    {
+      throw new Error("The min purchase amount should be atleast 800 or above ")
+    }
+
+     if(discountPercent > 90)
+    {
+      throw new Error("The maximun discount amount should below 90% ");
+    }
+
      const updateData = {
       code: code.toUpperCase(),
       discountPercent: parseInt(discountPercent),
@@ -143,11 +176,11 @@ const editCoupon = async (req, res) => {
     };
 
         await Coupon.findByIdAndUpdate(id, updateData);
-    res.json({ success: true, message: 'Coupon updated successfully' });
+    res.status(Status.ACCEPTED).json({ success: true, message: 'Coupon updated successfully' });
 
   } catch (error) {
       console.error('Error updating coupon:', error);
-    res.json({ success: false, message: 'Error updating coupon' });
+    res.json({ success: false, message: error.message });
   }
 };
 
@@ -173,7 +206,7 @@ const deleteCoupon = async(req,res)=>{
     res.json({ success: true, message: 'Coupon deleted successfully' });
   } catch (error) {
     console.error('Error deleting coupon:', error);
-    res.json({ success: false, message: 'Error deleting coupon' });
+    res.json({ success: false, message: message.SERVER_ERROR });
   }
 }
 

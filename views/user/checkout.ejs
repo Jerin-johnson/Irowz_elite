@@ -852,7 +852,8 @@
                                 ondismiss: function() {
                                     swal("Payment Cancelled", "Payment was cancelled by user", "warning")
                                     .then(() => {
-                                        window.location.href = `/order/failure?orderId=${data.orderId}`;
+                                        // window.location.href = `/order/failure?orderId=${data.orderId}`;
+                                        window.location.href ="/checkout"
                                     });
                                 }
                             }

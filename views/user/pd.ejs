@@ -703,13 +703,14 @@
                     <ul>
                         <li><a href="/">Home</a></li>
                         <li><a href="/shop">Shop</a></li>
+                        <li><a href="/cart">Cart</a></li>
                         <li><a href="/wishlist">Wishlist</a></li>
                     </ul>
                 </nav>
                 <div class="header__nav__option">
                     <% if (user) { %>
                     <div class="dropdown">
-                        <a class="premium-user-link"><%= user.fullName.split(" ")[0].toUpperCase() %> <i class="fas fa-chevron-down"></i></a>
+                        <!-- <a class="premium-user-link"><%= user.fullName.split(" ")[0].toUpperCase() %> <i class="fas fa-chevron-down"></i></a> -->
                         <div class="dropdown-content">
                             <a href="/profile">Profile</a>
                             <a href="/logout" onclick="confirmLogout(event)">Logout</a>

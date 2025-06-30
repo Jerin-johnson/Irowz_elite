@@ -1,5 +1,8 @@
 const { Brand } = require("../../models/brandSchema");
 const { Product } = require("../../models/productSchema");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
+
 
 const loadBrandPage = async (req, res) => {
   try {
@@ -34,19 +37,19 @@ const addBrand = async (req, res) => {
 
     if (!brandName || brandName.trim().length < 3) {
       return res
-        .status(400)
+        .status(Status.BAD_REQUEST)
         .json({ error: "Brand name must be at least 3 characters long." });
     }
 
     // Check if brand exists already
     const exists = await Brand.findOne({ brandName: brandName });
     if (exists) {
-      return res.status(400).json({ error: "Brand name already exists." });
+      return res.status(Status.BAD_REQUEST).json({ error: "Brand name already exists." });
     };
 
     // In addBrand controller
   if (!req.file) {
-  return res.status(400).json({ error: "Brand logo is required" });
+  return res.status(Status.BAD_REQUEST).json({ error: "Brand logo is required" });
   }
 
     let logoPath = "";
@@ -60,11 +63,11 @@ const addBrand = async (req, res) => {
     })
 
     await brand.save();
-    res.status(201).json({ message: 'Brand created successfully' });
+    res.status(Status.CREATED).json({ message: 'Brand created successfully' });
   } catch (err) {
 
      console.error('Error adding brand:', err);
-    res.status(500).json({ error: 'Server error while adding brand' });
+    res.status(Status.INTERNAL_SERVER_ERROR).json({ error: message.SERVER_ERROR });
   }
 };
 
@@ -75,7 +78,7 @@ const changeStatus = async (req, res) => {
     const id = req.params.id;
     const { isBlocked } = req.body;
 
-    // Use findByIdAndUpdate for better reliability
+ 
     const updatedBrand = await Brand.findByIdAndUpdate(
       id,
       { isBlocked },
@@ -83,13 +86,13 @@ const changeStatus = async (req, res) => {
     );
 
     if (!updatedBrand) {
-      return res.status(404).json({ error: "Brand not found" });
+      return res.status(Status.NOT_FOUND).json({ error: "Brand not found" });
     }
 
-    res.status(200).json({ message: "Status updated successfully" });
+    res.status(Status.ACCEPTED).json({ message: "Status updated successfully" });
   } catch (err) {
     console.error("Error updating brand status:", err);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(Status.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
   }
 };
 

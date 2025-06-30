@@ -474,7 +474,7 @@
                             <div class="item-name"><%= item.productId.productName %></div>
                             <div class="item-quantity">Quantity: <%= item.quantity %></div>
                         </div>
-                        <div class="item-price">$<%= (item.price * item.quantity).toFixed(2) %></div>
+                        <div class="item-price">₹<%= (item.price * item.quantity).toFixed(2) %></div>
                     </div>
                     <% }); %>
                 </div>
@@ -483,17 +483,17 @@
                 <div class="order-total">
                     <div class="total-row">
                         <span>Subtotal:</span>
-                        <span>$<%= order.totalAmount.toFixed(2) %></span>
+                        <span>₹<%= order.totalAmount.toFixed(2) %></span>
                     </div>
                     <% if (order.discount > 0) { %>
                     <div class="total-row">
                         <span>Discount:</span>
-                        <span style="color: #28a745;">-$<%= order.discount.toFixed(2) %></span>
+                        <span style="color: #28a745;">-₹<%= order.discount.toFixed(2) %></span>
                     </div>
                     <% } %>
                     <div class="total-row">
                         <span>Tax:</span>
-                        <span>$<%= order.tax.toFixed(2) %></span>
+                        <span>₹<%= order.tax.toFixed(2) %></span>
                     </div>
                     <div class="total-row">
                         <span>Shipping:</span>
@@ -503,7 +503,7 @@
                     </div>
                     <div class="total-row final">
                         <span>Total Amount:</span>
-                        <span>$<%= order.finalAmount.toFixed(2) %></span>
+                        <span>₹<%= order.finalAmount.toFixed(2) %></span>
                     </div>
                 </div>
             </div>

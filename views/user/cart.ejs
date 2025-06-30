@@ -284,9 +284,9 @@
                     <div class="item-details">
                         <h3 class="item-name"><%= item.productId.productName %></h3>
                         <div class="item-price">
-                           $<%= item.totalPrice.toFixed(2) %>
+                           ₹<%= item.totalPrice.toFixed(2) %>
                             <% if (item.productId.regularPrice > item.price) { %>
-                                <span class="item-original-price">$<%= item.productId.regularPrice.toFixed(2) %></span>
+                                <span class="item-original-price">₹<%= item.productId.regularPrice.toFixed(2) %></span>
                             <% } %>
                         </div>
                         <div class="item-stock <%= item.productId.stock <= 5 ? (item.productId.stock === 0 ? 'out' : 'low') : '' %>">
@@ -309,7 +309,7 @@
                             <button class="qty-btn" onclick="updateQuantity('<%= item.productId._id %>', 1)" 
                                     <%= item.quantity >= Math.min(10, item.productId.stock) ? 'disabled' : '' %>>+</button>
                         </div>
-                        <div class="item-total">$<%= item.totalPrice.toFixed(2) %></div>
+                        <div class="item-total">₹<%= item.totalPrice.toFixed(2) %></div>
                         <button class="item-remove" onclick="removeItem('<%= item.productId._id %>')">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -327,13 +327,13 @@
                 
                 <div class="summary-row">
                     <span class="summary-label">Subtotal (<%= itemCount %> items)</span>
-                    <span class="summary-value">$<%= subtotal %></span>
+                    <span class="summary-value">₹<%= subtotal %></span>
                 </div>
                 
                 <% if (parseFloat(discount) > 0) { %>
                 <div class="summary-row">
                     <span class="summary-label">Discount</span>
-                    <span class="summary-value" style="color: #28a745;">-$<%= discount %></span>
+                    <span class="summary-value" style="color: #28a745;">-₹<%= discount %></span>
                 </div>
                 <% } %>
 
@@ -342,7 +342,7 @@
           <% if (parseFloat(shipping) === 0) { %>
          <span class="summary-value" style="color: #28a745;">Free</span>
           <% } else { %>
-        <span class="summary-value" style="color: #333;">$<%= shipping %></span>
+        <span class="summary-value" style="color: #333;">₹<%= shipping %></span>
          <% } %>
         </div>
 
@@ -352,12 +352,12 @@
                 
                 <div class="summary-row">
                     <span class="summary-label">Tax</span>
-                    <span class="summary-value">$<%= tax %></span>
+                    <span class="summary-value">₹<%= tax %></span>
                 </div>
                 
                 <div class="summary-row total">
                     <span>Total</span>
-                    <span>$<%= total %></span>
+                    <span>₹<%= total %></span>
                 </div>
                 
                 <% 
@@ -429,17 +429,17 @@
                 // Update the main price (first text node)
                 const priceText = itemPriceElement.firstChild;
                 if (priceText && priceText.nodeType === Node.TEXT_NODE) {
-                    priceText.textContent = `$${data.itemTotal}`;
+                    priceText.textContent = `₹${data.itemTotal}`;
                 } else {
                     // Fallback: replace entire content but preserve original price span
                     const originalPriceSpan = itemPriceElement.querySelector('.item-original-price');
                     const originalPriceHTML = originalPriceSpan ? originalPriceSpan.outerHTML : '';
-                    itemPriceElement.innerHTML = `$${data.itemTotal} ${originalPriceHTML}`;
+                    itemPriceElement.innerHTML = `₹${data.itemTotal} ${originalPriceHTML}`;
                 }
             }
             
             // 2. Update item-total in actions section
-            item.querySelector('.item-total').textContent = `$${data.itemTotal}`;
+            item.querySelector('.item-total').textContent = `₹${data.itemTotal}`;
             
             // Update stock information if available in response
             if (data.productStock !== undefined) {
@@ -467,7 +467,7 @@
             const summaryRows = document.querySelectorAll('.summary-row');
             
             // Update subtotal (first summary row)
-            summaryRows[0].querySelector('.summary-value').textContent = `$${data.subtotal}`;
+            summaryRows[0].querySelector('.summary-value').textContent = `₹${data.subtotal}`;
             
             // Update discount (if exists)
             if (parseFloat(data.discount) > 0) {
@@ -475,7 +475,7 @@
                     row.querySelector('.summary-label').textContent.includes('Discount')
                 );
                 if (discountRow) {
-                    discountRow.querySelector('.summary-value').textContent = `-$${data.discount}`;
+                    discountRow.querySelector('.summary-value').textContent = `-₹${data.discount}`;
                 }
             }
             
@@ -489,7 +489,7 @@
                     shippingValue.textContent = 'Free';
                     shippingValue.style.color = '#28a745';
                 } else {
-                    shippingValue.textContent = `$${data.shipping}`;
+                    shippingValue.textContent = `₹${data.shipping}`;
                     shippingValue.style.color = '#333';
                 }
             }
@@ -499,12 +499,12 @@
                 row.querySelector('.summary-label').textContent.includes('Tax')
             );
             if (taxRow) {
-                taxRow.querySelector('.summary-value').textContent = `$${data.tax}`;
+                taxRow.querySelector('.summary-value').textContent = `₹${data.tax}`;
             }
             
             // Update total
             const totalRow = document.querySelector('.summary-row.total');
-            totalRow.querySelector('span:last-child').textContent = `$${data.total}`;
+            totalRow.querySelector('span:last-child').textContent = `₹${data.total}`;
             
             // Update cart header item count
             const cartHeader = document.querySelector('.cart-header h2');

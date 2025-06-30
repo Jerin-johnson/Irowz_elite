@@ -163,10 +163,14 @@ onmouseout="this.style.color='black'; this.style.transform='scale(1)';">
           <div class="col-lg-6 col-md-6">
             <nav class="header__menu mobile-menu">
               <ul>
-                <li class="active"><a href="./index.html">Home</a></li>
+                <li class="active"><a href="/">Home</a></li>
                 <li><a href="/shop">Shop</a></li>
               
                 <li><a href="/wishlist">wishlist</a></li>
+                <% if (user) { %>
+                 <li><a href="/profile">Profile</a></li>
+                <li><a href="/cart">Cart</a></li>
+                <% } %>
               </ul>
             </nav>
           </div>

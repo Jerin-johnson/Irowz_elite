@@ -1,0 +1,7 @@
+const CHARGES = {
+  DELIVERY_CHARGE: 50,
+  COD_LIMIT: 2000,
+  FREE_DELIVERY_CHARGE_LIMIT : 1000
+};
+
+module.exports = CHARGES;

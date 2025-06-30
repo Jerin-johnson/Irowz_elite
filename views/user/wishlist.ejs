@@ -362,7 +362,7 @@
                     <p>Total Items</p>
                 </div>
                 <div class="stat-item">
-                    <h4>$<%= totalValue.toFixed(2) %></h4>
+                    <h4>₹<%= totalValue.toFixed(2) %></h4>
                     <p>Total Value</p>
                 </div>
     
@@ -417,9 +417,9 @@
                                 <% } %>
                             </div>
                             <div class="item-price">
-                                <span class="current-price">$<%= item.productId.salePrice.toFixed(2) %></span>
+                                <span class="current-price">₹<%= item.productId.salePrice.toFixed(2) %></span>
                                 <% if (item.productId.regularPrice > item.productId.salePrice) { %>
-                                    <span class="original-price">$<%= item.productId.regularPrice.toFixed(2) %></span>
+                                    <span class="original-price">₹<%= item.productId.regularPrice.toFixed(2) %></span>
                                     
                                 <% } %>
                             </div>

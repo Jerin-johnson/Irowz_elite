@@ -180,7 +180,7 @@
                 <!-- Wallet Balance Card -->
                 <div class="wallet-balance-card">
                     <h3 style="margin: 0; opacity: 0.9;">Available Balance</h3>
-                    <div class="balance-amount" id="walletBalance">$<%= walletData.balance %></div>
+                    <div class="balance-amount" id="walletBalance">₹<%= walletData.balance %></div>
                     <p style="margin: 0; opacity: 0.8;">Last updated: <%= walletData.lastUpdated %></p>
                     
                     <div class="wallet-actions">
@@ -216,7 +216,7 @@
                                     </div>
                                 </div>
                                 <div class="transaction-amount">
-                                    <div class="amount <%= tx.type %>"><%= tx.type === 'credit' ? '+' : '-' %>$<%= tx.amount %></div>
+                                    <div class="amount <%= tx.type %>"><%= tx.type === 'credit' ? '+' : '-' %>₹<%= tx.amount %></div>
                                 </div>
                             </div>
                         <% }) %>

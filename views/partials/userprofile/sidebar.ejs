@@ -2,9 +2,7 @@
     <div class="user-info">
         <div class="user-avatar">
             <img src="/<%= user.profilePic %>" alt="Profile Image" 
-     style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
-
-            <!-- <i class="fas fa-user-circle fa-3x"></i> -->
+                 style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
         </div>
         <% if (typeof user !== 'undefined' && user) { %>
         <h4>Welcome, <%= user.fullName.split(" ")[0] %>!</h4>
@@ -13,36 +11,197 @@
         <h4>Welcome, Guest!</h4>
         <% } %>
     </div>
-    <nav class="nav flex-column">
-    <a class="nav-link" href="/profile" data-page="profile">
-        <i class="fas fa-tachometer-alt"></i> Dashboard
-    </a>
-    <a class="nav-link" href="/profile/edit" data-page="edit-profile">
-        <i class="fas fa-user-edit"></i> Edit Profile
-    </a>
-    <a class="nav-link" href="/orders" data-page="orders">
-        <i class="fas fa-shopping-bag"></i> My Orders
-    </a>
-    <a class="nav-link" href="/address" data-page="address">
-        <i class="fas fa-map-marker-alt"></i> Address Book
-    </a>
-    <a class="nav-link" href="/wallet" data-page="wallet">
-        <i class="fas fa-wallet"></i> My Wallet
-    </a>
-    <!-- <a class="nav-link" href="/returns" data-page="returns">
-        <i class="fas fa-undo-alt"></i> Return Orders
-    </a> -->
-    <!-- <a class="nav-link" href="/coupons" data-page="coupons">
-        <i class="fas fa-tags"></i> Coupons
-    </a> -->
-    <a class="nav-link" href="/profile/password/edit" data-page="change-password">
-        <i class="fas fa-lock"></i> Change Password
-    </a>
-    <a class="nav-link" href="/logout" onclick="confirmLogout(event)">
-        <i class="fas fa-sign-out-alt"></i> Logout
-    </a>
-</nav>
+    
+    <!-- Mobile Toggle Button -->
+    <button class="sidebar-toggle-btn" type="button">
+        <i class="fas fa-bars"></i>
+        <span>Menu</span>
+    </button>
+    
+    <nav class="nav flex-column sidebar-navigation">
+        <a class="nav-link" href="/profile" data-page="profile">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+        <a class="nav-link" href="/profile/edit" data-page="edit-profile">
+            <i class="fas fa-user-edit"></i> Edit Profile
+        </a>
+        <a class="nav-link" href="/orders" data-page="orders">
+            <i class="fas fa-shopping-bag"></i> My Orders
+        </a>
+        <a class="nav-link" href="/address" data-page="address">
+            <i class="fas fa-map-marker-alt"></i> Address Book
+        </a>
+        <a class="nav-link" href="/wallet" data-page="wallet">
+            <i class="fas fa-wallet"></i> My Wallet
+        </a>
+        <a class="nav-link" href="/profile/password/edit" data-page="change-password">
+            <i class="fas fa-lock"></i> Change Password
+        </a>
+        <a class="nav-link" href="/logout" onclick="confirmLogout(event)">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </nav>
 </div>
+
+<style>
+/* Mobile Toggle Button - Hidden by default */
+.sidebar-toggle-btn {
+    display: none !important;
+    width: 100%;
+    background: #b4883e;
+    color: white;
+    border: none;
+    padding: 12px 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 16px;
+}
+
+.sidebar-toggle-btn:hover {
+    background: #9a7235;
+}
+
+.sidebar-toggle-btn i {
+    margin-right: 8px;
+}
+
+/* Override existing styles for better mobile responsiveness */
+@media (max-width: 991px) {
+    .container .row {
+        flex-direction: column !important;
+        gap: 15px !important;
+    }
+    
+    .sidebar {
+        flex: none !important;
+        width: 100% !important;
+        min-height: auto !important;
+        margin-bottom: 20px;
+        order: -1;
+    }
+    
+    .main-content {
+        width: 100% !important;
+        padding: 20px !important;
+    }
+    
+    .sidebar-toggle-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .sidebar-navigation {
+        display: none !important;
+        margin-top: 10px;
+        width: 100%;
+    }
+    
+    .sidebar-navigation.mobile-active {
+        display: flex !important;
+        flex-direction: column;
+    }
+    
+    .user-info {
+        margin-bottom: 15px !important;
+        padding-bottom: 15px !important;
+        text-align: center;
+    }
+    
+    .user-info h4 {
+        font-size: 18px !important;
+        margin: 8px 0 5px !important;
+    }
+    
+    .user-info .text-muted {
+        font-size: 13px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .profile-sidebar {
+        padding: 15px !important;
+    }
+    
+    .sidebar-navigation .nav-link {
+        padding: 15px 12px !important;
+        font-size: 16px !important;
+        border-bottom: 1px solid #eee !important;
+        border-radius: 0 !important;
+        margin-bottom: 0 !important;
+        width: 100%;
+        text-align: left;
+    }
+    
+    .sidebar-navigation .nav-link:last-child {
+        border-bottom: none !important;
+    }
+    
+    .sidebar-navigation .nav-link:hover {
+        transform: none !important;
+        background-color: #f8f9fa !important;
+    }
+    
+    .sidebar-navigation .nav-link.active:hover {
+        background-color: #8e6b2f !important;
+        transform: none !important;
+    }
+    
+    .container {
+        width: 95% !important;
+        padding: 10px 0 !important;
+    }
+}
+
+@media (max-width: 575px) {
+    .user-avatar img {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    .user-info h4 {
+        font-size: 16px !important;
+    }
+    
+    .sidebar-navigation .nav-link {
+        padding: 12px 10px !important;
+        font-size: 15px !important;
+    }
+    
+    .sidebar-navigation .nav-link i {
+        margin-right: 8px !important;
+        width: 18px !important;
+        text-align: center;
+    }
+    
+    .sidebar-toggle-btn {
+        padding: 10px 12px !important;
+        font-size: 15px !important;
+    }
+    
+    .main-content {
+        padding: 15px !important;
+    }
+}
+
+/* Ensure layout works properly */
+@media (max-width: 991px) {
+    .row {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .col-md-3,
+    .col-md-9 {
+        flex: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+</style>
 
 <script>
 // Set active sidebar link based on current page
@@ -50,12 +209,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentPath = window.location.pathname;
     const sidebarLinks = document.querySelectorAll('.nav-link[data-page]');
     
-    // Remove active class from all links
     sidebarLinks.forEach(link => {
         link.classList.remove('active');
     });
     
-    // Determine which link should be active based on current path
     let activeLink = null;
     
     if (currentPath === '/profile' || currentPath === '/profile/') {
@@ -70,19 +227,48 @@ document.addEventListener('DOMContentLoaded', function() {
         activeLink = document.querySelector('[data-page="address"]');
     } else if (currentPath.includes('/wallet')) {
         activeLink = document.querySelector('[data-page="wallet"]');
-    } else if (currentPath.includes('/payment-methods')) {
-        activeLink = document.querySelector('[data-page="payment-methods"]');
-    } else if (currentPath.includes('/returns')) {
-        activeLink = document.querySelector('[data-page="returns"]');
-    } else if (currentPath.includes('/coupons')) {
-        activeLink = document.querySelector('[data-page="coupons"]');
-    } else if (currentPath.includes('/notifications')) {
-        activeLink = document.querySelector('[data-page="notifications"]');
     }
     
-    // Add active class to the determined link
     if (activeLink) {
         activeLink.classList.add('active');
+    }
+    
+    const sidebarToggle = document.querySelector('.sidebar-toggle-btn');
+    const sidebarNav = document.querySelector('.sidebar-navigation');
+    
+    if (sidebarToggle && sidebarNav) {
+        sidebarToggle.addEventListener('click', function() {
+            sidebarNav.classList.toggle('mobile-active');
+            const icon = this.querySelector('i');
+            if (sidebarNav.classList.contains('mobile-active')) {
+                icon.className = 'fas fa-times';
+            } else {
+                icon.className = 'fas fa-bars';
+            }
+        });
+        
+        const navLinks = document.querySelectorAll('.sidebar-navigation .nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 991) {
+                    sidebarNav.classList.remove('mobile-active');
+                    const toggleIcon = sidebarToggle.querySelector('i');
+                    if (toggleIcon) {
+                        toggleIcon.className = 'fas fa-bars';
+                    }
+                }
+            });
+        });
+        
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 991) {
+                sidebarNav.classList.remove('mobile-active');
+                const toggleIcon = sidebarToggle.querySelector('i');
+                if (toggleIcon) {
+                    toggleIcon.className = 'fas fa-bars';
+                }
+            }
+        });
     }
 });
 </script>

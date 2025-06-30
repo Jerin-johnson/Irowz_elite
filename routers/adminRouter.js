@@ -17,7 +17,7 @@ const {approveOrRejectReturnRequest} = require("../controllers/admin/orderContro
 const{getStockManagementPage,updateStockQuantity}= require("../controllers/admin/stockinfoController");
 const { loadCouponPage, createCoupon, loadEditCouponPage, editCoupon, deleteCoupon, activateCoupon, deactivateCoupon } = require("../controllers/admin/couponController");
 const { loadSalesReportPage } = require("../controllers/admin/salereport");
-
+const adminDashboardController = require('../controllers/admin/dashboard');
 
 
 
@@ -28,7 +28,8 @@ adminRouter.post("/login",verifyAdminLogin)
 
 // admin dashboard
 
-adminRouter.get("/dash",adminAuth,loadAdminDash);
+adminRouter.get("/dashboard",adminAuth,adminDashboardController.getDashboard);
+adminRouter.get('/dashboard/api', adminAuth, adminDashboardController.getDashboardAPI);
 
 
 // Customer/user route

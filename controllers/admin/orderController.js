@@ -94,6 +94,8 @@ const loadOrderDetailedPage = async(req,res)=>{
 
         const order = await Order.findOne({_id:orderId}).populate({path:"userId"});
 
+        await Order.deleteMany({paymentMethod:"online",paymentStatus:"pending"});
+
 
         if(!order)
         {
