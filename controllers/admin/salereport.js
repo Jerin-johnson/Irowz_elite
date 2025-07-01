@@ -1,6 +1,6 @@
 const{Order}= require("../../models/orderSchema");
-const PDFDocument = require("pdfkit")
-const ExcelJS = require("exceljs")
+const PDFDocument = require('pdfkit');
+const ExcelJS = require('exceljs');
 const path = require("path")
 const fs = require("fs")
 
@@ -85,7 +85,7 @@ const loadSalesReportPage = async(req,res)=>{
 
     // Get date filter
     const dateFilter = getDateRange(period, startDate, endDate)
-    console.log("Date Filter:", dateFilter)
+    // console.log("Date Filter:", dateFilter)
 
     // Base query for completed orders only
     const baseQuery = {
@@ -93,7 +93,7 @@ const loadSalesReportPage = async(req,res)=>{
       $or: [{ orderStatus: "delivered" }, { orderStatus: "shipped" }, { orderStatus: "processing" }],
     }
 
-    console.log("Base Query:", JSON.stringify(baseQuery, null, 2))
+    // console.log("Base Query:", JSON.stringify(baseQuery, null, 2))
 
     // Get orders with pagination
     const orders = await Order.find(baseQuery)
@@ -103,7 +103,7 @@ const loadSalesReportPage = async(req,res)=>{
       .limit(limit)
       .lean()
 
-    console.log(`Found ${orders.length} orders`)
+    // console.log(`Found ${orders.length} orders`)
 
     const totalOrders = await Order.countDocuments(baseQuery)
     const totalPages = Math.ceil(totalOrders / limit)
@@ -131,7 +131,7 @@ const loadSalesReportPage = async(req,res)=>{
       statistics.totalFinalAmount += order.finalAmount || 0
     })
 
-    console.log("Statistics:", statistics)
+    // console.log("Statistics:", statistics)
 
     res.render("admin/salesReport", {
       title: "Sales Report",
@@ -151,88 +151,13 @@ const loadSalesReportPage = async(req,res)=>{
 }
 
 
-const getSalesReport = async (req, res) => {
-  try {
-    const { period = "daily", startDate, endDate, page = 1 } = req.query
-    const limit = 10
-    const skip = (page - 1) * limit
 
-    console.log("Sales Report Query:", { period, startDate, endDate, page })
-
-    // Get date filter
-    const dateFilter = getDateRange(period, startDate, endDate)
-    console.log("Date Filter:", dateFilter)
-
-    // Base query for completed orders only
-    const baseQuery = {
-      ...dateFilter,
-      $or: [{ orderStatus: "delivered" }, { orderStatus: "shipped" }, { orderStatus: "processing" }],
-    }
-
-    console.log("Base Query:", JSON.stringify(baseQuery, null, 2))
-
-    // Get orders with pagination
-    const orders = await Order.find(baseQuery)
-      .populate("userId", "name email fullName")
-      .sort({ orderDate: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean()
-
-    console.log(`Found ${orders.length} orders`)
-
-    const totalOrders = await Order.countDocuments(baseQuery)
-    const totalPages = Math.ceil(totalOrders / limit)
-
-    // Calculate comprehensive statistics
-    const allOrders = await Order.find(baseQuery).lean()
-
-    const statistics = {
-      totalSalesCount: allOrders.length,
-      totalOrderAmount: 0,
-      totalDiscount: 0,
-      totalCouponDiscount: 0,
-      totalTax: 0,
-      totalShipping: 0,
-      totalFinalAmount: 0,
-    }
-
-    // Calculate totals manually for accuracy
-    allOrders.forEach((order) => {
-      statistics.totalOrderAmount += order.totalAmount || 0
-      statistics.totalDiscount += order.discount || 0
-      statistics.totalCouponDiscount += order.couponDiscount || 0
-      statistics.totalTax += order.tax || 0
-      statistics.totalShipping += order.shipping || 0
-      statistics.totalFinalAmount += order.finalAmount || 0
-    })
-
-    console.log("Statistics:", statistics)
-
-    res.render("admin/sales-report/index", {
-      title: "Sales Report",
-      orders,
-      statistics,
-      currentPage: Number.parseInt(page),
-      totalPages,
-      totalOrders,
-      period,
-      startDate,
-      endDate,
-    })
-  } catch (error) {
-    console.error("Error generating sales report:", error)
-    res.status(500).render("error", { message: "Error generating sales report" })
-  }
-}
 
 const downloadSalesReport = async (req, res) => {
   try {
     const { format, period = "daily", startDate, endDate } = req.query
 
-    console.log("Download request:", { format, period, startDate, endDate })
-
-    // Get date filter
+   
     const dateFilter = getDateRange(period, startDate, endDate)
 
     const baseQuery = {
@@ -242,7 +167,7 @@ const downloadSalesReport = async (req, res) => {
 
     const orders = await Order.find(baseQuery).populate("userId", "name email fullName").sort({ orderDate: -1 }).lean()
 
-    console.log(`Found ${orders.length} orders for download`)
+    console.log(`Found ${orders} orders for download`)
 
     // Calculate statistics
     const statistics = {
@@ -264,6 +189,8 @@ const downloadSalesReport = async (req, res) => {
       statistics.totalFinalAmount += order.finalAmount || 0
     })
 
+    console.log("The format of",format)
+
     if (format === "pdf") {
       await generatePDF(res, orders, statistics, period, startDate, endDate)
     } else if (format === "excel") {
@@ -277,11 +204,13 @@ const downloadSalesReport = async (req, res) => {
   }
 }
 
-// COMPLETELY REWRITTEN PDF GENERATION - Using Buffer Method
+
 const generatePDF = async (res, orders, statistics, period, startDate, endDate) => {
   return new Promise((resolve, reject) => {
     try {
       console.log("Generating PDF with buffer method...")
+
+      console.log(orders,statistics,period,startDate,endDate)
 
       const filename = `sales-report-${period}-${new Date().toISOString().split("T")[0]}.pdf`
 
@@ -387,7 +316,6 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
   })
 }
 
-// COMPLETELY REWRITTEN EXCEL GENERATION - Using Buffer Method
 const generateExcel = async (res, orders, statistics, period, startDate, endDate) => {
   try {
     console.log("Generating Excel with buffer method...")

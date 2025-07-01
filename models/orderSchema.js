@@ -170,12 +170,12 @@ const orderSchema = new Schema({
     type: Number,
     default: 0,
   },
-   // Add coupon discount field
+   // 
   couponDiscount: {
     type: Number,
     default: 0,
   },
-   // Add coupon code field
+   // 
   couponCode: {
     type: String,
     default: null,

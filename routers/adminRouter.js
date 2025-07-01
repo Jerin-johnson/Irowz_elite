@@ -16,7 +16,7 @@ const {approveOrRejectReturnRequest} = require("../controllers/admin/orderContro
 
 const{getStockManagementPage,updateStockQuantity}= require("../controllers/admin/stockinfoController");
 const { loadCouponPage, createCoupon, loadEditCouponPage, editCoupon, deleteCoupon, activateCoupon, deactivateCoupon } = require("../controllers/admin/couponController");
-const { loadSalesReportPage } = require("../controllers/admin/salereport");
+const { loadSalesReportPage, downloadSalesReport } = require("../controllers/admin/salereport");
 const adminDashboardController = require('../controllers/admin/dashboard');
 
 
@@ -117,7 +117,7 @@ adminRouter.delete("/coupon/delete",adminAuth,deleteCoupon);
 
 // salesReport page
 adminRouter.get("/sales/report",adminAuth,loadSalesReportPage);
-adminRouter.get("/sales/report/download",adminAuth,loadSalesReportPage);
+adminRouter.get("/sales/report/download",adminAuth,downloadSalesReport);
 
 
 // Stock management 

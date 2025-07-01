@@ -479,13 +479,13 @@
                     <input type="date" name="startDate" value="<%= startDate || '' %>">
                 </div>
 
-                <div class="form-group" id="endDateGroup" style="display: <%= period === 'custom' ? 'flex' : 'none' %>;">
+                <div class="form-group" id="endDateGroup" style="display: <%= period === 'custom' ? 'selected' : 'none' %>;">
                     <label>End Date</label>
                     <input type="date" name="endDate" value="<%= endDate || '' %>">
                 </div>
 
                 <div class="form-group">
-                    <label>&nbsp;</label>
+                    <label> </label>
                     <div class="button-group">
                         <button type="submit" class="btn btn-primary">
                             🔍 Generate Report
@@ -647,7 +647,7 @@
 
     <script src="/js/admin/adminNav.js"></script>
     <script>
-        // Toggle custom date fields
+        // Toggle custom date fields and initialize date validation
         function toggleCustomDates() {
             const period = document.getElementById('periodSelect').value;
             const startDateGroup = document.getElementById('startDateGroup');
@@ -660,6 +660,35 @@
                 startDateGroup.style.display = 'none';
                 endDateGroup.style.display = 'none';
             }
+
+            // Update date constraints
+            updateDateConstraints();
+        }
+
+        // Function to enforce date validation
+        function updateDateConstraints() {
+            const startDateInput = document.querySelector('input[name="startDate"]');
+            const endDateInput = document.querySelector('input[name="endDate"]');
+
+            // When startDate changes, set endDate's min to startDate
+            startDateInput.addEventListener('change', () => {
+                const startDate = startDateInput.value;
+                if (startDate) {
+                    endDateInput.min = startDate; // Prevent endDate from being before startDate
+                } else {
+                    endDateInput.removeAttribute('min'); // Clear min if startDate is empty
+                }
+            });
+
+            // When endDate changes, set startDate's max to endDate
+            endDateInput.addEventListener('change', () => {
+                const endDate = endDateInput.value;
+                if (endDate) {
+                    startDateInput.max = endDate; // Prevent startDate from being after endDate
+                } else {
+                    startDateInput.removeAttribute('max'); // Clear max if endDate is empty
+                }
+            });
         }
 
         // Download report function with proper fetch and blob handling

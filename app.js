@@ -17,11 +17,12 @@ const {adminRouter} = require("./routers/adminRouter.js");
 const session = require("express-session")
 connectDB()
 
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 
-
-app.use(express.json());
-app.use(express.urlencoded({extended:true}))
+// app.use(express.json());
+// app.use(express.urlencoded({extended:true}))
 
 // Using express session
 
@@ -43,18 +44,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-
-
-
-
-
-
-
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
-
-
-
 
 
 // Serve static files (CSS, images)
@@ -68,10 +59,6 @@ app.use('/chat', chatRoutes);
 
 app.use("/",userRouter);
 app.use("/admin",adminRouter)
-
-
-
-
 
 
 
