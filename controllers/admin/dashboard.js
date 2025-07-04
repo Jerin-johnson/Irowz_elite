@@ -115,7 +115,7 @@ async function getBasicStats() {
     };
   } catch (error) {
     console.error('Error getting basic stats:', error);
-    throw error;
+    
   }
 }
 

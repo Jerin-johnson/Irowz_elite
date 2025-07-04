@@ -152,6 +152,7 @@ const cancelOrderItem = async (req, res) => {
     // Mark item as cancelled
     cancelItem.status = "cancelled";
     cancelItem.cancellationReason = reason || "Cancelled by user";
+    let cancelCouponMessage = ""
 
     let refundAmount = 0;
 
@@ -170,8 +171,12 @@ const cancelOrderItem = async (req, res) => {
         order.couponApplied = false;
         order.couponCode = null;
         order.couponDiscount = 0;
+        cancelCouponMessage ="Coupon discount removed; refund issued after deducting coupon amount."
         console.log("The coupon is not valid anymore",refundAmount+""+order.items[itemIndex].totalPrice)
       }
+    }else{
+     
+      refundAmount = order.items[itemIndex].totalPrice
     }
 
 
@@ -191,22 +196,13 @@ const cancelOrderItem = async (req, res) => {
     );
 
     // Use only stored discountAmount per item (not new logic)
-    order.discount = activeItems.reduce(
-      (sum, item) => sum + item.discountAmount * item.quantity,
-      0
-    );
+    // order.discount = activeItems.reduce(
+    //   (sum, item) => sum + item.discountAmount * item.quantity,
+    //   0
+    // );
 
    
-    // order.tax = 0;
-    // order.shipping =
-    //   order.totalActiveAmount >= 1000
-    //     ? 0
-    //     : order.totalActiveAmount > 0
-    //       ? 50
-    //       : 0;
-
-    // order.finalAmount =
-    //   order.totalActiveAmount - order.discount + order.tax + order.shipping;
+  
 
     //  refunding online paid user
     if (
@@ -247,14 +243,6 @@ const cancelOrderItem = async (req, res) => {
       order.cancellationReason = reason || "All items cancelled by user";
     }
 
-    //  Order History log
-    // const orderHistory = new OrderHistory({
-    //   orderId: order._id,
-    //   eventType: "cancelled",
-    //   description: `Item ${cancelItem.productName} cancelled`,
-    //   details: { productId, reason: reason || "Cancelled by user" },
-    // });
-    // await orderHistory.save();
 
     // Save final order
     order.totalRefundAmount +=refundAmount
@@ -264,6 +252,7 @@ const cancelOrderItem = async (req, res) => {
       success: true,
       message: "Item cancelled successfully",
       allItemsCancelled: activeItems.length === 0,
+      cancelCouponMessage
     });
   } catch (error) {
     console.error(error);

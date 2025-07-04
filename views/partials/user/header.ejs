@@ -1,147 +1,145 @@
 <!DOCTYPE html>
 <html lang="zxx">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="description" content="Male_Fashion Template" />
-    <meta name="keywords" content="Male_Fashion, unica, creative, html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Irowz Elitle | Ecommerce</title>
-    <style>
-       .sign-in-link {
-        text-decoration: none;
-        color: black;
-        font-size: 16px;
-        font-weight: 600;
-        margin-left: 15px;
-      }
 
-      .sign-in-link:hover {
-        font-weight: 200;
-        color: rgb(42, 11, 11);
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Male_Fashion Template" />
+  <meta name="keywords" content="Male_Fashion, unica, creative, html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Irowz Elitle | Ecommerce</title>
+  <style>
+    .sign-in-link {
+      text-decoration: none;
+      color: black;
+      font-size: 16px;
+      font-weight: 600;
+      margin-left: 15px;
+    }
 
-      .dropdown {
-        position: relative;
-        display: inline-block;
-      }
+    .sign-in-link:hover {
+      font-weight: 200;
+      color: rgb(42, 11, 11);
+    }
 
-      .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: white;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-        right: 0;
-      }
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
 
-      .dropdown-content a {
-        color: black;
-        padding: 12px 16px;
-        text-decoration: none;
-        display: block;
-        width: 100%;
-      }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: white;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      right: 0;
+    }
 
-      .dropdown-content a:hover {
-        background-color: #938585;
-      }
+    .dropdown-content a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+    }
 
-      .dropdown:hover .dropdown-content {
-        display: block;
-      }
+    .dropdown-content a:hover {
+      background-color: #938585;
+    }
 
-      .header {
-        position: relative;
-        z-index: 500;
-      }
-      .premium-user-link {
-  color: #1a1a1a; /* Dark but soft black */
-  font-weight: 600;
-  font-size: 18px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px; /* space between name and icon */
-  transition: color 0.3s ease;
-}
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
 
-.premium-user-link:hover {
-  color: #b4883e; /* elegant gold tone on hover */
-}
+    .header {
+      position: relative;
+      z-index: 500;
+    }
 
-.premium-user-link i {
-  font-size: 14px;
-  transition: transform 0.3s ease;
-}
+    .premium-user-link {
+      color: #1a1a1a;
+      /* Dark but soft black */
+      font-weight: 600;
+      font-size: 18px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      /* space between name and icon */
+      transition: color 0.3s ease;
+    }
 
-.premium-user-link:hover i {
-  transform: rotate(180deg); /* subtle icon rotation on hover */
-}
+    .premium-user-link:hover {
+      color: #b4883e;
+      /* elegant gold tone on hover */
+    }
 
-    </style>
+    .premium-user-link i {
+      font-size: 14px;
+      transition: transform 0.3s ease;
+    }
 
-    <!-- Google Font -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css">
+    .premium-user-link:hover i {
+      transform: rotate(180deg);
+      /* subtle icon rotation on hover */
+    }
+  </style>
 
-    <link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-/>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css">
 
-    <!-- Css Styles -->
-    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css" />
-    <link rel="stylesheet" href="css/elegant-icons.css" type="text/css" />
-    <link rel="stylesheet" href="css/magnific-popup.css" type="text/css" />
-    <link rel="stylesheet" href="css/nice-select.css" type="text/css" />
-    <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css" />
-    <link rel="stylesheet" href="css/slicknav.min.css" type="text/css" />
-    <link rel="stylesheet" href="css/style.css" type="text/css" />
-  </head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-  <body>
-    <!-- Page Preloder -->
-    <div id="preloder">
-      <div class="loader"></div>
+  <!-- Css Styles -->
+  <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
+  <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css" />
+  <link rel="stylesheet" href="css/elegant-icons.css" type="text/css" />
+  <link rel="stylesheet" href="css/magnific-popup.css" type="text/css" />
+  <link rel="stylesheet" href="css/nice-select.css" type="text/css" />
+  <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css" />
+  <link rel="stylesheet" href="css/slicknav.min.css" type="text/css" />
+  <link rel="stylesheet" href="css/style.css" type="text/css" />
+</head>
+
+<body>
+  <!-- Page Preloder -->
+  <div id="preloder">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Offcanvas Menu Begin -->
+  <div class="offcanvas-menu-overlay"></div>
+  <div class="offcanvas-menu-wrapper">
+    <div class="offcanvas__option">
+
     </div>
-
-    <!-- Offcanvas Menu Begin -->
-    <div class="offcanvas-menu-overlay"></div>
-    <div class="offcanvas-menu-wrapper">
-      <div class="offcanvas__option">
-       
-      </div>
-      <div class="offcanvas__nav__option">
-        <a href="#" class="search-switch"
-          ><img src="img/icon/search.png" alt=""
-        /></a>
-        <a href="/wishlist"><img src="img/icon/heart.png" alt="" /></a>
-        <a href="/cart"><img src="img/icon/cart.png" alt="" /> <span>0</span></a>
-      </div>
-      <div id="mobile-menu-wrap"></div>
-      <div class="offcanvas__text">
-        <p>Free shipping, 30-day return or refund guarantee.</p>
-      </div>
+    <div class="offcanvas__nav__option">
+      <a href="#" class="search-switch"><img src="img/icon/search.png" alt="" /></a>
+      <a href="/wishlist"><img src="img/icon/heart.png" alt="" /></a>
+      <a href="/cart"><img src="img/icon/cart.png" alt="" /> <span>0</span></a>
     </div>
-    <!-- Offcanvas Menu End -->
+    <div id="mobile-menu-wrap"></div>
+    <div class="offcanvas__text">
+      <p>Free shipping, 30-day return or refund guarantee.</p>
+    </div>
+  </div>
+  <!-- Offcanvas Menu End -->
 
-    <!-- Header Section Begin -->
-    <header class="header">
-    
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-3 col-md-3">
-            <div class="header__logo">
-             <a href="/" style="
+  <!-- Header Section Begin -->
+  <header class="header">
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-3 col-md-3">
+          <div class="header__logo">
+            <a href="/" style="
   text-decoration: none; 
   color: black; 
   font-size: 35px; 
@@ -152,59 +150,55 @@
   top: 19px; 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   transition: color 0.3s ease, transform 0.3s ease;
-" 
-onmouseover="this.style.color='black'; this.style.transform='scale(1.05)';" 
-onmouseout="this.style.color='black'; this.style.transform='scale(1)';">
-  Irowz Elite
-</a>
+" onmouseover="this.style.color='black'; this.style.transform='scale(1.05)';"
+              onmouseout="this.style.color='black'; this.style.transform='scale(1)';">
+              Irowz Elite
+            </a>
 
-            </div>
           </div>
-          <div class="col-lg-6 col-md-6">
-            <nav class="header__menu mobile-menu">
-              <ul>
-                <li class="active"><a href="/">Home</a></li>
-                <li><a href="/shop">Shop</a></li>
-              
-                <li><a href="/wishlist">wishlist</a></li>
-                <% if (user) { %>
-                 <li><a href="/profile">Profile</a></li>
+        </div>
+        <div class="col-lg-6 col-md-6">
+          <nav class="header__menu mobile-menu">
+            <ul>
+              <li class="active"><a href="/">Home</a></li>
+              <li><a href="/shop">Shop</a></li>
+
+              <li><a href="/wishlist">wishlist</a></li>
+              <% if (user) { %>
+                <li><a href="/profile">Profile</a></li>
                 <li><a href="/cart">Cart</a></li>
                 <% } %>
-              </ul>
-            </nav>
-          </div>
-          <div class="col-lg-3 col-md-3">
-            <div class="header__nav__option">
-              <% if (user) { %>
+            </ul>
+          </nav>
+        </div>
+        <div class="col-lg-3 col-md-3">
+          <div class="header__nav__option">
+            <% if (user) { %>
               <div class="dropdown">
-                <a class="premium-user-link"><%= user.fullName.split(" ")[0].toUpperCase() %> <i class="fas fa-chevron-down"></i>
-</a>
+                <a class="premium-user-link">
+                  <%= user.fullName.split(" ")[0].toUpperCase() %> <i class=" fas fa-chevron-down"></i>
+                </a>
                 <div class="dropdown-content">
                   <a href="/profile">Profile</a>
                   <a href="#" onclick="confirmLogout(event)">Logout</a>
                 </div>
               </div>
               <% } else { %>
-              <a href="/signup" class="sign-in-link">Sign Up</a>
-              <a href="/login" class="sign-in-link">Login</a>
-              <% } %>
+                <a href="/signup" class="sign-in-link">Sign Up</a>
+                <a href="/login" class="sign-in-link">Login</a>
+                <% } %>
 
-              <a href="#" class="search-switch"
-                ><img src="img/icon/search.png" alt=""
-              /></a>
-              <!-- <a href="#"><img src="img/icon/heart.png" alt=""></a> -->
-              <a href="/cart"
-                ><img src="img/icon/cart.png" alt="" /> <span><%- typeof cart !== "undefined" ? cart : "" %></span>
-</span></a
-              >
-              <!-- <div class="price">$0.00</div> -->
-            </div>
+                  <a href="#" class="search-switch"><img src="img/icon/search.png" alt="" /></a>
+                  <!-- <a href="#"><img src="img/icon/heart.png" alt=""></a> -->
+                  <a href="/cart"><img src="img/icon/cart.png" alt="" /> <span id="cartCount"><%- typeof cart !=="undefined" ? cart
+                        : "" %></span>
+                    </span></a>
+                  <!-- <div class="price">$0.00</div> -->
           </div>
         </div>
-        <div class="canvas__open"><i class="fa fa-bars"></i></div>
       </div>
-    </header>
+      <div class="canvas__open"><i class="fa fa-bars"></i></div>
+    </div>
+  </header>
 
-    <!-- Header Section End -->
- 
+  <!-- Header Section End -->

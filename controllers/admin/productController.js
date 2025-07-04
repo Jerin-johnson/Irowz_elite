@@ -89,7 +89,10 @@ const addProduct = async (req, res) => {
     }
 
 
-    const existProduct = await Product.findOne({ productName: name});
+    // const existProduct = await Product.findOne({productName:{ $regex: name, $options: "i" }});
+    const existProduct = await Product.findOne({
+  productName: { $regex: `^${name}$`, $options: "i" }
+});
 
 
 
@@ -204,7 +207,7 @@ const editProduct = async (req, res) => {
       removedImages,
     } = req.body;
     const images = req.files;
-    console.log(req.files)
+
 
     // Basic validation
     if (

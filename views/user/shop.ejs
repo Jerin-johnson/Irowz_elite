@@ -317,6 +317,19 @@ async function addToWishlist(productId) {
     }
 }
 
+// update cart quantity function
+
+function updateCart(newCount)
+{
+    let cartCount = document.getElementById("cartCount");
+    console.log(newCount)
+
+ if(cartCount)
+{
+    cartCount.textContent = newCount;
+}
+}
+
 // Function to add product to cart
 async function addToCart(productId) {
     try {
@@ -330,13 +343,15 @@ async function addToCart(productId) {
         const result = await response.json();
 
         if (response.ok && result.success) {
+            updateCart(result.cartCount);
             Swal.fire({
                 icon: 'success',
                 title: 'Added to Cart!',
                 text: result.message || 'Product has been added to your cart.',
                 showConfirmButton: false,
                 timer: 1500
-            });
+            })
+                
         } else {
             Swal.fire({
                 icon: 'error',

@@ -81,10 +81,17 @@ const createCoupon = async (req, res) => {
       throw new Error("The min purchase amount should be atleast 800 or above ")
     }
 
-    if(discountPercent > 90)
+    if(discountPercent > 70)
     {
-      throw new Error("The maximun discount amount should below 90% ");
+      throw new Error("The maximun discount amount should below 70% ");
     }
+
+     const estimatedDiscount = (discountPercent / 100) * minPurchaseAmount;
+     console.log("The estimatedDiscount is ",estimatedDiscount)
+  if (maxDiscountAmount && estimatedDiscount > maxDiscountAmount) {
+    throw new Error("Minimum purchase too low for the discount percent");
+  }
+
 
     const newCoupon = new Coupon({
       code: code.toUpperCase(),
@@ -98,7 +105,7 @@ const createCoupon = async (req, res) => {
     });
 
     await newCoupon.save();
-    res.Status(Status.CREATED).json({ success: true, message: "Coupon added successfully" });
+    res.status(Status.CREATED).json({ success: true, message: "Coupon added successfully" });
   } catch (error) {
     console.error("Error adding coupon:", error);
     res.json({ success: false, message: error.message });
@@ -158,10 +165,15 @@ const editCoupon = async (req, res) => {
       throw new Error("The min purchase amount should be atleast 800 or above ")
     }
 
-     if(discountPercent > 90)
+     if(discountPercent > 70)
     {
-      throw new Error("The maximun discount amount should below 90% ");
+      throw new Error("The maximun discount amount should below 70% ");
     }
+
+     const estimatedDiscount = (discountPercent / 100) * minPurchaseAmount;
+  if (maxDiscountAmount && estimatedDiscount > maxDiscountAmount) {
+    throw new Error("Minimum purchase too low for the discount percent");
+  }
 
      const updateData = {
       code: code.toUpperCase(),

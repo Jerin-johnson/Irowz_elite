@@ -69,6 +69,13 @@ app.use((req, res) => {
 
 
 
+app.use((err,req,res,next)=>{
+        console.error(' Error:', err.stack || err.message);
+
+        res.status(err.status || 500).json({success:false})
+
+})
+
 
 app.listen(process.env.PORT || 3000,()=>{
     console.log("The server is running")

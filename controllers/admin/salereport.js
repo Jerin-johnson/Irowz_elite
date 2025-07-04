@@ -165,6 +165,8 @@ const downloadSalesReport = async (req, res) => {
       $or: [{ orderStatus: "delivered" }, { orderStatus: "shipped" }, { orderStatus: "processing" }],
     }
 
+    console.log("To check what will be this thing",{...dateFilter})
+
     const orders = await Order.find(baseQuery).populate("userId", "name email fullName").sort({ orderDate: -1 }).lean()
 
     console.log(`Found ${orders} orders for download`)
