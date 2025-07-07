@@ -223,7 +223,7 @@ const approveOrRejectReturnRequest = async(req,res)=>{
     console.log(productId);
     const productIndex = order.items.findIndex((item) => item.productId.toString() === productId.toString());
 
-console.log(productIndex)
+
 
 
     if(productIndex === -1)

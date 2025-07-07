@@ -29,11 +29,11 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(session({
     secret:process.env.SESSION_SECERT || "my-secert",
     resave:false,
-    saveUninitialized:true,
+    saveUninitialized:false,
     cookie:{
         secure:false,
         httpOnly:true,
-        maxAge:72*60*60*1000
+        maxAge:72*60*60*1000,
     }
 }))
 

@@ -209,7 +209,7 @@ const verifyOtp = async (req, res) => {
         if(!referUser)
         {
           console.log("YOur refercal code is wrong so i skipped that fool");
-          return res.status({success:false,message:"The refercode is not valid"});
+          // return res.status({success:false,message:"The refercode is not valid"});
         }
         saveUserData.referredBy = referUser.referalCode;
         referUser.redeemedUser.push(saveUserData._id);

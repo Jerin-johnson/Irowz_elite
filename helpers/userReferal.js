@@ -8,7 +8,7 @@ const generateUniqueReferralCode = async (base = "") => {
   let exists = true;
 
   while (exists) {
-    // Example: "JERIN-X1A9Z" or "USER-7C5LQ"
+    // Example: "USER-7C5LQ"
     const suffix = crypto.randomBytes(3).toString("hex").toUpperCase(); // 6 random chars
     code = `${base.toUpperCase().slice(0, 5)}-${suffix}`;
 

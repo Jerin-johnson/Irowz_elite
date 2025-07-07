@@ -34,7 +34,6 @@ const verifyAdminLogin =async (req,res)=>{
 
           if(comparePassword)
           {
-            req.session.admin = true;
             req.session.admin = admin._id;
             return res.redirect("/admin/dashboard")
           }else{
@@ -75,7 +74,7 @@ const loadAdminDash = async (req, res) => {
 
 const adminLogout = async (req, res) => {
   try {
-    delete req.session.admin; //instead of destorying delete the session of the admin
+    delete req.session.admin; // delete the session of the admin
     delete req.session.isAdmin ;
     res.redirect("/admin/login");
   } catch (error) {

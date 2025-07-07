@@ -165,7 +165,6 @@ const downloadSalesReport = async (req, res) => {
       $or: [{ orderStatus: "delivered" }, { orderStatus: "shipped" }, { orderStatus: "processing" }],
     }
 
-    console.log("To check what will be this thing",{...dateFilter})
 
     const orders = await Order.find(baseQuery).populate("userId", "name email fullName").sort({ orderDate: -1 }).lean()
 
@@ -182,6 +181,9 @@ const downloadSalesReport = async (req, res) => {
       totalFinalAmount: 0,
     }
 
+
+
+   
     orders.forEach((order) => {
       statistics.totalOrderAmount += order.totalAmount || 0
       statistics.totalDiscount += order.discount || 0

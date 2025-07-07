@@ -3,6 +3,7 @@ const { Product } = require('../../models/productSchema');
 const { Category } = require('../../models/categorySchema');
 const { Brand } = require('../../models/brandSchema');
 const { User } = require('../../models/userSchema');
+const{getDashSalesData}=require("../../helpers/calculateStates")
 
 const adminDashboardController = {
   // Main dashboard page
@@ -66,31 +67,21 @@ const adminDashboardController = {
 // Helper function to get basic statistics
 async function getBasicStats() {
   try {
-    // Total revenue from delivered orders
-    const revenueResult = await Order.aggregate([
-      {
-        $match: {
-          'items.status': 'delivered'
-        }
-      },
-      {
-        $unwind: '$items'
-      },
-      {
-        $match: {
-          'items.status': 'delivered'
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalRevenue: { $sum: '$items.totalPrice' }
-        }
-      }
-    ]);
+
+
+    let{finalRevune,
+            totalRefundAmount,
+            totalCouponDiscount,
+            totalOrders,
+            totalRevune} = await getDashSalesData();
+
+            // console.log(await getDashSalesData())
+
+   
+  
 
     // Total orders count
-    const totalOrders = await Order.countDocuments();
+    // const totalOrders = await Order.countDocuments();
 
     // Total customers (unique users who placed orders)
     const customerResult = await Order.aggregate([
@@ -108,10 +99,15 @@ async function getBasicStats() {
     const totalProducts = await Product.countDocuments({ isBlocked: false });
 
     return {
-      totalRevenue: revenueResult[0]?.totalRevenue || 0,
+      // totalRevenue: revenueResult[0]?.totalRevenue || 0,
+       finalRevune : finalRevune ,
+       totalRevune: totalRevune,
+       
       totalOrders,
       totalCustomers: customerResult[0]?.totalCustomers || 0,
-      totalProducts
+      totalProducts,
+      totalCouponDiscount,
+      totalRefundAmount
     };
   } catch (error) {
     console.error('Error getting basic stats:', error);
@@ -281,7 +277,7 @@ function getStartDate(filter, now) {
   return date;
 }
 
-// Helper function to get best selling products
+// best products
 async function getBestSellingProducts() {
   try {
     const pipeline = [

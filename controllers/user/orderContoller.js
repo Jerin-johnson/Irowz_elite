@@ -453,8 +453,8 @@ const downloadInvoice = async (req, res) => {
         item.productName || item.productId?.productName || "Unnamed Product";
       doc.text(name, 50, yPosition, { width: 180 });
       doc.text(item.quantity.toString(), 250, yPosition);
-      doc.text(`$${item.price.toFixed(2)}`, 350, yPosition);
-      doc.text(`$${item.totalPrice.toFixed(2)}`, 450, yPosition);
+      doc.text(`₹${item.price.toFixed(2)}`, 350, yPosition);
+      doc.text(`₹${item.totalPrice.toFixed(2)}`, 450, yPosition);
       yPosition += 20;
     });
 
@@ -466,14 +466,14 @@ const downloadInvoice = async (req, res) => {
     yPosition += 10;
     doc.font("Helvetica-Bold");
     doc.text(`Subtotal:`, 350, yPosition);
-    doc.text(`$${order.totalAmount.toFixed(2)}`, 450, yPosition, {
+    doc.text(`₹${order.totalAmount.toFixed(2)}`, 450, yPosition, {
       align: "right",
     });
 
     yPosition += 15;
     if (order.discount > 0) {
       doc.text(`Discount:`, 350, yPosition);
-      doc.text(`-$${order.discount.toFixed(2)}`, 450, yPosition, {
+      doc.text(`-₹${order.discount.toFixed(2)}`, 450, yPosition, {
         align: "right",
       });
       yPosition += 15;
@@ -481,13 +481,21 @@ const downloadInvoice = async (req, res) => {
 
     if (order.tax > 0) {
       doc.text(`Tax:`, 350, yPosition);
-      doc.text(`$${order.tax.toFixed(2)}`, 450, yPosition, { align: "right" });
+      doc.text(`₹${order.tax.toFixed(2)}`, 450, yPosition, { align: "right" });
       yPosition += 15;
     }
 
     if (order.shipping > 0) {
       doc.text(`Shipping:`, 350, yPosition);
-      doc.text(`$${order.shipping.toFixed(2)}`, 450, yPosition, {
+      doc.text(`₹${order.shipping.toFixed(2)}`, 450, yPosition, {
+        align: "right",
+      });
+      yPosition += 15;
+    }
+
+    if (order.couponApplied) {
+      doc.text(`Coupon:`, 350, yPosition);
+      doc.text(`-₹${order.couponDiscount.toFixed(2)}`, 450, yPosition, {
         align: "right",
       });
       yPosition += 15;
