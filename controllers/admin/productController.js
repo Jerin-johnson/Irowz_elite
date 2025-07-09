@@ -159,11 +159,12 @@ const addProduct = async (req, res) => {
 // GET Edit Product Page
 const loadEditProduct = async (req, res) => {
   try {
+
     const productId = req.query.id;
     const product = await Product.findById(productId);
 
     if (!product) {
-      return res.status(404).render("admin/editProduct", {
+      return res.status(404).render("admin/editproduct", {
         product: null,
         categories: [],
         brands: [],
@@ -174,15 +175,16 @@ const loadEditProduct = async (req, res) => {
     const categories = await Category.find({ isListed: true });
     const brands = await Brand.find({ isBlocked: false });
 
-    res.render("admin/editProduct", {
+    res.render("admin/editproduct", {
       product,
       categories,
       brands,
       error: null,
     });
+
   } catch (error) {
-    console.error("Error loading edit product:", error);
-    res.status(500).render("admin/editProduct", {
+    console.log("Error loading edit product:", error);
+    res.status(500).render("admin/editproduct", {
       product: null,
       categories: [],
       brands: [],
