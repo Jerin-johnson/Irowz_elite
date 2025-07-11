@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
     cb(null, `product-${timestamp}-${random}${ext}`);
   }
 });
-//when a category is delted => product stock that less than 5 and product price less than 1000 wants to deleted
+
 
 
 

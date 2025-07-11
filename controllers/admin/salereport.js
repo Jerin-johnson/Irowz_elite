@@ -2,7 +2,8 @@ const{Order}= require("../../models/orderSchema");
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const path = require("path")
-const fs = require("fs")
+const fs = require("fs");
+const { getDashSalesData } = require("../../helpers/calculateStates");
 
 
 // Helper function to get date ranges
@@ -85,7 +86,14 @@ const loadSalesReportPage = async(req,res)=>{
 
     // Get date filter
     const dateFilter = getDateRange(period, startDate, endDate)
-    // console.log("Date Filter:", dateFilter)
+    // console.log("Date Filter:", dateFilter);
+
+
+    let{finalRevune,
+                totalRefundAmount,
+                totalCouponDiscount,
+                totalOrders,
+                totalRevune} = await getDashSalesData();
 
     // Base query for completed orders only
     const baseQuery = {
@@ -105,7 +113,7 @@ const loadSalesReportPage = async(req,res)=>{
 
     // console.log(`Found ${orders.length} orders`)
 
-    const totalOrders = await Order.countDocuments(baseQuery)
+    // const totalOrders = await Order.countDocuments(baseQuery)
     const totalPages = Math.ceil(totalOrders / limit)
 
     // Calculate comprehensive statistics
@@ -115,20 +123,19 @@ const loadSalesReportPage = async(req,res)=>{
       totalSalesCount: allOrders.length,
       totalOrderAmount: 0,
       totalDiscount: 0,
-      totalCouponDiscount: 0,
+      totalCouponDiscount: totalCouponDiscount || 0,
       totalTax: 0,
       totalShipping: 0,
-      totalFinalAmount: 0,
+      totalFinalAmount:finalRevune || 0,
     }
 
     // Calculate totals manually
     allOrders.forEach((order) => {
-      statistics.totalOrderAmount += order.totalAmount || 0
       statistics.totalDiscount += order.discount || 0
-      statistics.totalCouponDiscount += order.couponDiscount || 0
-      statistics.totalTax += order.tax || 0
+      // statistics.totalCouponDiscount += order.couponDiscount || 0
+      // statistics.totalTax += order.tax || 0
       statistics.totalShipping += order.shipping || 0
-      statistics.totalFinalAmount += order.finalAmount || 0
+      // statistics.totalFinalAmount += order.finalAmount || 0
     })
 
     // console.log("Statistics:", statistics)

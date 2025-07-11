@@ -488,24 +488,26 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="stats-grid">
-      <div class="stat-card revenue">
+     <div class="stats-grid">
+      <!-- <div class="stat-card revenue">
         <div class="stat-value">₹<%= (stats.totalRevune || 0).toLocaleString() %></div>
         <div class="stat-label">Total Revenue</div>
+      </div>  -->
+
+      <div class="stat-card revenue">
+        <div class="stat-value">₹<%= stats.finalRevune %></div>
+        <div class="stat-label">Final Revenue</div>
       </div>
      
       <div class="stat-card orders">
         <div class="stat-value"><%= stats.totalOrders %></div>
-        <div class="stat-label">Total Per Order(individual)</div>
+        <div class="stat-label">Total orders Total Orders(delivered,shipped,processing)</div>
       </div>
       <div class="stat-card customers">
         <div class="stat-value"><%= stats.totalCustomers %></div>
         <div class="stat-label">Total Customers</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value"><%= stats.totalRefundAmount %></div>
-        <div class="stat-label">Total RefundedAmount</div>
-      </div>
+      
 
       <!-- <div class="stat-card orders">
         <div class="stat-value"><%= stats.totalCancelAmount %></div>
@@ -515,11 +517,10 @@
     </div>
 
 
-
-       <div class="stats-grid">
-      <div class="stat-card revenue">
-        <div class="stat-value">₹<%= stats.finalRevune %></div>
-        <div class="stat-label">Final Revenue</div>
+ <div class="stats-grid">
+     <div class="stat-card">
+        <div class="stat-value"><%= stats.totalRefundAmount %></div>
+        <div class="stat-label">Total RefundedAmount</div>
       </div>
      
       <div class="stat-card orders">

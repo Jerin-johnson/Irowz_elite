@@ -53,7 +53,7 @@ async function getDashSalesData() {
       { $group: { _id: null, revenue: { $sum: "$items.totalPrice" } } },
     ]);
 
-    const totalOrders = await Order.countDocuments();
+    const totalOrders = await Order.countDocuments( {$or: [{ orderStatus: "delivered" }, { orderStatus: "shipped" }, { orderStatus: "processing" }]});
 
     const totalRefundAmount = await Order.aggregate([
       {
