@@ -2,11 +2,14 @@ const express = require("express");
 const app = express();
 const env = require("dotenv").config()
 const {connectDB}= require("./config/db.js");
-const  nocache = require("nocache");
+
 const chatRoutes = require('./routers/chat.js');
+const compression = require('compression');
+app.use(compression());
 
 
-app.use(nocache())
+
+// app.use(nocache())
 
 
 //google sign in
@@ -49,7 +52,11 @@ app.set('view engine', 'ejs');
 
 
 // Serve static files (CSS, images)
-app.use(express.static('public'));
+// app.use(express.static('public'));
+app.use(express.static('public', {
+  maxAge: '5d'  // cache for 30 days
+}));
+
 
 
 // ai chatbot integration
@@ -65,6 +72,8 @@ app.use("/admin",adminRouter)
 app.use((req, res) => {
   res.status(404).render('user/error-404');
 });
+
+
 
 
 

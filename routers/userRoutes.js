@@ -31,7 +31,10 @@ const{loadCheckOutPage,placeOrder,loadOrderSuccessPage,loadOrderFaliurePage,veri
 
 
 // apply and remove coupon
-const{applyCoupon,removeAppliedCoupon}= require("../controllers/user/couponController.js")
+const{applyCoupon,removeAppliedCoupon}= require("../controllers/user/couponController.js");
+
+//n caheche
+const  nocache = require("nocache");
 
 
 // For Loading Home page & shopping page
@@ -39,17 +42,17 @@ userRouter.get("/",loadHomePage);
 userRouter.get("/shop",isUserLoggedIn,loadShoppingPage);
 
 // get and post signup
-userRouter.get("/signup",isUserLoggedOut,loadSignup);
+userRouter.get("/signup",nocache(),isUserLoggedOut,loadSignup);
 userRouter.post("/signup",signUp)
 
 // setting login route
-userRouter.get("/login",isUserLoggedOut,loadLogin)
+userRouter.get("/login",nocache(),isUserLoggedOut,loadLogin)
 userRouter.post("/login",verifyLogin)
 
 
 // load otp page and post otp
 
-userRouter.get("/otp", ensureOtpSession, loadOtp);
+userRouter.get("/otp",nocache(), ensureOtpSession, loadOtp);
 userRouter.post("/otp",ensureOtpSession, verifyOtp);
 userRouter.post("/resend-otp", ensureOtpSession, ResentOtp);
 
@@ -57,7 +60,7 @@ userRouter.post("/resend-otp", ensureOtpSession, ResentOtp);
 // reset password
 // userRouter.get("/email/verify",preventGoBackToVerifyEmail,loadVerifyEmail)
 // userRouter.get("/password/forgot/otp",isUserLoggedOut,preventAccessingOtp,loadForgetPasswordOtpPage);
-userRouter.get("/verify-email",preventGoBackToVerifyEmail,loadVerifyEmail)
+userRouter.get("/verify-email",nocache(),preventGoBackToVerifyEmail,loadVerifyEmail)
 userRouter.post("/verify-email",isUserLoggedOut,verifyEmail)
 userRouter.get("/forgetpassword/otp",isUserLoggedOut,preventAccessingOtp,loadForgetPasswordOtpPage);
 userRouter.post("/forgetpassword/otp",preventAccessingOtp,verifyForgetOtp)
@@ -69,7 +72,7 @@ userRouter.post("/forgetpassword",resetPassword);
 
 userRouter.get("/profile",isUserLoggedIn,loadProfilePage);
 userRouter.get("/profile/edit",isUserLoggedIn,loadEditProflie);
-userRouter.get("/profile/password/edit",isUserLoggedIn,loadChangePassword);
+userRouter.get("/profile/password/edit",nocache(),isUserLoggedIn,loadChangePassword);
 userRouter.post("/profile/password/edit",updateChangePassword);
 userRouter.post("/profile/update",isUserLoggedIn,upload.single('profileImage'),updateProfile);
 userRouter.post("/profile/password/add",isUserLoggedIn,addPasswordForGoogleUser)
