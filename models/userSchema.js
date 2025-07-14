@@ -36,8 +36,7 @@ const userSchema = new mongoose.Schema({
   },
   googleId: {
     type: String,
-    unique: true,
-    sparse: true // Only enforces uniqueness if googleId is present
+    default: null
   },
   isBlocked: {
     type: Boolean,

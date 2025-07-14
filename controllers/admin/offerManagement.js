@@ -41,7 +41,7 @@ async function calculateOfferDetails(regularPrice, productOffer, categoryId) {
   };
 }
 
-// ------------------ ADD PRODUCT OFFER ------------------
+
 const addProductOffer = async (req, res) => {
   try {
     const { id, offer } = req.body;

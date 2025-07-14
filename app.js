@@ -11,7 +11,6 @@ app.use(compression());
 
 // app.use(nocache())
 
-
 //google sign in
 const {passport}= require("./config/passport.js")
 

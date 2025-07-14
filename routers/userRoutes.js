@@ -181,6 +181,7 @@ userRouter.get("/auth/google/callback",
     (req, res, next) => {
         passport.authenticate("google", async (err, user, info) => {
             if (err) {
+                
                 console.error("OAuth Error:", err);
                 return res.redirect("/signup");
             }
@@ -199,6 +200,9 @@ userRouter.get("/auth/google/callback",
                 req.session.user = user._id;
                 return res.redirect("/");
             });
+
+
+
         })(req, res, next);
     }
 );
