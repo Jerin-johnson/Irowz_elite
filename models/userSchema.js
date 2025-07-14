@@ -24,7 +24,6 @@ const userSchema = new mongoose.Schema({
     unique: true,             // ✅ Ensures no duplicate phone numbers
     sparse: true,             // ✅ Enforces uniqueness only when the field is present
     match: [/^\d{10}$/, 'Phone number must be 10 digits'],
-    default: null
   },
    profilePic: {
     type: String, // You can store the image URL or file path here
