@@ -1,6 +1,8 @@
 const { Cart } = require("../../models/cartSchema");
 const { Coupon } = require("../../models/couponSchema");
 const { Order } = require("../../models/orderSchema");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 
 
 const applyCoupon = async(req,res)=>{
@@ -78,7 +80,7 @@ return res.json({
         
     } catch (error) {
         console.error(error);
-        return res.status(404).json({success:false,message:error.message})
+        return res.status(Status.NOT_FOUND).json({success:false,message:error.message})
         
     }
 }
@@ -112,7 +114,7 @@ const removeAppliedCoupon = async(req,res)=>{
         
     } catch (error) {
         console.error(error);
-        return res.status(404).json({success:false,message:error.message});
+        return res.status(Status.NOT_FOUND).json({success:false,message:error.message});
         
     }
 }

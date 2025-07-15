@@ -1,6 +1,8 @@
 const { User } = require("../../models/userSchema");
 const { Wishlist } = require("../../models/wishListSchema");
 const { Product } = require("../../models/productSchema");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 
 const loadWishlistPage = async (req, res) => {
   try {
@@ -15,7 +17,7 @@ const loadWishlistPage = async (req, res) => {
     console.log(wishlist);
 
     if (!wishlist) {
-      return res.status(400).render("user/wishlist", {
+      return res.status(Status.BAD_REQUEST).render("user/wishlist", {
         wishlistItems: [],
         totalValue: 0,
         inStockCount: 0,
@@ -32,14 +34,14 @@ const loadWishlistPage = async (req, res) => {
       return val.productId.stock > 0;
     }).length;
 
-    return res.status(200).render("user/wishlist", {
+    return res.status(Status.OK).render("user/wishlist", {
       wishlistItems: items,
       totalValue,
       inStockCount,
       user,
     });
   } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(Status.BAD_REQUEST).json({ success: false, message: error.message });
   }
 };
 
@@ -73,11 +75,11 @@ const addToWishList = async (req, res) => {
     await wishlist.save();
 
     return res
-      .status(200)
+      .status(Status.OK)
       .json({ success: true, message: "Added to wishlist" });
   } catch (error) {
     console.error(error);
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(Status.BAD_REQUEST).json({ success: false, message: error.message });
   }
 };
 
@@ -100,11 +102,11 @@ const deleteWishlist = async (req, res) => {
     }
 
     return res
-      .status(200)
+      .status(Status.OK)
       .json({ success: true, message: "wishlist cleared successfully" });
   } catch (error) {
     console.error(error);
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(Status.BAD_REQUEST).json({ success: false, message: error.message });
   }
 };
 
@@ -128,14 +130,14 @@ const removeFromWishlist = async (req, res) => {
     await wishlist.save();
 
     return res
-      .status(200)
+      .status(Status.OK)
       .json({
         success: true,
         message: "The product removed from the wishlist successfully",
       });
   } catch (error) {
     console.error(error);
-    return res.status(404).json({ success: false, message: error.message });
+    return res.status(Status.NOT_FOUND).json({ success: false, message: error.message });
   }
 };
 

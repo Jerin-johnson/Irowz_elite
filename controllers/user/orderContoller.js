@@ -7,6 +7,7 @@ const { OrderHistory } = require("../../models/orderHistory");
 const { Wallet } = require("../../models/walletSchema");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
+
 const { Coupon } = require("../../models/couponSchema");
 const { calculateDiscount, calculateTax } = require("../../helpers/helper");
 const { Category } = require("../../models/categorySchema");
@@ -74,7 +75,7 @@ const loadOrderPage = async (req, res) => {
       ];
     }
 
-     await Order.deleteMany({paymentMethod:"online",paymentStatus:"pending"});
+    //  await Order.deleteMany({paymentMethod:"online",paymentStatus:"pending"});
 
     const orders = await Order.find(searchQuery)
       .populate({ path: "items.productId" })
@@ -570,6 +571,10 @@ const sendReturnOrderRequest = async (req, res) => {
     return res.json({ success: false, message: error.message });
   }
 };
+
+
+
+
 
 module.exports = {
   loadOrderPage,

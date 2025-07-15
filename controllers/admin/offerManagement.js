@@ -1,6 +1,9 @@
 
 const { Category } = require("../../models/categorySchema");
 const { Product } = require("../../models/productSchema");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
+
 
 
 async function getCategoryOfferIfValid(categoryId) {
@@ -74,11 +77,11 @@ const addProductOffer = async (req, res) => {
 
     await product.save();
 
-    return res.status(200).json({ success: true, message: "Product offer added successfully" });
+    return res.status(Status.OK).json({ success: true, message: "Product offer added successfully" });
 
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(Status.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
   }
 };
 
@@ -105,11 +108,11 @@ const removeProductOfffer = async (req, res) => {
 
     await product.save();
 
-    return res.status(200).json({ success: true, message: "Product offer removed successfully" });
+    return res.status(Status.OK).json({ success: true, message: "Product offer removed successfully" });
 
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(Status.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
   }
 };
 
@@ -153,11 +156,11 @@ const addCategoryOffer = async (req, res) => {
 
    
 
-    return res.status(200).json({ success: true, message: "Category offer added successfully" });
+    return res.status(Status.OK).json({ success: true, message: "Category offer added successfully" });
 
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(Status.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
   }
 };
 
@@ -196,11 +199,11 @@ const removeCategoryOffer = async (req, res) => {
 
     
 
-    return res.status(200).json({ success: true, message: "Category offer removed successfully" });
+    return res.status(Status.OK).json({ success: true, message: "Category offer removed successfully" });
 
   } catch (error) {
     console.error(error.message);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(Status.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
   }
 };
 

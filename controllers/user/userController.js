@@ -18,6 +18,8 @@ const{Wallet}=require("../../models/walletSchema");
 const { PAGINATION, SORT_OPTIONS, PRICE_RANGES } = require("../../constants/constant");
 const { Cart } = require("../../models/cartSchema");
 const { BlockReason } = require("@google/generative-ai");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 
 // For loading Homepage
 
@@ -82,24 +84,24 @@ const signUp = async (req, res) => {
     console.log("The user side req.body",req.body)
 
     if (!fullname || !email || !phoneno || !password ) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(Status.BAD_REQUEST).json({ message: "All fields are required" });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: "Invalid email format" });
+      return res.status(Status.BAD_REQUEST).json({ message: "Invalid email format" });
     }
 
     const phoneRegex = /^\d{10}$/;
     if (!phoneRegex.test(phoneno)) {
       return res
-        .status(400)
+        .status(Status.BAD_REQUEST)
         .json({ message: "Phone number must be 10 digits" });
     }
 
     if (password.length < 8) {
       return res
-        .status(400)
+        .status(Status.BAD_REQUEST)
         .json({ message: "Password must be at least 8 characters" });
     }
 
@@ -108,10 +110,10 @@ const signUp = async (req, res) => {
     });
     if (existingUser) {
       if (existingUser.email === email) {
-        return res.status(400).json({ message: "Email already exists" });
+        return res.status(Status.BAD_REQUEST).json({ message: "Email already exists" });
       }
       if (existingUser.phone === phoneno) {
-        return res.status(400).json({ message: "Phone number already exists" });
+        return res.status(Status.BAD_REQUEST).json({ message: "Phone number already exists" });
       }
     }
 
@@ -138,7 +140,7 @@ const signUp = async (req, res) => {
 
       if(!referuser)
       {
-        return res.status(404).json({success:false,message:"The coupon id is not valid please reCheck that"})
+        return res.status(Status.NOT_FOUND).json({success:false,message:"The coupon id is not valid please reCheck that"})
       }
       req.session.userData.referalcode = referalcode;
      
@@ -263,7 +265,7 @@ const verifyOtp = async (req, res) => {
 
       return res.json({ success: true });
     } else {
-      res.status(400).json({ success: false, message: "invalid otp" });
+      res.status(Status.BAD_REQUEST).json({ success: false, message: "invalid otp" });
     }
   } catch (error) {
     console.error(error.message);
@@ -279,7 +281,7 @@ const ResentOtp = async (req, res) => {
 
     if (!email) {
       return res
-        .status(400)
+        .status(Status.BAD_REQUEST)
         .json({ success: false, message: "email is not found in session" });
     }
     let otp = generateOtp();
@@ -289,7 +291,7 @@ const ResentOtp = async (req, res) => {
     const emailSent = sendVerficationEmail(email, otp);
     if (emailSent) {
       return res
-        .status(200)
+        .status(Status.OK)
         .json({ success: true, message: "Opt resent successfully" });
     } else {
       return res

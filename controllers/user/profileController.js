@@ -3,6 +3,8 @@ const{Order}=require("../../models/orderSchema");
 const{ Wishlist}=require("../../models/wishListSchema");
 const mongoose = require("mongoose");
 
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 
 
 const nodemailer = require("nodemailer");
@@ -33,7 +35,7 @@ const verifyEmail = async (req, res) => {
     const user = await User.findOne({ email: email });
     console.log(user);
     if (!user) {
-      return res.status(500).json({ message: "User doesn't exit" });
+      return res.status(Status.INTERNAL_SERVER_ERROR).json({ message: "User doesn't exit" });
     }
 
     const otp = generateOtp();
@@ -45,7 +47,7 @@ const verifyEmail = async (req, res) => {
     console.log(emailSent);
 
     if (!emailSent) {
-      return res.status(500).json({ message: "error while sending email" });
+      return res.status(Status.INTERNAL_SERVER_ERROR).json({ message: "error while sending email" });
     }
     req.session.verification = {
       email,
@@ -53,7 +55,7 @@ const verifyEmail = async (req, res) => {
     };
 
     return res
-      .status(200)
+      .status(Status.OK)
       .json({ success: true, message: "otp is send successfully" });
   } catch (error) {
     return res.send("error in verify email page", error.message);
@@ -87,12 +89,12 @@ const verifyForgetOtp = async (req, res) => {
 
     if (String(req.session.userOtp) === String(otp)) {
       delete req.session.userOtp;
-      return res.status(200).json({ success: true, message: "OTP verified" });
+      return res.status(Status.OK).json({ success: true, message: "OTP verified" });
     }
 
-    return res.status(500).json({ success: false, message: "Invalid OTP" });
+    return res.status(Status.INTERNAL_SERVER_ERROR).json({ success: false, message: "Invalid OTP" });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(Status.INTERNAL_SERVER_ERROR).json({
       message:
         "There is something wrong in verify forget OTP page: " + error.message,
     });
@@ -241,14 +243,14 @@ const updateChangePassword = async (req, res) => {
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       return res
-        .status(400)
+        .status(Status.BAD_REQUEST)
         .json({ success: false, message: "All fields are required" });
     }
 
     console.log(currentPassword,newPassword,confirmPassword)
     // Check if new password matches confirm password
     if (newPassword !== confirmPassword) {
-      return res.status(400).json({
+      return res.status(Status.BAD_REQUEST).json({
         success: false,
         message: "Google signined User doesn't have changne password option",
       });
@@ -256,14 +258,14 @@ const updateChangePassword = async (req, res) => {
 
     const user = await User.findById(req.session.user);
     if (!user) {
-      return res.status(400).redirect("/login");
+      return res.status(Status.BAD_REQUEST).redirect("/login");
     }
 
 
     // Handle passwordless users
     if (!user.password) {
       if (currentPassword) {
-        return res.status(400).json({
+        return res.status(Status.BAD_REQUEST).json({
           success: false,
           message: "Your loginined with google",
         });
@@ -272,14 +274,14 @@ const updateChangePassword = async (req, res) => {
     } else {
       // Verify current password for users with a password
       if (!currentPassword) {
-        return res.status(400).json({
+        return res.status(Status.BAD_REQUEST).json({
           success: false,
           message: "Current password is required",
         });
       }
       const isMatch = await bcrypt.compare(currentPassword, user.password);
       if (!isMatch) {
-        return res.status(400).json({
+        return res.status(Status.BAD_REQUEST).json({
           success: false,
           message: "Current password is incorrect",
         });
@@ -298,7 +300,7 @@ const updateChangePassword = async (req, res) => {
     
 
     return res
-      .status(200)
+      .status(Status.OK)
       .json({ success: true, message: "The password updated successfully" });
   } catch (error) {
     console.log(error.message);
@@ -413,11 +415,11 @@ const addAddress = async (req, res) => {
     }
 
     return res
-      .status(200)
+      .status(Status.OK)
       .json({ success: true, message: "Address Added successfully",redriect });
   } catch (error) {
     console.error(error.message);
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(Status.BAD_REQUEST).json({ success: false, message: error.message });
   }
 };
 
@@ -427,11 +429,11 @@ const loadUpdateEmailOtp = async (req, res) => {
   try {
     const userId = req.session.user;
     if (!userId) {
-      return res.status(400).redirect("/login");
+      return res.status(Status.BAD_REQUEST).redirect("/login");
     }
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(400).redirect("/login");
+      return res.status(Status.BAD_REQUEST).redirect("/login");
     }
 
     const otp = generateOtp();
@@ -457,7 +459,7 @@ const verifyUpdateEmailOtp = async (req, res) => {
   try {
     if (!req.session.userData || !req.session.userData.email) {
       return res
-        .status(500)
+        .status(Status.INTERNAL_SERVER_ERROR)
         .json({ success: false, message: "User is not found in session" });
     }
 
@@ -469,13 +471,13 @@ const verifyUpdateEmailOtp = async (req, res) => {
 
     if (String(req.session.userOtp) !== String(otp)) {
       return res
-        .status(500)
+        .status(Status.INTERNAL_SERVER_ERROR)
         .json({ success: false, message: "Otp doesn't match" });
     }
 
     req.session.otpVerified = true;
     return res
-      .status(200)
+      .status(Status.OK)
       .json({ success: true, message: "Redirecting to change email" });
   } catch (error) {
     console.error(error.message);
@@ -488,7 +490,7 @@ const loadUpdateEmail = async (req, res) => {
   try {
     if (!req.session.userData.email && !req.session.userOtp)
       return res
-        .status(400)
+        .status(Status.BAD_REQUEST)
         .json({ success: false, message: "Email doesn't found in session" });
 
     if (!req.session?.otpVerified) {
@@ -514,7 +516,7 @@ const updateEmail = async (req, res) => {
 
     if (!email) {
       return res
-        .status(400)
+        .status(Status.BAD_REQUEST)
         .json({ success: false, message: "Please enter a valid email" });
     }
 
@@ -522,14 +524,14 @@ const updateEmail = async (req, res) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res
-        .status(400)
+        .status(Status.BAD_REQUEST)
         .json({ success: false, message: "Invalid email format" });
     }
 
     const existEmail = await User.findOne({ email });
     if (existEmail) {
       return res
-        .status(400)
+        .status(Status.BAD_REQUEST)
         .json({ success: false, message: "Email already exists" });
     }
 
@@ -551,7 +553,7 @@ const updateEmail = async (req, res) => {
     delete req.session.userData;
 
     return res
-      .status(200)
+      .status(Status.OK)
       .json({ success: true, message: "Email updated successfully" });
   } catch (error) {
     console.error("Update email error:", error.message);
@@ -575,12 +577,12 @@ const resendOtpEmail = async (req, res) => {
     );
     if (!sendEmail) {
       return res
-        .status(500)
+        .status(Status.INTERNAL_SERVER_ERROR)
         .json({ success: false, message: "Unable to send email" });
     }
 
     return res
-      .status(200)
+      .status(Status.OK)
       .json({ success: true, message: "Otp resended successfully" });
   } catch (error) {
     console.error(error.message);
@@ -625,7 +627,7 @@ const loadEditAddressPage = async (req, res) => {
     });
   } catch (error) {
     console.error(error.message);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(Status.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
   }
 };
 
@@ -693,11 +695,11 @@ const editAddress = async (req, res) => {
     );
 
     return res
-      .status(200)
+      .status(Status.OK)
       .json({ success: true, message: "Address Updated successfully" });
   } catch (error) {
     console.log(error.message);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(Status.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
   }
 };
 
@@ -748,11 +750,11 @@ const deleteAddress = async (req, res) => {
       }
     }
 
-    return res.status(200).json({ success: true, message: "Deleted Successfully" });
+    return res.status(Status.OK).json({ success: true, message: "Deleted Successfully" });
 
   } catch (error) {
     console.error("Error deleting address:", error.message);
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(Status.BAD_REQUEST).json({ success: false, message: error.message });
   }
 };
 
@@ -777,7 +779,7 @@ const updateProfile = async(req,res)=>{
     
      
 
-    return res.status(200).json({success:true,message:"Updated Successfully"})
+    return res.status(Status.OK).json({success:true,message:"Updated Successfully"})
     
   } catch (error) {
     console.log(error);

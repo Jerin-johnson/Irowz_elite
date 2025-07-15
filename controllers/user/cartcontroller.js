@@ -3,6 +3,8 @@ const { User } = require("../../models/userSchema");
 const { Category } = require("../../models/categorySchema");
 const { Cart } = require("../../models/cartSchema");
 const { Wishlist } = require("../../models/wishListSchema");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 
 //  helper functions
 const {calculateDiscount,calculateTax} = require("../../helpers/helper")
@@ -82,7 +84,7 @@ const loadCartPage = async (req, res) => {
 
   } catch (error) {
     console.error("Error loading cart page:", error);
-    res.status(500).render("error", { message: "Error loading cart page" });
+    res.status(Status.INTERNAL_SERVER_ERROR).render("error", { message: "Error loading cart page" });
   }
 };
 
@@ -169,7 +171,7 @@ const addToCart = async (req, res) => {
     await cart.save();
   
 
-    return res.status(200).json({
+    return res.status(Status.OK).json({
       success: true,
       message: "product added to cart successfully",
       cart,
@@ -177,7 +179,7 @@ const addToCart = async (req, res) => {
     });
   } catch (error) {
     console.error("Error adding to cart:", error);
-    return res.status(500).json({
+    return res.status(Status.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: error.message,
     });
@@ -270,7 +272,7 @@ const updateCartQuantity = async(req,res)=>{
      
   } catch (error) {
     console.error(error.message);
-    return res.status(404).json({success:false,message:error.message});
+    return res.status(Status.NOT_FOUND).json({success:false,message:error.message});
     
   }
 }
@@ -296,7 +298,7 @@ const deleteCartItem = async(req,res)=>{
 
     await cart.save();
 
-    res.status(200).json({success:true,message:"Deleted Successfully"})
+    res.status(Status.OK).json({success:true,message:"Deleted Successfully"})
     
   } catch (error) {
     console.error(error);
@@ -317,13 +319,13 @@ const clearCart = async(req,res)=>{
 
     await cart.save();
 
-    return res.status(200).json({success:true,message:"Cleared Successfully"})
+    return res.status(Status.OK).json({success:true,message:"Cleared Successfully"})
 
     
   } catch (error) {
 
     console.error(error.message);
-    return res.status(404).json({success:false,message:error.message})
+    return res.status(Status.NOT_FOUND).json({success:false,message:error.message})
     
   }
 }

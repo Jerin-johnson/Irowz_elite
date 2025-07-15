@@ -6,7 +6,9 @@ const mongoose = require("mongoose");
 const fs = require("fs");
 const sharp = require("sharp");
 const path = require("path");
-const{calculateOfferDetails}=require("../../helpers/calculateSalesPrice")
+const{calculateOfferDetails}=require("../../helpers/calculateSalesPrice");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 
 
 
@@ -148,11 +150,11 @@ const addProduct = async (req, res) => {
 
     // Return success response
     res
-      .status(200)
+      .status(Status.OK)
       .json({ success: true, message: "Product added successfully" });
   } catch (error) {
     console.log(error.message);
-    res.status(400).json({ message: error.message || "Failed to add product" });
+    res.status(Status.BAD_REQUEST).json({ message: error.message || "Failed to add product" });
   }
 };
 
@@ -164,7 +166,7 @@ const loadEditProduct = async (req, res) => {
     const product = await Product.findById(productId);
 
     if (!product) {
-      return res.status(404).render("admin/editproduct", {
+      return res.status(Status.NOT_FOUND4).render("admin/editproduct", {
         product: null,
         categories: [],
         brands: [],
@@ -312,12 +314,12 @@ const editProduct = async (req, res) => {
     await product.save();
 
     res
-      .status(200)
+      .status(Status.OK)
       .json({ success: true, message: "Product updated successfully" });
   } catch (error) {
     console.error("Error updating product:", error);
     res
-      .status(400)
+      .status(Status.BAD_REQUEST)
       .json({ message: error.message || "Failed to update product" });
   }
 };
@@ -327,7 +329,7 @@ const blockProduct = async (req, res) => {
     const id = req.query.id;
 
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).send("Invalid product ID");
+      return res.status(Status.BAD_REQUEST).send("Invalid product ID");
     }
 
     const result = await Product.updateOne(
@@ -336,7 +338,7 @@ const blockProduct = async (req, res) => {
     );
 
     if (result.matchedCount === 0) {
-      return res.status(404).send("Product not found");
+      return res.status(Status.NOT_FOUND4).send("Product not found");
     }
 
     res.redirect("/admin/product");
@@ -351,7 +353,7 @@ const unBlockProduct = async (req, res) => {
     const id = req.query.id;
 
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).send("Invalid product ID");
+      return res.status(Status.BAD_REQUEST).send("Invalid product ID");
     }
 
     const result = await Product.updateOne(
@@ -360,7 +362,7 @@ const unBlockProduct = async (req, res) => {
     );
 
     if (result.matchedCount === 0) {
-      return res.status(404).send("Product not found");
+      return res.status(Status.NOT_FOUND4).send("Product not found");
     }
 
     res.redirect("/admin/product");

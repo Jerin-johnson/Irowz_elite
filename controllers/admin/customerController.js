@@ -1,4 +1,6 @@
-const {User} = require("../../models/userSchema")
+const {User} = require("../../models/userSchema");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 
 
 
@@ -44,9 +46,11 @@ const loadCustomer = async (req, res) => {
   filter,  
 });
 
+
+
   } catch (error) {
     console.error(error);
-    res.status(500).send('Server Error');
+    res.status(Status.INTERNAL_SERVER_ERROR).send('Server Error');
   }
 };
 

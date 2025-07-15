@@ -3,7 +3,12 @@ const { Product } = require('../../models/productSchema');
 const { Category } = require('../../models/categorySchema');
 const { Brand } = require('../../models/brandSchema');
 const { User } = require('../../models/userSchema');
-const{getDashSalesData}=require("../../helpers/calculateStates")
+const{getDashSalesData}=require("../../helpers/calculateStates");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
+
+
+
 
 const adminDashboardController = {
   // Main dashboard page
@@ -34,13 +39,15 @@ const adminDashboardController = {
       });
     } catch (error) {
       console.error('Dashboard error:', error);
-      res.status(500).render('admin/error', { 
+      res.status(Status.INTERNAL_SERVER_ERROR).render('admin/error', { 
         message: 'Error loading dashboard',
         error: error.message 
       });
     }
   },
 
+
+  
   
   getDashboardAPI: async (req, res) => {
     try {
@@ -56,7 +63,7 @@ const adminDashboardController = {
       });
     } catch (error) {
       console.error('Dashboard API error:', error);
-      res.status(500).json({
+      res.status(Status.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: error.message
       });

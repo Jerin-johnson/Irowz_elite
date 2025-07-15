@@ -27,7 +27,7 @@ const{loadWishlistPage,addToWishList,deleteWishlist,removeFromWishlist}=require(
 const{loadCartPage,addToCart,updateCartQuantity,deleteCartItem,clearCart}=require("../controllers/user/cartcontroller.js");
 
 // checkout releted things
-const{loadCheckOutPage,placeOrder,loadOrderSuccessPage,loadOrderFaliurePage,verifyPayment}=require("../controllers/user/checkoutController.js")
+const{loadCheckOutPage,placeOrder,loadOrderSuccessPage,loadOrderFaliurePage,verifyPayment,createOrder,failedPayementRetry}=require("../controllers/user/checkoutController.js")
 
 
 // apply and remove coupon
@@ -149,6 +149,11 @@ userRouter.post("/orders/:orderId/return",isUserLoggedIn,sendReturnOrderRequest)
 
 
 
+
+// for pay now  option
+userRouter.post('/create-order',isUserLoggedIn,createOrder);
+
+userRouter.post('/verify-payment',isUserLoggedIn,failedPayementRetry)
 
 
 

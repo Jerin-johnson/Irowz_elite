@@ -850,10 +850,10 @@
                             },
                             modal: {
                                 ondismiss: function() {
-                                    swal("Payment Cancelled", "Payment was cancelled by user", "warning")
+                                    swal("Payment Cancelled", "Order Placed successfull", "warning")
                                     .then(() => {
-                                        // window.location.href = `/order/failure?orderId=${data.orderId}`;
-                                        window.location.href ="/checkout"
+                                        window.location.href = `/order/failure?orderId=${data.orderId}`;
+                                        // window.location.href ="/checkout"
                                     });
                                 }
                             }

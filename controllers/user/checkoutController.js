@@ -514,6 +514,8 @@ const loadOrderSuccessPage = async (req, res) => {
       return res.redirect("/");
     }
 
+   
+
     res.render("user/order-success", {
       order,
       orderId: order.orderId,
@@ -538,10 +540,92 @@ const loadOrderFaliurePage = async(req,res)=>{
       order = await Order.findOne({ orderId }).populate("items.productId")
     }
 
+     if(order.paymentMethod ==="online" && order.paymentStatus ==="pending")
+    {
+      const cart =await Cart.findOne({userId :order.userId});
+      if(cart.couponApplied)
+      {
+        await Coupon.findOneAndUpdate({code:cart.couponCode}, {
+          $inc: { usedCount: 1 },
+          $push: { usedBy: userId },
+        })
+      }
+
+      // Clear user's cart
+      await Cart.findOneAndUpdate({ userId: order.userId }, { $set: {
+              items: [],
+            couponApplied: false,
+            couponCode: null,
+            couponDiscount: 0,} });
+
+      // Reduce stock for each product
+      for (const item of order.items) {
+        await Product.findByIdAndUpdate(item.productId, {
+          $inc: { stock: -item.quantity },
+        });
+      }
+    }
+
     res.render("user/order-failure", { order,user })
   } catch (error) {
     console.error("Error loading failure page:", error)
     res.render("order-failure", { order: null })
+  }
+}
+
+const createOrder = async(req,res)=>{
+    try {
+    const {  orderId } = req.body;
+
+    let payOrder = await Order.findOne({orderId,userId:req.session.user})
+      const finalAmount = payOrder.finalAmount - payOrder.totalCancelAmount
+    const options = {
+      amount: finalAmount * 100, // amount in paise (₹500 -> 50000)
+      currency: 'INR',
+      receipt: orderId,
+      payment_capture: 1, // auto capture
+    };
+
+    const order = await razorpay.orders.create(options);
+   return res.json({
+          success: true,
+          message: "Order created successfully",
+          orderId,
+          razorpayOrderId: order.id,
+          amount: finalAmount,
+          currency: "INR",
+          key: process.env.RAZORPAY_KEY_ID,
+          order
+        
+        })
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Payment initiation failed' });
+  }
+}
+
+const failedPayementRetry =async(req,res)=>{
+   try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(body)
+      .digest('hex');
+
+    
+
+    if (expectedSignature === razorpay_signature) {
+      
+      await Order.updateOne({ orderId }, {
+        paymentStatus: "completed",
+        razorpayPaymentId: razorpay_payment_id,
+      });
+      return res.json({ success: true });
+    } else {
+      return res.json({ success: false });
+    }
+  } catch (err) {
+    return res.status(500).json({ success: false });
   }
 }
 
@@ -551,5 +635,7 @@ module.exports = {
   placeOrder,
   loadOrderSuccessPage,
   loadOrderFaliurePage,
-  verifyPayment
+  verifyPayment,
+  createOrder,
+  failedPayementRetry
 };

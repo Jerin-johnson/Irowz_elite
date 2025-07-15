@@ -1,5 +1,5 @@
 const { Category } = require("../../models/categorySchema");
-const{Product}=require("../../models/productSchema");
+const { Product } = require("../../models/productSchema");
 const Status = require("../../utils/status");
 const message = require("../../utils/message");
 
@@ -46,23 +46,26 @@ const addCategory = async (req, res) => {
     const existingCat = await Category.find({});
     console.log(existingCat);
 
-    for(let cat of existingCat)
-    {
-      if(cat.name.toLowerCase() === name.toLowerCase())
-      {
-        return res.status(402).json({success:false,message:"The cateogroy already exists"})
+    for (let cat of existingCat) {
+      if (cat.name.toLowerCase() === name.toLowerCase()) {
+        return res
+          .status(Status.BAD_REQUEST)
+          .json({ success: false, message: "The cateogroy already exists" });
       }
     }
-   
 
     const newCat = await new Category({
       name,
       description,
     });
     await newCat.save();
-    return res.status(Status.CREATED).json({ message: "Category add successfully" });
+    return res
+      .status(Status.CREATED)
+      .json({ message: "Category add successfully" });
   } catch (error) {
-    return res.status(Status.INTERNAL_SERVER_ERROR).json({ message: message.SERVER_ERROR});
+    return res
+      .status(Status.INTERNAL_SERVER_ERROR)
+      .json({ message: message.SERVER_ERROR });
   }
 };
 
@@ -77,7 +80,7 @@ const loadAddCategory = (req, res) => {
 const listCategory = async (req, res) => {
   try {
     let { id } = req.query;
-  await Category.findByIdAndUpdate(id, { isListed: true });
+    await Category.findByIdAndUpdate(id, { isListed: true });
     res.redirect("/admin/category");
   } catch (error) {
     console.error("Error unlisting category:", err);
@@ -85,14 +88,9 @@ const listCategory = async (req, res) => {
   }
 };
 
-
-
 const unlistCategory = async (req, res) => {
   try {
     let { id } = req.query;
-
-
-  
 
     await Category.findByIdAndUpdate(id, { isListed: false });
     res.redirect("/admin/category");
@@ -101,9 +99,6 @@ const unlistCategory = async (req, res) => {
     res.status(Status.INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 };
-
-
-
 
 const loadEditCategory = async (req, res) => {
   try {
@@ -116,8 +111,6 @@ const loadEditCategory = async (req, res) => {
   }
 };
 
-
-
 const editCategory = async (req, res) => {
   try {
     const id = req.params.id;
@@ -126,15 +119,13 @@ const editCategory = async (req, res) => {
       _id: { $ne: id },
     });
 
-    for(let cat of existCat)
-    {
-      if(cat.name.toLowerCase() === name.toLowerCase())
-      {
-        return res.status(Status.BAD_REQUEST).json({success:false,message:"The cateogroy already exists"})
+    for (let cat of existCat) {
+      if (cat.name.toLowerCase() === name.toLowerCase()) {
+        return res
+          .status(Status.BAD_REQUEST)
+          .json({ success: false, message: "The cateogroy already exists" });
       }
     }
-
-   
 
     const update = await Category.findByIdAndUpdate(
       id,
@@ -151,9 +142,6 @@ const editCategory = async (req, res) => {
     res.send(message.SERVER_ERROR);
   }
 };
-
-
-
 
 module.exports = {
   loadCategory,

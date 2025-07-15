@@ -1,7 +1,9 @@
 const {Order} = require("../../models/orderSchema");
 const {User} = require("../../models/userSchema");
 const{Product} = require("../../models/productSchema");
-const{Wallet}= require("../../models/walletSchema")
+const{Wallet}= require("../../models/walletSchema");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 
 const loadOrderListingPage = async(req,res)=>{
   try {
@@ -94,9 +96,7 @@ const loadOrderDetailedPage = async(req,res)=>{
 
         const order = await Order.findOne({_id:orderId}).populate({path:"userId"});
 
-        await Order.deleteMany({paymentMethod:"online",paymentStatus:"pending"});
-
-
+        
         if(!order)
         {
             return res.redirect("/error-404");
@@ -292,7 +292,7 @@ const approveOrRejectReturnRequest = async(req,res)=>{
       await order.save();
       
        const statusMessage = action === "approve" ? "approved" : "rejected";
-     return res.status(200).json({ success: true, message: `You have successfully ${statusMessage} the return request.` });
+     return res.status(Status.OK).json({ success: true, message: `You have successfully ${statusMessage} the return request.` });
    
   
     

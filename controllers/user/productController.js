@@ -1,6 +1,8 @@
 const { User } = require("../../models/userSchema");
 const { Product } = require("../../models/productSchema");
 const{Cart}= require("../../models/cartSchema");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 
 const loadProductDetailedPage = async (req, res) => {
     try {
@@ -20,7 +22,7 @@ const loadProductDetailedPage = async (req, res) => {
         console.log("The product page cart",cart);
         const product = await Product.findById(pid).populate('category').populate("brand");
         if (!product) {
-            return res.status(404).render("user/404", { message: "Product not found" });
+            return res.status(Status.NOT_FOUND).render("user/404", { message: "Product not found" });
         }
 
         const relatedProducts = await Product.find({

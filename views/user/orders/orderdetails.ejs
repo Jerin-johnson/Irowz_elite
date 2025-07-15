@@ -490,6 +490,8 @@
                                         </span>
                                     </div>
                                 </div>
+
+
                                 <div class="info-item">
                                     <div class="info-label">Total Amount</div>
                                     <div class="info-value">₹<%= order.finalAmount.toFixed(2) %>
@@ -716,6 +718,17 @@
                                                 <i class="fas fa-undo"></i> Return Order
                                             </button>
                                             <% } %>
+
+                                                <% if (order.paymentMethod==='online' && order.paymentStatus==="pending"
+                                                    ) { %>
+                                                    <button class="btn "
+                                                        style="background-color: #12ff49; color: #000000;"
+                                                        onclick="MakePayment('<%= order.orderId %>')">
+                                                        <i class="fas fa-credit-card"></i> Pay Now
+                                                    </button>
+                                                    <% } %>
+
+
                             </div>
                 </div>
             </div>
@@ -775,7 +788,11 @@
             </div>
         </div>
 
+
+
         <%- include('../../partials/userprofile/footer') %>
+            <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 
             <script>
                 let currentOrderId = null;
@@ -826,8 +843,8 @@
                                     //     })
 
                                     // }
-                                        window.location.reload();
-                                    
+                                    window.location.reload();
+
                                 });
                             } else {
                                 swal("Error", data.message, "error");
@@ -945,6 +962,67 @@
                         }
                     });
                 }
+
+
+                async function MakePayment(orderId) {
+                    try {
+                        const res = await fetch('/create-order', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ orderId })
+                        });
+
+                        const data = await res.json();
+                        if (!data.success) return swal("Payment initiation failed");
+
+                        const options = {
+                            key: data.key, // Pass this from server via EJS or config
+                            amount: data.order.amount,
+                            currency: "INR",
+                            name: "IrowzElite",
+                            description: "Order Payment",
+                            order_id: data.order.id,
+                            handler: function (response) {
+                                // Send payment success details to backend
+                                fetch("/verify-payment", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_signature: response.razorpay_signature,
+                                        orderId: orderId
+                                    }),
+                                }).then(res => res.json()).then(data => {
+                                    if (data.success) {
+                                        swal("Payment successful").then(()=>  location.reload());
+                                       
+                                    } else {
+                                        swal("Payment verification failed");
+                                    }
+                                });
+                            },
+                            theme: {
+                                color: "#3399cc"
+                            }
+                        };
+
+                        const rzp = new Razorpay(options);
+                        rzp.open();
+                    } catch (err) {
+                        swal("Something went wrong!");
+                    }
+                }
+
+
+
+
+
+
+
+
 
                 function downloadInvoice(orderId) {
                     swal("Downloading Invoice", `Invoice for order ${orderId} is being downloaded...`, "success");

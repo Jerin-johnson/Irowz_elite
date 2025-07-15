@@ -1,5 +1,6 @@
 const {Product} = require("../../models/productSchema");
-
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 
 const getStockManagementPage = async (req, res) => {
 
@@ -83,7 +84,7 @@ const updateStockQuantity = async(req,res)=>{
 
         await product.save();
 
-        return res.status(200).json({success:true,message:"The product stock updated successfully"});
+        return res.status(Status.OK).json({success:true,message:"The product stock updated successfully"});
 
         
     } catch (error) {

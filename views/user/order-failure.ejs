@@ -247,18 +247,14 @@
             
             <div class="action-buttons">
                 <% if (order) { %>
-                <a href="/checkout?retry=<%= order.orderId %>" class="btn btn-danger">
-                    <i class="fas fa-redo"></i>
-                    Retry Payment
-                </a>
-                <a href="/order/details/<%= order.orderId %>" class="btn btn-outline">
+                <a href="/orders/<%= order.orderId %>" class="btn btn-outline">
                     <i class="fas fa-receipt"></i>
                     View Order Details
                 </a>
                 <% } %>
                 <a href="/" class="btn btn-primary">
                     <i class="fas fa-home"></i>
-                    Go to Home
+                    Continue shopping
                 </a>
             </div>
         </div>
