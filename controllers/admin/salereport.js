@@ -3,7 +3,7 @@ const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const path = require("path")
 const fs = require("fs");
-const { getDashSalesData } = require("../../helpers/calculateStates");
+// const { getDashSalesData } = require("../../helpers/calculateStates");
 
 
 // Helper function to get date ranges
@@ -75,87 +75,226 @@ const getDateRange = (period, startDate, endDate) => {
   return dateFilter
 }
 
+// helper function
 
-const loadSalesReportPage = async(req,res)=>{
- try {
-    const { period = "daily", startDate, endDate, page = 1 } = req.query
-    const limit = 10
-    const skip = (page - 1) * limit
+async function getDashSalesData(dateFilter = {}) {
+  try {
+    let totalRevune = await Order.aggregate([
+      { $match: { ...dateFilter } },
+      { $unwind: "$items" },
+      { $match: { "items.status": "delivered" } },
+      { $group: { _id: null, revenue: { $sum: "$items.totalPrice" } } },
+    ]);
 
-    console.log("Sales Report Query:", { period, startDate, endDate, page })
+    const totalOrders = await Order.countDocuments({
+      ...dateFilter,
+      $or: [
+        { orderStatus: "delivered" },
+        { orderStatus: "shipped" },
+        { orderStatus: "processing" },
+      ],
+    });
 
-    // Get date filter
-    const dateFilter = getDateRange(period, startDate, endDate)
-    // console.log("Date Filter:", dateFilter);
+    const totalRefundAmount = await Order.aggregate([
+      { $match: { ...dateFilter } },
+      {
+        $group: {
+          _id: null,
+          totalRefundAmount: { $sum: "$totalRefundAmount" },
+        },
+      },
+    ]);
+
+    const totalCouponDiscount = await Order.aggregate([
+      { $match: { ...dateFilter } },
+      {
+        $group: {
+          _id: null,
+          couponDiscount: { $sum: "$couponDiscount" },
+        },
+      },
+    ]);
+
+    const finalRevune = await Order.aggregate([
+      { $match: { ...dateFilter, paymentStatus: "completed" } },
+      { $unwind: "$items" },
+      {
+        $match: {
+          "items.status": "delivered",
+          "items.refundStatus": { $nin: ["refunded", "processing"] },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          finalRevenue: { $sum: "$items.totalPrice" },
+        },
+      },
+    ]);
+
+    let couponDis = totalCouponDiscount[0]?.couponDiscount || 0;
+
+    return {
+      finalRevune: (finalRevune[0]?.finalRevenue || 0) - couponDis,
+      totalRefundAmount: totalRefundAmount[0]?.totalRefundAmount || 0,
+      totalCouponDiscount: couponDis,
+      totalOrders,
+      totalRevune: totalRevune[0]?.revenue || 0,
+    };
+  } catch (error) {
+    console.error(error);
+    return {};
+  }
+}
 
 
-    let{finalRevune,
-                totalRefundAmount,
-                totalCouponDiscount,
-                totalOrders,
-                totalRevune} = await getDashSalesData();
 
-    // Base query for completed orders only
+// const loadSalesReportPage = async(req,res)=>{
+//  try {
+//     const { period = "daily", startDate, endDate, page = 1 } = req.query
+//     const limit = 10
+//     const skip = (page - 1) * limit
+
+//     console.log("Sales Report Query:", { period, startDate, endDate, page })
+
+//     // Get date filter
+//     const dateFilter = getDateRange(period, startDate, endDate)
+//     // console.log("Date Filter:", dateFilter);
+
+
+//     let{finalRevune,
+//                 totalRefundAmount,
+//                 totalCouponDiscount,
+//                 totalOrders,
+//                 totalRevune} = await getDashSalesData();
+
+//     // Base query for completed orders only
+//     const baseQuery = {
+//       ...dateFilter,
+//       $or: [{ orderStatus: "delivered" }, { orderStatus: "shipped" }, { orderStatus: "processing" }],
+//     }
+
+
+//     // Get orders with pagination
+//     const orders = await Order.find(baseQuery)
+//       .populate("userId", "name email fullName")
+//       .sort({ orderDate: -1 })
+//       .skip(skip)
+//       .limit(limit)
+//       .lean()
+
+//     // console.log(`Found ${orders.length} orders`)
+
+//      const totalAfterFilterOrders = await Order.countDocuments(baseQuery)
+//     const totalPages = Math.ceil(totalOrders / limit)
+
+//     // Calculate comprehensive statistics
+//     const allOrders = await Order.find(baseQuery).lean()
+
+//     const statistics = {
+//       totalSalesCount: allOrders.length,
+//       totalOrderAmount: 0,
+//       totalDiscount: 0,
+//       totalCouponDiscount: totalCouponDiscount || 0,
+//       totalTax: 0,
+//       totalShipping: 0,
+//       totalFinalAmount:finalRevune || 0,
+//     }
+
+//     // Calculate totals manually
+//     allOrders.forEach((order) => {
+//       statistics.totalDiscount += order.discount || 0
+//       // statistics.totalCouponDiscount += order.couponDiscount || 0
+//       // statistics.totalTax += order.tax || 0
+//       statistics.totalShipping += order.shipping || 0
+//       // statistics.totalFinalAmount += order.finalAmount || 0
+//     })
+
+//     // console.log("Statistics:", statistics)
+
+//     res.render("admin/salesReport", {
+//       title: "Sales Report",
+//       orders,
+//       statistics,
+//       currentPage: Number.parseInt(page),
+//       totalPages,
+//       totalOrders,
+//       period,
+//       startDate,
+//       endDate,
+//     })
+//   } catch (error) {
+//     console.error("Error generating sales report:", error)
+//     res.status(500).render("error", { message: "Error generating sales report" })
+//   }
+// }
+
+
+const loadSalesReportPage = async (req, res) => {
+  try {
+    const { period = "daily", startDate, endDate, page = 1 } = req.query;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    const dateFilter = getDateRange(period, startDate, endDate);
+
     const baseQuery = {
       ...dateFilter,
-      $or: [{ orderStatus: "delivered" }, { orderStatus: "shipped" }, { orderStatus: "processing" }],
-    }
+      $or: [
+        { orderStatus: "delivered" },
+        { orderStatus: "shipped" },
+        { orderStatus: "processing" },
+      ],
+    };
 
-    // console.log("Base Query:", JSON.stringify(baseQuery, null, 2))
+    const {
+      finalRevune,
+      totalRefundAmount,
+      totalCouponDiscount,
+      totalOrders,
+      totalRevune,
+    } = await getDashSalesData(dateFilter);
 
-    // Get orders with pagination
     const orders = await Order.find(baseQuery)
       .populate("userId", "name email fullName")
       .sort({ orderDate: -1 })
       .skip(skip)
       .limit(limit)
-      .lean()
+      .lean();
 
-    // console.log(`Found ${orders.length} orders`)
+    const totalAfterFilterOrders = await Order.countDocuments(baseQuery);
+    const totalPages = Math.ceil(totalAfterFilterOrders / limit);
 
-    // const totalOrders = await Order.countDocuments(baseQuery)
-    const totalPages = Math.ceil(totalOrders / limit)
+    const allOrders = await Order.find(baseQuery).lean();
 
-    // Calculate comprehensive statistics
-    const allOrders = await Order.find(baseQuery).lean()
 
+    console.log(allOrders)
     const statistics = {
       totalSalesCount: allOrders.length,
-      totalOrderAmount: 0,
-      totalDiscount: 0,
-      totalCouponDiscount: totalCouponDiscount || 0,
-      totalTax: 0,
-      totalShipping: 0,
-      totalFinalAmount:finalRevune || 0,
-    }
-
-    // Calculate totals manually
-    allOrders.forEach((order) => {
-      statistics.totalDiscount += order.discount || 0
-      // statistics.totalCouponDiscount += order.couponDiscount || 0
-      // statistics.totalTax += order.tax || 0
-      statistics.totalShipping += order.shipping || 0
-      // statistics.totalFinalAmount += order.finalAmount || 0
-    })
-
-    // console.log("Statistics:", statistics)
+      totalOrderAmount: allOrders.reduce((acc, order) => acc + (order.totalAmount || 0), 0),
+      totalDiscount: allOrders.reduce((acc, order) => acc + (order.discount || 0), 0),
+      totalCouponDiscount,
+      totalShipping: allOrders.reduce((acc, order) => acc + (order.shipping || 0), 0),
+      totalFinalAmount: finalRevune,
+    };
 
     res.render("admin/salesReport", {
       title: "Sales Report",
       orders,
       statistics,
-      currentPage: Number.parseInt(page),
+      currentPage: parseInt(page),
       totalPages,
-      totalOrders,
+      totalOrders: totalAfterFilterOrders,
       period,
       startDate,
       endDate,
-    })
+    });
   } catch (error) {
-    console.error("Error generating sales report:", error)
-    res.status(500).render("error", { message: "Error generating sales report" })
+    console.error("Error generating sales report:", error);
+    res.status(500).render("error", { message: "Error generating sales report" });
   }
-}
+};
+
 
 
 

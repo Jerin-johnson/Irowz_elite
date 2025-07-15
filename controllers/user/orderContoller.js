@@ -180,6 +180,12 @@ const cancelOrderItem = async (req, res) => {
     }
 
 
+    if(refundAmount< order.items[itemIndex].totalPrice)
+    {
+      throw new Error("Since the coupon is applied you cannot cancelled this order");
+    }
+
+
 
     //  cancellation amount
      order.totalCancelAmount += refundAmount;
