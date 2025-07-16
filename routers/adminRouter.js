@@ -6,7 +6,7 @@ const{loadCustomer,blockUser,unblockUser} = require("../controllers/admin/custom
 const {loadCategory,addCategory,loadAddCategory,listCategory,unlistCategory,loadEditCategory,editCategory}= require("../controllers/admin/categoryContoller")
 const {loadProductPage,loadAddProductPage,addProduct,editProduct,loadEditProduct,blockProduct,unBlockProduct} = require("../controllers/admin/productController");
 const {upload} = require("../middleware/multerMiddleWare")
-const {loadBrandPage,addBrand,changeStatus} = require("../controllers/admin/brandController");
+const {loadBrandPage,addBrand,changeBrandStatus} = require("../controllers/admin/brandController");
 
 const{loadOrderListingPage,loadOrderDetailedPage,changeOrderStatus}= require("../controllers/admin/orderController");
 // offer managemet
@@ -85,7 +85,7 @@ adminRouter.post("/category/removeoffer",adminAuth,removeCategoryOffer);
 
 adminRouter.get("/brand",adminAuth,loadBrandPage)
 adminRouter.post("/brand",adminAuth,upload.single('brandImage'),addBrand);
-adminRouter.patch("/brand/:id",adminAuth,changeStatus);
+adminRouter.patch("/brand/:id",adminAuth,changeBrandStatus);
 
 
 

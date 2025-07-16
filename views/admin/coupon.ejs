@@ -334,8 +334,8 @@
         <div class="form-row">
           <div class="form-group">
             <label for="discountPercent">Discount Percentage (%) *</label>
-            <input type="number" id="discountPercent" name="discountPercent" min="1" max="100" required>
-            <div id="discountError" class="error">Discount must be between 1 and 100</div>
+            <input type="number" id="discountPercent" name="discountPercent" min="1" max="70" required>
+            <div id="discountError" class="error">Discount must be between 1 and 70</div>
           </div>
           <div class="form-group">
             <label for="maxDiscountAmount">Max Discount Amount (₹)</label>
@@ -349,7 +349,7 @@
             <input type="number" id="minPurchaseAmount" name="minPurchaseAmount" min="0" value="0">
           </div>
           <div class="form-group">
-            <label for="expiresAt">Expiry Date *</label>
+            <label for="expiresAt">Expiry Date </label>
             <input type="date" id="expiresAt" name="expiresAt" required>
             <div id="expiryError" class="error">Expiry date cannot be in the past</div>
           </div>
@@ -420,8 +420,8 @@
     
     document.getElementById('discountPercent').addEventListener('input', function() {
       const value = parseInt(this.value);
-      if (isNaN(value) || value < 1 || value > 100) {
-        showError(document.getElementById('discountError'), "Discount must be between 1 and 100");
+      if (isNaN(value) || value < 1 || value > 70) {
+        showError(document.getElementById('discountError'), "Discount must be between 1 and 70");
       } else {
         hideError(document.getElementById('discountError'));
       }

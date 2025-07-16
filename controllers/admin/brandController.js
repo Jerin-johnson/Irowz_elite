@@ -73,14 +73,13 @@ const addBrand = async (req, res) => {
 
 
 
-const changeStatus = async (req, res) => {
+const changeBrandStatus = async (req, res) => {
   try {
-    const id = req.params.id;
+    const brandId = req.params.id;
     const { isBlocked } = req.body;
 
- 
     const updatedBrand = await Brand.findByIdAndUpdate(
-      id,
+      brandId,
       { isBlocked },
       { new: true }
     );
@@ -99,8 +98,9 @@ const changeStatus = async (req, res) => {
 
 
 
+
 module.exports = {
   loadBrandPage,
   addBrand,
-  changeStatus
+  changeBrandStatus
 };

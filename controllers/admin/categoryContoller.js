@@ -77,22 +77,25 @@ const loadAddCategory = (req, res) => {
   }
 };
 
+
+
 const listCategory = async (req, res) => {
   try {
-    let { id } = req.query;
-    await Category.findByIdAndUpdate(id, { isListed: true });
+    let { id: categoryId } = req.query;
+    await Category.findByIdAndUpdate(categoryId, { isListed: true });
     res.redirect("/admin/category");
   } catch (error) {
     console.error("Error unlisting category:", err);
     res.status(Status.INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 };
+
 
 const unlistCategory = async (req, res) => {
   try {
-    let { id } = req.query;
+    let { id: categoryId } = req.query;
 
-    await Category.findByIdAndUpdate(id, { isListed: false });
+    await Category.findByIdAndUpdate(categoryId, { isListed: false });
     res.redirect("/admin/category");
   } catch (error) {
     console.error("Error unlisting category:", err);
@@ -100,35 +103,40 @@ const unlistCategory = async (req, res) => {
   }
 };
 
+
+
+
 const loadEditCategory = async (req, res) => {
   try {
-    const id = req.query.id;
+    const categoryId = req.query.id;
 
-    const category = await Category.findById(id);
+    const category = await Category.findById(categoryId);
     res.render("admin/editcategory", { category });
   } catch (error) {
     res.send("Error in edit category page");
   }
 };
 
+
 const editCategory = async (req, res) => {
   try {
-    const id = req.params.id;
+    const categoryId = req.params.id;
     const { name, description } = req.body;
-    const existCat = await Category.find({
-      _id: { $ne: id },
+
+    const existingCategories = await Category.find({
+      _id: { $ne: categoryId },
     });
 
-    for (let cat of existCat) {
-      if (cat.name.toLowerCase() === name.toLowerCase()) {
+    for (let category of existingCategories) {
+      if (category.name.toLowerCase() === name.toLowerCase()) {
         return res
           .status(Status.BAD_REQUEST)
-          .json({ success: false, message: "The cateogroy already exists" });
+          .json({ success: false, message: "The category already exists" });
       }
     }
 
     const update = await Category.findByIdAndUpdate(
-      id,
+      categoryId,
       { name, description },
       { new: true }
     );
@@ -142,6 +150,7 @@ const editCategory = async (req, res) => {
     res.send(message.SERVER_ERROR);
   }
 };
+
 
 module.exports = {
   loadCategory,
