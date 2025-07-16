@@ -118,21 +118,7 @@ const resetPassword = async (req, res) => {
   }
 };
 
-// const loadProfilePage = async (req, res) => {
-//   try {
-//     const user = req.session.user;
-//     const userData = await User.findOne({ _id: user });
-//     const order = await Order.aggregate([{$match:{userId :user}},{$unwind:"$items"},{$group:{_id:null,totalOrder:{$sum:1}}}])
-//     const wishlist = await Wishlist.findOne({userId:user})
 
-//     console.log("The Order and the wishlist",order)
-
-//     res.render("user/profile/profile", { user: userData,wishlist:wishlist. products.length || 0,order : order.totalOrder ||0 });
-//   } catch (error) {
-//     res.send("Some error while loading the profile page", error);
-//     res.redirect("/error-404");
-//   }
-// };
 
 const loadProfilePage = async (req, res) => {
   try {

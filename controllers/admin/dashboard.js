@@ -3,7 +3,8 @@ const { Product } = require('../../models/productSchema');
 const { Category } = require('../../models/categorySchema');
 const { Brand } = require('../../models/brandSchema');
 const { User } = require('../../models/userSchema');
-const{getDashSalesData}=require("../../helpers/calculateStates");
+// const{getDashSalesData}=require("../../helpers/calculateStates");
+const{ getDashSalesData}=require("./salereport")
 const Status = require("../../utils/status");
 const message = require("../../utils/message");
 

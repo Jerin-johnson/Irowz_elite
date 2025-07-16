@@ -140,48 +140,48 @@
               <th>REGULAR PRICE</th>
               <th>SALE PRICE</th>
               <th>Offer</th>
-               <th>Offer type</th>
+              <th>Offer type</th>
               <th>IMAGES</th>
               <th>ACTIONS</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="productTableBody">
             <% if (!products || products.length === 0) { %>
             <tr>
-              <td colspan="9" class="no-data">
+              <td colspan="11" class="no-data">
                 <div>📂</div>
                 <h3>No products found</h3>
                 <p>Try a different search or add a new product</p>
               </td>
             </tr>
-            <% } else { %> <% products.forEach((product, index) => { %>
+            <% } else { %> 
+            <% products.forEach((product, index) => { %>
             <tr>
               <td>
                 <%= ((currentPage || 1) - 1) * (limit || 10) + index + 1 %>
               </td>
               <td><%= product.productName || 'N/A' %></td>
-              <td><%= product.category? product.category.name : 'N/A' %></td>
-              <td><%= product.brand.brandName || 'N/A' %></td>
+              <td><%= product.category ? product.category.name : 'N/A' %></td>
+              <td><%= product.brand ? product.brand.brandName : 'N/A' %></td>
               <td><%= product.stock != null ? product.stock : 'N/A' %></td>
               <td>
-                ₹<%= product.regularPrice != null ?
-                product.regularPrice.toFixed(2) : 'N/A' %>
+                ₹<%= product.regularPrice != null ? product.regularPrice.toFixed(2) : 'N/A' %>
               </td>
               <td>
-                ₹<%= product.salePrice != null ? product.salePrice.toFixed(2) :
-                'N/A' %>
+                ₹<%= product.salePrice != null ? product.salePrice.toFixed(2) : 'N/A' %>
               </td>
               <td>
-                <span style="color: rgb(206, 2, 2); font-size: large;"><%= product.productOffer != null ? product.productOffer :
-                'N/A' %>%</span>
-              </td>
-               <td>
-                <span style="color: rgb(206, 2, 2); font-size: large;"><%= product.appliedOfferType != null ? product.appliedOfferType :
-                'N/A' %></span>
+                <span style="color: rgb(206, 2, 2); font-size: large;">
+                  <%= product.productOffer != null ? product.productOffer : 'N/A' %>%
+                </span>
               </td>
               <td>
-                <% if (product.productImage && product.productImage.length > 0)
-                { %>
+                <span style="color: rgb(206, 2, 2); font-size: large;">
+                  <%= product.appliedOfferType != null ? product.appliedOfferType : 'N/A' %>
+                </span>
+              </td>
+              <td>
+                <% if (product.productImage && product.productImage.length > 0) { %>
                 <img
                   src="/<%= product.productImage[0].path %>"
                   alt="Product Image"
@@ -199,7 +199,6 @@
                   <a href="/admin/product/edit?id=<%= product._id || '' %>">
                     <button class="btn btn-warning btn-sm">Edit</button>
                   </a>
-                  
                   <% if (product.isBlocked === false) { %>
                   <a
                     href="/admin/product/block?id=<%= product._id || '' %>"
@@ -208,13 +207,12 @@
                     <button class="btn btn-danger btn-sm">block</button>
                   </a>
                   <% } else { %>
-                   <a
+                  <a
                     href="/admin/product/unblock?id=<%= product._id || '' %>"
                   >
                     <button class="btn btn-success btn-sm">Unblock</button>
                   </a>
                   <% } %>
-                  
                   <!-- Offer Management Buttons -->
                   <% if (product.productOffer && product.productOffer > 0) { %>
                     <button 
@@ -234,20 +232,19 @@
                 </div>
               </td>
             </tr>
-            <% }) %> <% } %>
+            <% }) %> 
+            <% } %>
           </tbody>
         </table>
       </div>
 
       <!-- Pagination -->
-      <div class="pagination">
-        <% const pages = totalPages || 1; %> <% for (let i = 1; i <= pages; i++)
-        { %>
-        <a href="/admin/product?page=<%= i %>&search=<%= search || '' %>">
-          <button class="<%= i === (currentPage || 1) ? 'active' : '' %>">
-            <%= i %>
-          </button>
-        </a>
+      <div class="pagination" id="pagination">
+        <% const pages = totalPages || 1; %> 
+        <% for (let i = 1; i <= pages; i++) { %>
+        <button class="page-btn <%= i === (currentPage || 1) ? 'active' : '' %>" data-page="<%= i %>">
+          <%= i %>
+        </button>
         <% } %>
       </div>
     </div>
@@ -433,7 +430,6 @@
                 icon: "success",
                 confirmButtonColor: "#28a745"
               }).then(() => {
-                offerModal.style.display = 'none';
                 window.location.reload();
               });
             } else {
@@ -465,6 +461,203 @@
         offerError.style.display = 'block';
         offerInput.focus();
       }
+
+      // AJAX Pagination
+      const productTableBody = document.getElementById('productTableBody');
+      const pagination = document.getElementById('pagination');
+
+      async function loadProducts(page) {
+        try {
+          const search = document.getElementById('searchInput').value;
+          const response = await fetch(`/admin/product?page=${page}&search=${encodeURIComponent(search)}`, {
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+          });
+          const data = await response.json();
+
+          // Update table body
+          productTableBody.innerHTML = data.products.length === 0
+            ? `
+              <tr>
+                <td colspan="11" class="no-data">
+                  <div>📂</div>
+                  <h3>No products found</h3>
+                  <p>Try a different search or add a new product</p>
+                </td>
+              </tr>
+            `
+            : data.products.map((product, index) => `
+              <tr>
+                <td>${(data.currentPage - 1) * data.limit + index + 1}</td>
+                <td>${product.productName || 'N/A'}</td>
+                <td>${product.category ? product.category.name : 'N/A'}</td>
+                <td>${product.brand ? product.brand.brandName : 'N/A'}</td>
+                <td>${product.stock != null ? product.stock : 'N/A'}</td>
+                <td>₹${product.regularPrice != null ? product.regularPrice.toFixed(2) : 'N/A'}</td>
+                <td>₹${product.salePrice != null ? product.salePrice.toFixed(2) : 'N/A'}</td>
+                <td><span style="color: rgb(206, 2, 2); font-size: large;">${product.productOffer != null ? product.productOffer : 'N/A'}%</span></td>
+                <td><span style="color: rgb(206, 2, 2); font-size: large;">${product.appliedOfferType != null ? product.appliedOfferType : 'N/A'}</span></td>
+                <td>
+                  ${product.productImage && product.productImage.length > 0
+                    ? `<img src="/${product.productImage[0].path}" alt="Product Image" style="width: 50px; height: 50px; object-fit: cover; margin-right: 5px;" />`
+                    : 'No Images'}
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <a href="/admin/product/edit?id=${product._id || ''}">
+                      <button class="btn btn-warning btn-sm">Edit</button>
+                    </a>
+                    ${product.isBlocked === false
+                      ? `<a href="/admin/product/block?id=${product._id || ''}" class="delete-link">
+                          <button class="btn btn-danger btn-sm">block</button>
+                        </a>`
+                      : `<a href="/admin/product/unblock?id=${product._id || ''}">
+                          <button class="btn btn-success btn-sm">Unblock</button>
+                        </a>`
+                    }
+                    ${product.productOffer && product.productOffer > 0
+                      ? `<button class="btn btn-secondary btn-sm remove-offer-btn" data-product-id="${product._id || ''}">
+                          Remove Offer
+                        </button>`
+                      : `<button class="btn btn-info btn-sm add-offer-btn" data-product-id="${product._id || ''}">
+                          Add Offer
+                        </button>`
+                    }
+                  </div>
+                </td>
+              </tr>
+            `).join('');
+
+          // Update pagination
+          pagination.innerHTML = Array.from({ length: data.totalPages }, (_, i) => i + 1)
+            .map(i => `
+              <button class="page-btn ${i === data.currentPage ? 'active' : ''}" data-page="${i}">
+                ${i}
+              </button>
+            `).join('');
+
+          // Re-attach pagination event listeners
+          attachPaginationListeners();
+
+          // Re-attach existing event listeners for delete links
+          document.querySelectorAll(".delete-link").forEach((link) => {
+            link.removeEventListener('click', handleDelete); // Remove old listeners to prevent duplicates
+            link.addEventListener('click', handleDelete);
+          });
+
+          // Re-attach existing event listeners for offer buttons
+          document.querySelectorAll(".remove-offer-btn").forEach(btn => {
+            btn.removeEventListener('click', handleRemoveOffer); // Remove old listeners
+            btn.addEventListener('click', handleRemoveOffer);
+          });
+
+          document.querySelectorAll('.add-offer-btn').forEach(btn => {
+            btn.removeEventListener('click', handleAddOffer); // Remove old listeners
+            btn.addEventListener('click', handleAddOffer);
+          });
+        } catch (error) {
+          console.error('Error loading products:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to load products. Please try again.',
+            confirmButtonColor: '#d33',
+          });
+        }
+      }
+
+      // Store original event handlers to re-attach them
+      const handleDelete = (e) => {
+        e.preventDefault();
+        const url = e.target.closest('a').href;
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You are about to delete this product.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, delete",
+          reverseButtons: true,
+        }).then((result) => {
+          if (result.isConfirmed) window.location.href = url;
+        });
+      };
+
+      const handleRemoveOffer = (e) => {
+        const productId = e.target.getAttribute('data-product-id');
+        Swal.fire({
+          title: "Remove Offer?",
+          text: "Are you sure you want to remove this product offer?",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonColor: "#28a745",
+          cancelButtonColor: "#6c757d",
+          confirmButtonText: "Yes, remove offer",
+          reverseButtons: true,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch('/admin/product/removeOffer', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ id: productId })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire({
+                  title: "Success!",
+                  text: data.message,
+                  icon: "success",
+                  confirmButtonColor: "#28a745"
+                }).then(() => {
+                  window.location.reload();
+                });
+              } else {
+                Swal.fire({
+                  title: "Error!",
+                  text: data.message || "Failed to remove offer",
+                  icon: "error",
+                  confirmButtonColor: "#d33"
+                });
+              }
+            })
+            .catch(error => {
+              Swal.fire({
+                title: "Error!",
+                text: "Something went wrong: " + error.message,
+                icon: "error",
+                confirmButtonColor: "#d33"
+              });
+            });
+          }
+        });
+      };
+
+      const handleAddOffer = (e) => {
+        currentProductId = e.target.getAttribute('data-product-id');
+        offerModal.style.display = 'block';
+        offerInput.focus();
+        offerInput.value = '';
+        offerError.style.display = 'none';
+      };
+
+      // Attach pagination event listeners
+      function attachPaginationListeners() {
+        document.querySelectorAll('.page-btn').forEach(button => {
+          button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = e.target.dataset.page;
+            loadProducts(page);
+          });
+        });
+      }
+
+      // Initial attachment of pagination listeners
+      attachPaginationListeners();
     </script>
   </body>
 </html>

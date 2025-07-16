@@ -2,16 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard</title>
   <link rel="stylesheet" href="/css/admin/customer.css" />
   <link rel="stylesheet" href="/css/admin/admin.css" />
-
   <!-- SweetAlert2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-
   <%- include('../partials/admin/header') %>
 
   <div class="dashboard-container">
@@ -19,26 +17,26 @@
       <h1>DASHBOARD</h1>
 
       <!-- Filter and Search Form -->
-      <form method="GET" action="/admin/customer" class="filter-search" id="filterForm">
+      <form class="filter-search" id="filterForm">
         <div class="filter">
-          <select name="filter" onchange="this.form.submit()">
-            <option value="">All</option>
+          <select name="filter" id="filterSelect">
+            <option value="" <%= filter === '' ? 'selected' : '' %>>All</option>
             <option value="blocked" <%= filter === 'blocked' ? 'selected' : '' %>>Blocked</option>
             <option value="unblocked" <%= filter === 'unblocked' ? 'selected' : '' %>>Unblocked</option>
           </select>
         </div>
         <div class="search">
-          <input type="text" name="search" value="<%= search || '' %>" placeholder="Search"/>
+          <input type="text" name="search" id="searchInput" value="<%= search || '' %>" placeholder="Search" />
         </div>
         <button type="submit">Apply</button>
-         <a href="/admin/customer">
-            <button type="button" >Reset</button>
-         </a>
+        <a href="/admin/customer">
+          <button type="button">Reset</button>
+        </a>
       </form>
     </div>
 
     <!-- User Table -->
-    <table>
+    <table id="userTable">
       <thead>
         <tr>
           <th>S.No</th>
@@ -48,21 +46,20 @@
           <th>Update</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="userTableBody">
         <% users.forEach((user, index) => { %>
           <tr>
             <td><%= (currentPage - 1) * limit + index + 1 %></td>
             <td><%= user.fullName %></td>
             <td><%= user.email %></td>
-             <td><%= user.phone %></td>
-           
+            <td><%= user.phone %></td>
             <td>
-               <% if (user.isBlocked) { %>
-                <a href="/admin/unblock?id=<%= user._id %>">
+              <% if (user.isBlocked) { %>
+                <a href="/admin/unblock?id=<%= user._id %>" class="action-link">
                   <button class="action-btn unblock-btn">Unblock</button>
                 </a>
               <% } else { %>
-                <a href="/admin/block?id=<%= user._id %>">
+                <a href="/admin/block?id=<%= user._id %>" class="action-link">
                   <button class="action-btn block-btn">Block</button>
                 </a>
               <% } %>
@@ -73,49 +70,195 @@
     </table>
 
     <!-- Pagination -->
-    <div class="pagination">
+    <div class="pagination" id="pagination">
       <% for (let i = 1; i <= totalPages; i++) { %>
-        <a href="/admin/customer?page=<%= i %>&filter=<%= filter || '' %>&search=<%= search || '' %>">
-          <button class="<%= i === currentPage ? 'active' : '' %>"><%= i %></button>
-        </a>
+        <button class="page-btn <%= i === currentPage ? 'active' : '' %>" data-page="<%= i %>"><%= i %></button>
       <% } %>
     </div>
   </div>
 
   <script src="/js/admin/adminNav.js"></script>
 
- 
   <script>
-    const form = document.getElementById('filterForm');
-    form.addEventListener('change', () => {
-      form.submit();
-    });
+    // Prevent form submission from reloading the page
+    const filterForm = document.getElementById('filterForm');
+    const userTableBody = document.getElementById('userTableBody');
+    const pagination = document.getElementById('pagination');
 
+    // Function to fetch and update table and pagination
+    async function loadUsers(page = 1, filter = '', search = '') {
+      try {
+        const response = await fetch(`/admin/customer?page=${page}&filter=${filter}&search=${encodeURIComponent(search)}`, {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest', // Mark as AJAX request
+          },
+        });
+        const data = await response.json();
 
-      // Confirmation for Block 
+        // Update table body
+        userTableBody.innerHTML = data.users
+          .map((user, index) => `
+            <tr>
+              <td>${(data.currentPage - 1) * data.limit + index + 1}</td>
+              <td>${user.fullName}</td>
+              <td>${user.email}</td>
+              <td>${user.phone || ''}</td>
+              <td>
+                ${user.isBlocked
+                  ? `<a href="/admin/unblock?id=${user._id}" class="action-link"><button class="action-btn unblock-btn">Unblock</button></a>`
+                  : `<a href="/admin/block?id=${user._id}" class="action-link"><button class="action-btn block-btn">Block</button></a>`
+                }
+              </td>
+            </tr>
+          `)
+          .join('');
 
-    // SweetAlert confirmation only for block buttons
-    document.querySelectorAll('.block-btn').forEach(button => {
-      button.addEventListener('click', function (e) {
-        e.preventDefault();
-        const link = this.closest('a').href;
+        // Update pagination
+        pagination.innerHTML = Array.from({ length: data.totalPages }, (_, i) => i + 1)
+          .map(
+            (i) => `
+              <button class="page-btn ${i === data.currentPage ? 'active' : ''}" data-page="${i}">${i}</button>
+            `
+          )
+          .join('');
 
+        // Re-attach event listeners for pagination
+        attachPaginationListeners();
+
+        // Re-attach event listeners for block buttons
+        attachBlockButtonListeners();
+      } catch (error) {
+        console.error('Error loading users:', error);
         Swal.fire({
-          title: 'Are you sure?',
-          text: 'You are about to block this user.',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#d33',
-          cancelButtonColor: '#3085d6',
-          confirmButtonText: 'Yes, block',
-          reverseButtons: true
-        }).then((result) => {
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to load users. Please try again.',
+        });
+      }
+    }
+
+    // Attach event listeners to pagination buttons
+    function attachPaginationListeners() {
+      document.querySelectorAll('.page-btn').forEach((button) => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          const page = e.target.dataset.page;
+          const filter = document.getElementById('filterSelect').value;
+          const search = document.getElementById('searchInput').value;
+          loadUsers(page, filter, search);
+        });
+      });
+    }
+
+    // Attach event listeners to block buttons
+    function attachBlockButtonListeners() {
+      document.querySelectorAll('.block-btn').forEach((button) => {
+        button.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const link = button.closest('a').href;
+
+          const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'You are about to block this user.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, block',
+            reverseButtons: true,
+          });
+
           if (result.isConfirmed) {
-            window.location.href = link;
+            try {
+              const response = await fetch(link, {
+                method: 'GET',
+              });
+              if (response.ok) {
+                // Reload users after blocking
+                const filter = document.getElementById('filterSelect').value;
+                const search = document.getElementById('searchInput').value;
+                const page = document.querySelector('.page-btn.active')?.dataset.page || 1;
+                loadUsers(page, filter, search);
+                Swal.fire('Blocked!', 'The user has been blocked.', 'success');
+              } else {
+                Swal.fire('Error!', 'Failed to block the user.', 'error');
+              }
+            } catch (error) {
+              Swal.fire('Error!', 'An error occurred while blocking the user.', 'error');
+            }
           }
         });
       });
+
+      // Handle unblock buttons similarly
+      document.querySelectorAll('.unblock-btn').forEach((button) => {
+        button.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const link = button.closest('a').href;
+
+          const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'You are about to unblock this user.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, unblock',
+            reverseButtons: true,
+          });
+
+          if (result.isConfirmed) {
+            try {
+              const response = await fetch(link, {
+                method: 'GET',
+              });
+              if (response.ok) {
+                // Reload users after unblocking
+                const filter = document.getElementById('filterSelect').value;
+                const search = document.getElementById('searchInput').value;
+                const page = document.querySelector('.page-btn.active')?.dataset.page || 1;
+                loadUsers(page, filter, search);
+                Swal.fire('Unblocked!', 'The user has been unblocked.', 'success');
+              } else {
+                Swal.fire('Error!', 'Failed to unblock the user.', 'error');
+              }
+            } catch (error) {
+              Swal.fire('Error!', 'An error occurred while unblocking the user.', 'error');
+            }
+          }
+        });
+      });
+    }
+
+    // Handle form submission
+    filterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const filter = document.getElementById('filterSelect').value;
+      const search = document.getElementById('searchInput').value;
+      loadUsers(1, filter, search);
     });
+
+    // Handle filter change
+    document.getElementById('filterSelect').addEventListener('change', () => {
+      const filter = document.getElementById('filterSelect').value;
+      const search = document.getElementById('searchInput').value;
+      loadUsers(1, filter, search);
+    });
+
+    // Handle search input (optional: debounce for better UX)
+    let searchTimeout;
+    document.getElementById('searchInput').addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const filter = document.getElementById('filterSelect').value;
+        const search = document.getElementById('searchInput').value;
+        loadUsers(1, filter, search);
+      }, 500); // Debounce for 500ms
+    });
+
+    // Initial attachment of pagination and block/unblock listeners
+    attachPaginationListeners();
+    attachBlockButtonListeners();
   </script>
 </body>
 </html>

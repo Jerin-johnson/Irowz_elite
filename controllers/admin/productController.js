@@ -11,8 +11,6 @@ const Status = require("../../utils/status");
 const message = require("../../utils/message");
 
 
-
-
 const loadProductPage = async (req, res) => {
   try {
     const { search = "", page = 1 } = req.query;
@@ -30,12 +28,25 @@ const loadProductPage = async (req, res) => {
       .sort({ createdAt: -1 })
       .exec();
 
-    // console.log("To check what comes after populated", products);
-
     const totalProducts = await Product.countDocuments(query);
     const totalPages = Math.ceil(totalProducts / limit) || 1;
     const categories = await Category.find({ isListed: true });
 
+    // Check if the request is AJAX
+    const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest';
+
+    if (isAjax) {
+      // Return JSON for AJAX requests
+      return res.json({
+        products,
+        search,
+        currentPage: parseInt(page),
+        totalPages,
+        limit,
+      });
+    }
+
+    // Render EJS for initial page load
     res.render("admin/viewproduct", {
       products,
       categories,
@@ -46,9 +57,14 @@ const loadProductPage = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+    if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
+      return res.status(500).json({ error: 'Server Error' });
+    }
     res.status(500).send("Server Error");
   }
 };
+
+
 
 const loadAddProductPage = async (req, res) => {
   try {

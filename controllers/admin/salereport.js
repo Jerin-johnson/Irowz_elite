@@ -105,15 +105,25 @@ async function getDashSalesData(dateFilter = {}) {
       },
     ]);
 
-    const totalCouponDiscount = await Order.aggregate([
-      { $match: { ...dateFilter } },
-      {
-        $group: {
-          _id: null,
-          couponDiscount: { $sum: "$couponDiscount" },
-        },
-      },
-    ]);
+   const totalCouponDiscount = await Order.aggregate([
+  { $match: { ...dateFilter } },
+  {
+    $match: {
+      $or: [
+        { orderStatus: "delivered" },
+        { orderStatus: "shipped" },
+        { orderStatus: "processing" },
+      ],
+    },
+  },
+  {
+    $group: {
+      _id: null,
+      couponDiscount: { $sum: "$couponDiscount" },
+    },
+  },
+]);
+
 
     const finalRevune = await Order.aggregate([
       { $match: { ...dateFilter, paymentStatus: "completed" } },
@@ -149,85 +159,6 @@ async function getDashSalesData(dateFilter = {}) {
 
 
 
-// const loadSalesReportPage = async(req,res)=>{
-//  try {
-//     const { period = "daily", startDate, endDate, page = 1 } = req.query
-//     const limit = 10
-//     const skip = (page - 1) * limit
-
-//     console.log("Sales Report Query:", { period, startDate, endDate, page })
-
-//     // Get date filter
-//     const dateFilter = getDateRange(period, startDate, endDate)
-//     // console.log("Date Filter:", dateFilter);
-
-
-//     let{finalRevune,
-//                 totalRefundAmount,
-//                 totalCouponDiscount,
-//                 totalOrders,
-//                 totalRevune} = await getDashSalesData();
-
-//     // Base query for completed orders only
-//     const baseQuery = {
-//       ...dateFilter,
-//       $or: [{ orderStatus: "delivered" }, { orderStatus: "shipped" }, { orderStatus: "processing" }],
-//     }
-
-
-//     // Get orders with pagination
-//     const orders = await Order.find(baseQuery)
-//       .populate("userId", "name email fullName")
-//       .sort({ orderDate: -1 })
-//       .skip(skip)
-//       .limit(limit)
-//       .lean()
-
-//     // console.log(`Found ${orders.length} orders`)
-
-//      const totalAfterFilterOrders = await Order.countDocuments(baseQuery)
-//     const totalPages = Math.ceil(totalOrders / limit)
-
-//     // Calculate comprehensive statistics
-//     const allOrders = await Order.find(baseQuery).lean()
-
-//     const statistics = {
-//       totalSalesCount: allOrders.length,
-//       totalOrderAmount: 0,
-//       totalDiscount: 0,
-//       totalCouponDiscount: totalCouponDiscount || 0,
-//       totalTax: 0,
-//       totalShipping: 0,
-//       totalFinalAmount:finalRevune || 0,
-//     }
-
-//     // Calculate totals manually
-//     allOrders.forEach((order) => {
-//       statistics.totalDiscount += order.discount || 0
-//       // statistics.totalCouponDiscount += order.couponDiscount || 0
-//       // statistics.totalTax += order.tax || 0
-//       statistics.totalShipping += order.shipping || 0
-//       // statistics.totalFinalAmount += order.finalAmount || 0
-//     })
-
-//     // console.log("Statistics:", statistics)
-
-//     res.render("admin/salesReport", {
-//       title: "Sales Report",
-//       orders,
-//       statistics,
-//       currentPage: Number.parseInt(page),
-//       totalPages,
-//       totalOrders,
-//       period,
-//       startDate,
-//       endDate,
-//     })
-//   } catch (error) {
-//     console.error("Error generating sales report:", error)
-//     res.status(500).render("error", { message: "Error generating sales report" })
-//   }
-// }
 
 
 const loadSalesReportPage = async (req, res) => {
@@ -355,116 +286,7 @@ const downloadSalesReport = async (req, res) => {
 }
 
 
-// const generatePDF = async (res, orders, statistics, period, startDate, endDate) => {
-//   return new Promise((resolve, reject) => {
-//     try {
-//       console.log("Generating PDF with buffer method...")
 
-//       console.log(orders,statistics,period,startDate,endDate)
-
-//       const filename = `sales-report-${period}-${new Date().toISOString().split("T")[0]}.pdf`
-
-//       // Create document
-//       const doc = new PDFDocument({ margin: 50, size: "A4" })
-
-//       // Collect PDF data in chunks
-//       const chunks = []
-
-//       doc.on("data", (chunk) => {
-//         chunks.push(chunk)
-//       })
-
-//       doc.on("end", () => {
-//         // Combine all chunks into a single buffer
-//         const pdfBuffer = Buffer.concat(chunks)
-
-//         // Set headers and send buffer
-//         res.setHeader("Content-Type", "application/pdf")
-//         res.setHeader("Content-Disposition", `attachment; filename="${filename}"`)
-//         res.setHeader("Content-Length", pdfBuffer.length)
-
-//         res.send(pdfBuffer)
-//         resolve()
-//       })
-
-//       doc.on("error", (err) => {
-//         console.error("PDF generation error:", err)
-//         reject(err)
-//       })
-
-//       // Generate PDF content
-//       // Header
-//       doc.fontSize(24).font("Helvetica-Bold").text("SALES REPORT", { align: "center" })
-//       doc.moveDown(0.5)
-
-//       doc.fontSize(14).font("Helvetica").text(`Period: ${period.toUpperCase()}`, { align: "center" })
-
-//       if (period === "custom" && startDate && endDate) {
-//         doc.text(
-//           `Date Range: ${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`,
-//           { align: "center" },
-//         )
-//       }
-
-//       doc.text(`Generated on: ${new Date().toLocaleString()}`, { align: "center" })
-//       doc.moveDown(2)
-
-//       // Summary Statistics
-//       doc.fontSize(18).font("Helvetica-Bold").text("SUMMARY STATISTICS")
-//       doc.moveDown(0.5)
-
-//       doc.fontSize(12).font("Helvetica")
-//       const statsY = doc.y
-
-//       // Left column
-//       doc.text(`Total Orders: ${statistics.totalSalesCount}`, 50, statsY)
-//       doc.text(`Total Order Amount: ₹${statistics.totalOrderAmount.toFixed(2)}`, 50, statsY + 20)
-//       doc.text(`Product Discounts: ₹${statistics.totalDiscount.toFixed(2)}`, 50, statsY + 40)
-//       doc.text(`Coupon Discounts: ₹${statistics.totalCouponDiscount.toFixed(2)}`, 50, statsY + 60)
-
-//       // Right column
-//       doc.text(`Tax Collected: ₹${statistics.totalTax.toFixed(2)}`, 300, statsY)
-//       doc.text(`Shipping Charges: ₹${statistics.totalShipping.toFixed(2)}`, 300, statsY + 20)
-//       doc.text(`Final Revenue: ₹${statistics.totalFinalAmount.toFixed(2)}`, 300, statsY + 40)
-
-//       doc.y = statsY + 100
-//       doc.moveDown(2)
-
-//       // Orders Details
-//       if (orders.length > 0) {
-//         doc.fontSize(18).font("Helvetica-Bold").text("ORDER DETAILS")
-//         doc.moveDown(1)
-
-//         doc.fontSize(10).font("Helvetica")
-//         orders.slice(0, 15).forEach((order, index) => {
-//           if (doc.y > 700) {
-//             doc.addPage()
-//           }
-
-//           doc.text(`${index + 1}. Order ID: ${order.orderId}`)
-//           doc.text(`   Date: ${new Date(order.orderDate).toLocaleDateString()}`)
-//           doc.text(`   Customer: ${order.userId?.name || order.userId?.fullName || "N/A"}`)
-//           doc.text(`   Payment: ${order.paymentMethod.toUpperCase()}`)
-//           doc.text(`   Amount: ₹${order.totalAmount.toFixed(2)} | Final: ₹${order.finalAmount.toFixed(2)}`)
-//           if (order.couponCode) {
-//             doc.text(`   Coupon Used: ${order.couponCode}`)
-//           }
-//           doc.text(`   Status: ${order.orderStatus.toUpperCase()}`)
-//           doc.moveDown(0.5)
-//         })
-//       }
-
-//       // Footer
-//       doc.fontSize(10).font("Helvetica").text("Thank you for using Irowz Elite Admin Panel!", { align: "center" })
-
-//       // Finalize the PDF
-//       doc.end()
-//     } catch (error) {
-//       console.error("Error in PDF generation:", error)
-//       reject(error)
-//     }
-//   })
-// }
 
 
 const generatePDF = async (res, orders, statistics, period, startDate, endDate) => {
@@ -762,5 +584,6 @@ const generateExcel = async (res, orders, statistics, period, startDate, endDate
 
 module.exports={
     loadSalesReportPage,
-    downloadSalesReport
+    downloadSalesReport,
+     getDashSalesData
 }
