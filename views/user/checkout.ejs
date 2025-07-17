@@ -732,7 +732,7 @@
 
         // Your existing placeOrder function remains the same
         async function placeOrder() {
-            console.log("🚀 Starting order placement process");
+            
             
             if (!selectedAddressId) {
                 swal("Error", "Please select a shipping address", "error");
@@ -749,10 +749,7 @@
             btn.disabled = true;
 
             try {
-                console.log("📤 Sending order creation request:", {
-                    addressId: selectedAddressId,
-                    paymentMethod: selectedPaymentMethod
-                });
+             
 
                 const response = await fetch('/checkout/placeorder', {
                     method: 'POST',
@@ -790,12 +787,7 @@
                             description: "Order Payment",
                             order_id: data.razorpayOrderId,
                             handler: async function (response) {
-                                console.log("✅ Razorpay payment successful:", response);
-                                console.log("🔍 Payment details:", {
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_signature: response.razorpay_signature
-                                });
+                              
                                 
                                 // Payment successful, verify on server
                                 try {

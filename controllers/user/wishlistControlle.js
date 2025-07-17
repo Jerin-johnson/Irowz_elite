@@ -116,8 +116,7 @@ const removeFromWishlist = async (req, res) => {
     const userId = req.session.user;
 
     const wishlist = await Wishlist.findOne({ userId });
-    console.log(productId, wishlist);
-
+   
     const findProductIndex = wishlist.products.findIndex(
       (item) => productId.toString() === item.productId.toString()
     );

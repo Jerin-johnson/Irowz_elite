@@ -54,7 +54,7 @@ const loadWalletPage = async (req, res) => {
   } catch (error) {
     console.error("Error fetching wallet page:", error.message);
     res.status(Status.INTERNAL_SERVER_ERROR).render("error", {
-      message: "Server error. Please try again later",
+      message: message.SOMETHING_WENT_WRONG,
     });
   }
 };

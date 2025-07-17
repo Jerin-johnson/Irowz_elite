@@ -217,8 +217,7 @@ const updateCartQuantity = async (req, res) => {
       throw new Error("Product not found in the cart");
     }
 
-    console.log("Check whether what comes c", product);
-
+  
     // Update quantity & prices
     const item = cart.items[itemIndex];
     item.quantity = quantity;
