@@ -11,14 +11,15 @@ const fs = require("fs");
 const { Coupon } = require("../../models/couponSchema");
 const { calculateDiscount, calculateTax } = require("../../helpers/helper");
 const { Category } = require("../../models/categorySchema");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
+
 
 const loadOrderDetailedPage = async (req, res) => {
   try {
     const { orderId } = req.params;
 
     const userId = req.session.user;
-
-    
 
     const user = await User.findById(userId);
     console.log(user);
@@ -110,7 +111,7 @@ const cancelOrderItem = async (req, res) => {
 
     const order = await Order.findOne({ orderId, userId });
     if (!order) {
-      return res.status(404).json({
+      return res.status(Status.NOT_FOUND).json({
         success: false,
         message: "Order not found or invalid request",
       });
@@ -128,14 +129,14 @@ const cancelOrderItem = async (req, res) => {
     );
     if (itemIndex === -1) {
       return res
-        .status(404)
+        .status(Status.NOT_FOUND)
         .json({ success: false, message: "Product not found in order" });
     }
 
     const cancelItem = order.items[itemIndex];
     if (cancelItem.status === "cancelled") {
       return res
-        .status(400)
+        .status(Status.BAD_REQUEST)
         .json({ success: false, message: "Item already cancelled" });
     }
 
@@ -143,7 +144,7 @@ const cancelOrderItem = async (req, res) => {
     const product = await Product.findById(productId);
     if (!product || product.isBlocked) {
       return res
-        .status(400)
+        .status(Status.BAD_REQUEST)
         .json({ success: false, message: "Product unavailable or blocked" });
     }
 
@@ -153,7 +154,7 @@ const cancelOrderItem = async (req, res) => {
     // Mark item as cancelled
     cancelItem.status = "cancelled";
     cancelItem.cancellationReason = reason || "Cancelled by user";
-    let cancelCouponMessage = ""
+    let cancelCouponMessage = "";
 
     let refundAmount = 0;
 
@@ -167,30 +168,33 @@ const cancelOrderItem = async (req, res) => {
 
       if (refundAmount === order.items[itemIndex].totalPrice) {
         //if refund amount matches to the cancelAmount means coupon is still valid
-        console.log("The coupon is still valid righ",refundAmount+""+order.items[itemIndex].totalPrice)
+        console.log(
+          "The coupon is still valid righ",
+          refundAmount + "" + order.items[itemIndex].totalPrice
+        );
       } else {
         order.couponApplied = false;
         order.couponCode = null;
         order.couponDiscount = 0;
-        cancelCouponMessage ="Coupon discount removed; refund issued after deducting coupon amount."
-        console.log("The coupon is not valid anymore",refundAmount+""+order.items[itemIndex].totalPrice)
+        cancelCouponMessage =
+          "Coupon discount removed; refund issued after deducting coupon amount.";
+        console.log(
+          "The coupon is not valid anymore",
+          refundAmount + "" + order.items[itemIndex].totalPrice
+        );
       }
-    }else{
-     
-      refundAmount = order.items[itemIndex].totalPrice
+    } else {
+      refundAmount = order.items[itemIndex].totalPrice;
     }
 
-
-    if(refundAmount< order.items[itemIndex].totalPrice)
-    {
-      throw new Error("Since the coupon is applied you cannot cancelled this order");
+    if (refundAmount < order.items[itemIndex].totalPrice) {
+      throw new Error(
+        "Since the coupon is applied you cannot cancelled this order"
+      );
     }
-
-
 
     //  cancellation amount
-     order.totalCancelAmount += refundAmount;
-  
+    order.totalCancelAmount += refundAmount;
 
     //  Recalculate active item-based totals
     const activeItems = order.items.filter(
@@ -208,9 +212,6 @@ const cancelOrderItem = async (req, res) => {
     //   0
     // );
 
-   
-  
-
     //  refunding online paid user
     if (
       order.paymentMethod === "online" &&
@@ -218,9 +219,8 @@ const cancelOrderItem = async (req, res) => {
     ) {
       let wallet = await Wallet.findOne({ userId });
       let refund = refundAmount;
-      if(refund === 0)
-      {
-        refundAmount = order.items[itemIndex].totalPrice
+      if (refund === 0) {
+        refundAmount = order.items[itemIndex].totalPrice;
       }
       if (!wallet) {
         wallet = new Wallet({ userId, balance: 0, transactions: [] });
@@ -250,20 +250,19 @@ const cancelOrderItem = async (req, res) => {
       order.cancellationReason = reason || "All items cancelled by user";
     }
 
-
     // Save final order
-    order.totalRefundAmount +=refundAmount
+    order.totalRefundAmount += refundAmount;
     await order.save();
 
-    return res.status(200).json({
+    return res.status(Status.OK).json({
       success: true,
       message: "Item cancelled successfully",
       allItemsCancelled: activeItems.length === 0,
-      cancelCouponMessage
+      cancelCouponMessage,
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(Status.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
   }
 };
 
@@ -275,14 +274,14 @@ const cancelEntireOrder = async (req, res) => {
 
     const order = await Order.findOne({ userId, orderId });
     if (!order) {
-      return res.status(404).json({
+      return res.status(Status.NOT_FOUND).json({
         success: false,
         message: "Order not found or invalid request",
       });
     }
 
     if (!["pending", "processing"].includes(order.orderStatus)) {
-      return res.status(403).json({
+      return res.status(Status.BAD_REQUEST).json({
         success: false,
         message: "Item cannot be cancelled at this stage",
       });
@@ -292,7 +291,7 @@ const cancelEntireOrder = async (req, res) => {
       (item) => item.status === "cancelled"
     );
     if (hasCancelledItem) {
-      return res.status(400).json({
+      return res.status(Status.BAD_REQUEST).json({
         success: false,
         message:
           "Cannot cancel the entire order because some items are already cancelled",
@@ -352,7 +351,7 @@ const cancelEntireOrder = async (req, res) => {
     order.cancelledAt = now;
     order.cancelledBy = "user";
     order.cancellationReason = reason || "Entire order cancelled by user";
-    order.totalCancelAmount = order.finalAmount
+    order.totalCancelAmount = order.finalAmount;
 
     await order.save();
 
@@ -365,13 +364,13 @@ const cancelEntireOrder = async (req, res) => {
     // });
     // await orderHistory.save();
 
-    return res.status(200).json({
+    return res.status(Status.OK).json({
       success: true,
       message: "Entire order cancelled and refunded successfully",
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(Status.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
   }
 };
 
@@ -388,7 +387,7 @@ const downloadInvoice = async (req, res) => {
 
     if (!order) {
       return res
-        .status(404)
+        .status(Status.NOT_FOUND)
         .json({ success: false, message: "Order not found" });
     }
 
@@ -525,7 +524,7 @@ const downloadInvoice = async (req, res) => {
   } catch (error) {
     console.error("Error generating invoice:", error);
     res
-      .status(500)
+      .status(Status.INTERNAL_SERVER_ERROR)
       .json({ success: false, message: "Error generating invoice" });
   }
 };
@@ -571,10 +570,6 @@ const sendReturnOrderRequest = async (req, res) => {
     return res.json({ success: false, message: error.message });
   }
 };
-
-
-
-
 
 module.exports = {
   loadOrderPage,

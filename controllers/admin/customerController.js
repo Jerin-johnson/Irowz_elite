@@ -58,7 +58,7 @@ const loadCustomer = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Server Error");
+    res.status(Status.INTERNAL_SERVER_ERROR).send("Server Error");
   }
 };
 
@@ -72,10 +72,10 @@ const blockUser = async (req, res) => {
     if (!userId) {
       if (req.headers["x-requested-with"] === "XMLHttpRequest") {
         return res
-          .status(400)
+          .status(Status.BAD_REQUEST)
           .json({ success: false, error: "User ID is required" });
       }
-      return res.status(400).send("User ID is required");
+      return res.status(Status.BAD_REQUEST).send("User ID is required");
     }
 
     // Update user to set isBlocked to true
@@ -88,10 +88,10 @@ const blockUser = async (req, res) => {
     if (result.modifiedCount === 0) {
       if (req.headers["x-requested-with"] === "XMLHttpRequest") {
         return res
-          .status(404)
+          .status(Status.NOT_FOUND)
           .json({ success: false, error: "User not found or already blocked" });
       }
-      return res.status(404).send("User not found or already blocked");
+      return res.status(Status.NOT_FOUND).send("User not found or already blocked");
     }
 
     // Handle AJAX request
@@ -105,10 +105,10 @@ const blockUser = async (req, res) => {
     console.error("Error blocking user:", error);
     if (req.headers["x-requested-with"] === "XMLHttpRequest") {
       return res
-        .status(500)
+        .status(Status.INTERNAL_SERVER_ERROR)
         .json({ success: false, error: "Server error while blocking user" });
     }
-    res.status(500).send("Error in blocking");
+    res.status(Status.INTERNAL_SERVER_ERROR).send("Error in blocking");
   }
 };
 
@@ -120,10 +120,10 @@ const unblockUser = async (req, res) => {
     if (!userId) {
       if (req.headers["x-requested-with"] === "XMLHttpRequest") {
         return res
-          .status(400)
+          .status(Status.BAD_REQUEST)
           .json({ success: false, error: "User ID is required" });
       }
-      return res.status(400).send("User ID is required");
+      return res.status(Status.BAD_REQUEST).send("User ID is required");
     }
 
     // Update user to set isBlocked to false
@@ -136,13 +136,13 @@ const unblockUser = async (req, res) => {
     if (result.modifiedCount === 0) {
       if (req.headers["x-requested-with"] === "XMLHttpRequest") {
         return res
-          .status(404)
+          .status(Status.NOT_FOUND)
           .json({
             success: false,
             error: "User not found or already unblocked",
           });
       }
-      return res.status(404).send("User not found or already unblocked");
+      return res.status(Status.NOT_FOUND).send("User not found or already unblocked");
     }
 
     // Handle AJAX request
@@ -159,10 +159,10 @@ const unblockUser = async (req, res) => {
     console.error("Error unblocking user:", error);
     if (req.headers["x-requested-with"] === "XMLHttpRequest") {
       return res
-        .status(500)
+        .status(Status.INTERNAL_SERVER_ERROR)
         .json({ success: false, error: "Server error while unblocking user" });
     }
-    res.status(500).send("Error in unblocking");
+    res.status(Status.INTERNAL_SERVER_ERROR).send("Error in unblocking");
   }
 };
 

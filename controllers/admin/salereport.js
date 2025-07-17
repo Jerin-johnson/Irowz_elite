@@ -1,79 +1,98 @@
-const{Order}= require("../../models/orderSchema");
-const PDFDocument = require('pdfkit');
-const ExcelJS = require('exceljs');
-const path = require("path")
+const { Order } = require("../../models/orderSchema");
+const PDFDocument = require("pdfkit");
+const ExcelJS = require("exceljs");
+const path = require("path");
 const fs = require("fs");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 // const { getDashSalesData } = require("../../helpers/calculateStates");
-
 
 // Helper function to get date ranges
 const getDateRange = (period, startDate, endDate) => {
-  const now = new Date()
-  let dateFilter = {}
+  const now = new Date();
+  let dateFilter = {};
 
   switch (period) {
     case "daily":
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
+      const startOfDay = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate()
+      );
+      const endOfDay = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        23,
+        59,
+        59
+      );
       dateFilter = {
         orderDate: {
           $gte: startOfDay,
           $lte: endOfDay,
         },
-      }
-      break
+      };
+      break;
     case "weekly":
-      const startOfWeek = new Date(now)
-      startOfWeek.setDate(now.getDate() - now.getDay())
-      startOfWeek.setHours(0, 0, 0, 0)
-      const endOfWeek = new Date(startOfWeek)
-      endOfWeek.setDate(startOfWeek.getDate() + 6)
-      endOfWeek.setHours(23, 59, 59, 999)
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
       dateFilter = {
         orderDate: {
           $gte: startOfWeek,
           $lte: endOfWeek,
         },
-      }
-      break
+      };
+      break;
     case "monthly":
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        0,
+        23,
+        59,
+        59
+      );
       dateFilter = {
         orderDate: {
           $gte: startOfMonth,
           $lte: endOfMonth,
         },
-      }
-      break
+      };
+      break;
     case "yearly":
-      const startOfYear = new Date(now.getFullYear(), 0, 1)
-      const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59)
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
       dateFilter = {
         orderDate: {
           $gte: startOfYear,
           $lte: endOfYear,
         },
-      }
-      break
+      };
+      break;
     case "custom":
       if (startDate && endDate) {
-        const start = new Date(startDate)
-        start.setHours(0, 0, 0, 0)
-        const end = new Date(endDate)
-        end.setHours(23, 59, 59, 999)
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
         dateFilter = {
           orderDate: {
             $gte: start,
             $lte: end,
           },
-        }
+        };
       }
-      break
+      break;
   }
 
-  return dateFilter
-}
+  return dateFilter;
+};
 
 // helper function
 
@@ -105,25 +124,24 @@ async function getDashSalesData(dateFilter = {}) {
       },
     ]);
 
-   const totalCouponDiscount = await Order.aggregate([
-  { $match: { ...dateFilter } },
-  {
-    $match: {
-      $or: [
-        { orderStatus: "delivered" },
-        { orderStatus: "shipped" },
-        { orderStatus: "processing" },
-      ],
-    },
-  },
-  {
-    $group: {
-      _id: null,
-      couponDiscount: { $sum: "$couponDiscount" },
-    },
-  },
-]);
-
+    const totalCouponDiscount = await Order.aggregate([
+      { $match: { ...dateFilter } },
+      {
+        $match: {
+          $or: [
+            { orderStatus: "delivered" },
+            { orderStatus: "shipped" },
+            { orderStatus: "processing" },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          couponDiscount: { $sum: "$couponDiscount" },
+        },
+      },
+    ]);
 
     const finalRevune = await Order.aggregate([
       { $match: { ...dateFilter, paymentStatus: "completed" } },
@@ -156,10 +174,6 @@ async function getDashSalesData(dateFilter = {}) {
     return {};
   }
 }
-
-
-
-
 
 const loadSalesReportPage = async (req, res) => {
   try {
@@ -198,14 +212,22 @@ const loadSalesReportPage = async (req, res) => {
 
     const allOrders = await Order.find(baseQuery).lean();
 
-
-    console.log(allOrders)
+    console.log(allOrders);
     const statistics = {
       totalSalesCount: allOrders.length,
-      totalOrderAmount: allOrders.reduce((acc, order) => acc + (order.totalAmount || 0), 0),
-      totalDiscount: allOrders.reduce((acc, order) => acc + (order.discount || 0), 0),
+      totalOrderAmount: allOrders.reduce(
+        (acc, order) => acc + (order.totalAmount || 0),
+        0
+      ),
+      totalDiscount: allOrders.reduce(
+        (acc, order) => acc + (order.discount || 0),
+        0
+      ),
       totalCouponDiscount,
-      totalShipping: allOrders.reduce((acc, order) => acc + (order.shipping || 0), 0),
+      totalShipping: allOrders.reduce(
+        (acc, order) => acc + (order.shipping || 0),
+        0
+      ),
       totalFinalAmount: finalRevune,
     };
 
@@ -222,30 +244,33 @@ const loadSalesReportPage = async (req, res) => {
     });
   } catch (error) {
     console.error("Error generating sales report:", error);
-    res.status(500).render("error", { message: "Error generating sales report" });
+    res
+      .status(Status.INTERNAL_SERVER_ERROR)
+      .render("error", { message: "Error generating sales report" });
   }
 };
 
-
-
-
-
 const downloadSalesReport = async (req, res) => {
   try {
-    const { format, period = "daily", startDate, endDate } = req.query
+    const { format, period = "daily", startDate, endDate } = req.query;
 
-   
-    const dateFilter = getDateRange(period, startDate, endDate)
+    const dateFilter = getDateRange(period, startDate, endDate);
 
     const baseQuery = {
       ...dateFilter,
-      $or: [{ orderStatus: "delivered" }, { orderStatus: "shipped" }, { orderStatus: "processing" }],
-    }
+      $or: [
+        { orderStatus: "delivered" },
+        { orderStatus: "shipped" },
+        { orderStatus: "processing" },
+      ],
+    };
 
+    const orders = await Order.find(baseQuery)
+      .populate("userId", "name email fullName")
+      .sort({ orderDate: -1 })
+      .lean();
 
-    const orders = await Order.find(baseQuery).populate("userId", "name email fullName").sort({ orderDate: -1 }).lean()
-
-    console.log(`Found ${orders} orders for download`)
+    console.log(`Found ${orders} orders for download`);
 
     // Calculate statistics
     const statistics = {
@@ -256,40 +281,42 @@ const downloadSalesReport = async (req, res) => {
       totalTax: 0,
       totalShipping: 0,
       totalFinalAmount: 0,
-    }
+    };
 
-
-
-   
     orders.forEach((order) => {
-      statistics.totalOrderAmount += order.totalAmount || 0
-      statistics.totalDiscount += order.discount || 0
-      statistics.totalCouponDiscount += order.couponDiscount || 0
-      statistics.totalTax += order.tax || 0
-      statistics.totalShipping += order.shipping || 0
-      statistics.totalFinalAmount += order.finalAmount || 0
-    })
+      statistics.totalOrderAmount += order.totalAmount || 0;
+      statistics.totalDiscount += order.discount || 0;
+      statistics.totalCouponDiscount += order.couponDiscount || 0;
+      statistics.totalTax += order.tax || 0;
+      statistics.totalShipping += order.shipping || 0;
+      statistics.totalFinalAmount += order.finalAmount || 0;
+    });
 
-    console.log("The format of",format)
+    console.log("The format of", format);
 
     if (format === "pdf") {
-      await generatePDF(res, orders, statistics, period, startDate, endDate)
+      await generatePDF(res, orders, statistics, period, startDate, endDate);
     } else if (format === "excel") {
-      await generateExcel(res, orders, statistics, period, startDate, endDate)
+      await generateExcel(res, orders, statistics, period, startDate, endDate);
     } else {
-      res.status(400).json({ success: false, message: "Invalid format" })
+      res.status(Status.BAD_REQUEST).json({ success: false, message: "Invalid format" });
     }
   } catch (error) {
-    console.error("Error downloading sales report:", error)
-    res.status(500).json({ success: false, message: "Error downloading report" })
+    console.error("Error downloading sales report:", error);
+    res
+      .status(Status.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: "Error downloading report" });
   }
-}
+};
 
-
-
-
-
-const generatePDF = async (res, orders, statistics, period, startDate, endDate) => {
+const generatePDF = async (
+  res,
+  orders,
+  statistics,
+  period,
+  startDate,
+  endDate
+) => {
   return new Promise((resolve, reject) => {
     try {
       console.log("Generating PDF with buffer method...");
@@ -297,7 +324,9 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
 
       // Validate inputs
       if (!res || !orders || !statistics) {
-        throw new Error("Missing required parameters: res, orders, or statistics");
+        throw new Error(
+          "Missing required parameters: res, orders, or statistics"
+        );
       }
 
       const filename = `sales-report-${period}-${new Date().toISOString().split("T")[0]}.pdf`;
@@ -310,7 +339,10 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
       doc.on("end", () => {
         const pdfBuffer = Buffer.concat(chunks);
         res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="${filename}"`
+        );
         res.setHeader("Content-Length", pdfBuffer.length);
         res.send(pdfBuffer);
         resolve();
@@ -321,7 +353,14 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
       });
 
       // Helper function to draw a table row with borders and text wrapping
-      const drawTableRow = (doc, y, values, columnX, columnWidths, isHeader = false) => {
+      const drawTableRow = (
+        doc,
+        y,
+        values,
+        columnX,
+        columnWidths,
+        isHeader = false
+      ) => {
         const rowHeight = 20;
         let maxHeight = rowHeight;
 
@@ -331,14 +370,16 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
 
           // Draw cell background for headers
           if (isHeader) {
-            doc.rect(columnX[i], y, columnWidths[i], rowHeight)
+            doc
+              .rect(columnX[i], y, columnWidths[i], rowHeight)
               .fillOpacity(0.1)
               .fill("#b4883e")
               .fillOpacity(1.0);
           }
 
           // Draw cell borders
-          doc.rect(columnX[i], y, columnWidths[i], rowHeight)
+          doc
+            .rect(columnX[i], y, columnWidths[i], rowHeight)
             .strokeColor("#666")
             .lineWidth(0.5)
             .stroke();
@@ -348,7 +389,8 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
             width: columnWidths[i] - 2 * padding,
             align: "left",
           };
-          doc.fontSize(10)
+          doc
+            .fontSize(10)
             .font(isHeader ? "Helvetica-Bold" : "Helvetica")
             .fillColor(isHeader ? "#333" : "black")
             .text(value.toString(), columnX[i] + padding, textY, textOptions);
@@ -362,9 +404,15 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
       };
 
       // Header
-      doc.fontSize(24).font("Helvetica-Bold").text("SALES REPORT", { align: "center" });
+      doc
+        .fontSize(24)
+        .font("Helvetica-Bold")
+        .text("SALES REPORT", { align: "center" });
       doc.moveDown(0.5);
-      doc.fontSize(14).font("Helvetica").text(`Period: ${period.toUpperCase()}`, { align: "center" });
+      doc
+        .fontSize(14)
+        .font("Helvetica")
+        .text(`Period: ${period.toUpperCase()}`, { align: "center" });
 
       if (period === "custom" && startDate && endDate) {
         doc.text(
@@ -373,7 +421,9 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
         );
       }
 
-      doc.text(`Generated on: ${new Date().toLocaleString()}`, { align: "center" });
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, {
+        align: "center",
+      });
       doc.moveDown(2);
 
       // Summary Statistics Table
@@ -386,14 +436,27 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
 
       // Draw table headers
       let rowY = tableStartY;
-      rowY += drawTableRow(doc, rowY, ["Metric", "Value"], labelX, columnWidths, true);
+      rowY += drawTableRow(
+        doc,
+        rowY,
+        ["Metric", "Value"],
+        labelX,
+        columnWidths,
+        true
+      );
 
       // Draw table rows
       const statRows = [
         ["Total Orders", statistics.totalSalesCount || 0],
-        ["Total Order Amount", `₹${(statistics.totalOrderAmount || 0).toFixed(2)}`],
+        [
+          "Total Order Amount",
+          `₹${(statistics.totalOrderAmount || 0).toFixed(2)}`,
+        ],
         ["Product Discounts", `₹${(statistics.totalDiscount || 0).toFixed(2)}`],
-        ["Coupon Discounts", `₹${(statistics.totalCouponDiscount || 0).toFixed(2)}`],
+        [
+          "Coupon Discounts",
+          `₹${(statistics.totalCouponDiscount || 0).toFixed(2)}`,
+        ],
         ["Tax Collected", `₹${(statistics.totalTax || 0).toFixed(2)}`],
         ["Shipping Charges", `₹${(statistics.totalShipping || 0).toFixed(2)}`],
         ["Final Revenue", `₹${(statistics.totalFinalAmount || 0).toFixed(2)}`],
@@ -410,7 +473,16 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
         doc.fontSize(18).font("Helvetica-Bold").text("ORDER DETAILS");
         doc.moveDown(1);
 
-        const headers = ["#", "Order ID", "Date", "Customer", "Payment", "Total", "Final", "Status"];
+        const headers = [
+          "#",
+          "Order ID",
+          "Date",
+          "Customer",
+          "Payment",
+          "Total",
+          "Final",
+          "Status",
+        ];
         const columnWidths = [30, 80, 70, 100, 60, 50, 50, 55]; // Sum ~495px
         const columnX = [50];
         for (let i = 1; i < headers.length; i++) {
@@ -423,13 +495,15 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
         y += drawTableRow(doc, y, headers, columnX, columnWidths, true);
 
         orders.slice(0, 15).forEach((order, index) => {
-          if (y > 650) { // Threshold for page break
+          if (y > 650) {
+            // Threshold for page break
             doc.addPage();
             y = 50;
             y += drawTableRow(doc, y, headers, columnX, columnWidths, true);
           }
 
-          const customer = order.userId?.name || order.userId?.fullName || "N/A";
+          const customer =
+            order.userId?.name || order.userId?.fullName || "N/A";
           const rowData = [
             index + 1,
             order.orderId || "N/A",
@@ -446,10 +520,20 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
           // Add coupon info below row if exists
           if (order.couponCode) {
             doc.fontSize(8).fillColor("#555");
-            doc.text(`Coupon: ${order.couponCode || "N/A"}`, columnX[1] + padding, y + padding, {
-              width: columnWidths[1] + columnWidths[2] + columnWidths[3] + columnWidths[4] - 2 * padding,
-              align: "left",
-            });
+            doc.text(
+              `Coupon: ${order.couponCode || "N/A"}`,
+              columnX[1] + padding,
+              y + padding,
+              {
+                width:
+                  columnWidths[1] +
+                  columnWidths[2] +
+                  columnWidths[3] +
+                  columnWidths[4] -
+                  2 * padding,
+                align: "left",
+              }
+            );
             y += 15;
             doc.fontSize(10).fillColor("black");
           }
@@ -459,9 +543,12 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
       }
 
       doc.moveDown(2);
-      doc.fontSize(10).font("Helvetica").text("Thank you for using Irowz Elite Admin Panel!", {
-        align: "center",
-      });
+      doc
+        .fontSize(10)
+        .font("Helvetica")
+        .text("Thank you for using Irowz Elite Admin Panel!", {
+          align: "center",
+        });
 
       doc.end();
     } catch (error) {
@@ -471,47 +558,50 @@ const generatePDF = async (res, orders, statistics, period, startDate, endDate) 
   });
 };
 
-
-
-
-
-const generateExcel = async (res, orders, statistics, period, startDate, endDate) => {
+const generateExcel = async (
+  res,
+  orders,
+  statistics,
+  period,
+  startDate,
+  endDate
+) => {
   try {
-    console.log("Generating Excel with buffer method...")
+    console.log("Generating Excel with buffer method...");
 
-    const filename = `sales-report-${period}-${new Date().toISOString().split("T")[0]}.xlsx`
+    const filename = `sales-report-${period}-${new Date().toISOString().split("T")[0]}.xlsx`;
 
-    const workbook = new ExcelJS.Workbook()
-    const worksheet = workbook.addWorksheet("Sales Report")
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Sales Report");
 
     // Title and Headers
-    worksheet.addRow(["IROWZ ELITE - SALES REPORT"])
-    worksheet.addRow([`Period: ${period.toUpperCase()}`])
+    worksheet.addRow(["IROWZ ELITE - SALES REPORT"]);
+    worksheet.addRow([`Period: ${period.toUpperCase()}`]);
 
     if (period === "custom" && startDate && endDate) {
       worksheet.addRow([
         `Date Range: ${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`,
-      ])
+      ]);
     }
 
-    worksheet.addRow([`Generated on: ${new Date().toLocaleString()}`])
-    worksheet.addRow([]) // Empty row
+    worksheet.addRow([`Generated on: ${new Date().toLocaleString()}`]);
+    worksheet.addRow([]); // Empty row
 
     // Summary Statistics
-    worksheet.addRow(["SUMMARY STATISTICS"])
-    worksheet.addRow(["Metric", "Value"])
-    worksheet.addRow(["Total Orders", statistics.totalSalesCount])
-    worksheet.addRow(["Total Order Amount", statistics.totalOrderAmount])
-    worksheet.addRow(["Product Discounts", statistics.totalDiscount])
-    worksheet.addRow(["Coupon Discounts", statistics.totalCouponDiscount])
-    worksheet.addRow(["Tax Collected", statistics.totalTax])
-    worksheet.addRow(["Shipping Charges", statistics.totalShipping])
-    worksheet.addRow(["Final Revenue", statistics.totalFinalAmount])
+    worksheet.addRow(["SUMMARY STATISTICS"]);
+    worksheet.addRow(["Metric", "Value"]);
+    worksheet.addRow(["Total Orders", statistics.totalSalesCount]);
+    worksheet.addRow(["Total Order Amount", statistics.totalOrderAmount]);
+    worksheet.addRow(["Product Discounts", statistics.totalDiscount]);
+    worksheet.addRow(["Coupon Discounts", statistics.totalCouponDiscount]);
+    worksheet.addRow(["Tax Collected", statistics.totalTax]);
+    worksheet.addRow(["Shipping Charges", statistics.totalShipping]);
+    worksheet.addRow(["Final Revenue", statistics.totalFinalAmount]);
 
-    worksheet.addRow([]) // Empty row
+    worksheet.addRow([]); // Empty row
 
     // Order Details Headers
-    worksheet.addRow(["ORDER DETAILS"])
+    worksheet.addRow(["ORDER DETAILS"]);
     const headerRow = worksheet.addRow([
       "S.No",
       "Order ID",
@@ -527,15 +617,15 @@ const generateExcel = async (res, orders, statistics, period, startDate, endDate
       "Shipping",
       "Final Amount",
       "Status",
-    ])
+    ]);
 
     // Style the header row
-    headerRow.font = { bold: true }
+    headerRow.font = { bold: true };
     headerRow.fill = {
       type: "pattern",
       pattern: "solid",
       fgColor: { argb: "FFE6E6FA" },
-    }
+    };
 
     // Order Data
     orders.forEach((order, index) => {
@@ -554,36 +644,35 @@ const generateExcel = async (res, orders, statistics, period, startDate, endDate
         order.shipping,
         order.finalAmount,
         order.orderStatus.toUpperCase(),
-      ])
-    })
+      ]);
+    });
 
     // Auto-fit columns
     worksheet.columns.forEach((column) => {
-      column.width = 15
-    })
+      column.width = 15;
+    });
 
     // Generate buffer
-    const buffer = await workbook.xlsx.writeBuffer()
+    const buffer = await workbook.xlsx.writeBuffer();
 
     // Set headers and send buffer
-    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`)
-    res.setHeader("Content-Length", buffer.length)
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Content-Length", buffer.length);
 
-    res.send(buffer)
-    console.log("Excel generated successfully")
+    res.send(buffer);
+    console.log("Excel generated successfully");
   } catch (error) {
-    console.error("Error generating Excel:", error)
-    res.status(500).json({ success: false, message: "Error generating Excel" })
+    console.error("Error generating Excel:", error);
+    res.status(Status.INTERNAL_SERVER_ERROR).json({ success: false, message: "Error generating Excel" });
   }
-}
+};
 
-
-
-
-
-module.exports={
-    loadSalesReportPage,
-    downloadSalesReport,
-     getDashSalesData
-}
+module.exports = {
+  loadSalesReportPage,
+  downloadSalesReport,
+  getDashSalesData,
+};

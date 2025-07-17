@@ -1,5 +1,7 @@
 const { User } = require("../../models/userSchema");
 const {Wallet} = require("../../models/walletSchema");
+const Status = require("../../utils/status");
+const message = require("../../utils/message");
 
 const loadWalletPage = async (req, res) => {
   try {
@@ -51,7 +53,7 @@ const loadWalletPage = async (req, res) => {
     res.render("user/wallet/wallet", { walletData, user, currentPage: page, totalPages });
   } catch (error) {
     console.error("Error fetching wallet page:", error.message);
-    res.status(500).render("error", {
+    res.status(Status.INTERNAL_SERVER_ERROR).render("error", {
       message: "Server error. Please try again later",
     });
   }

@@ -40,7 +40,7 @@ const loadProductDetailedPage = async (req, res) => {
         });
     } catch (error) {
         console.error("Error loading product detail page:", error);
-        res.status(500).redirect("/error404")
+        res.status(Status.INTERNAL_SERVER_ERROR).redirect("/error404")
     }
 };
 

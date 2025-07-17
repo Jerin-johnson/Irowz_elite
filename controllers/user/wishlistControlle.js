@@ -94,7 +94,7 @@ const deleteWishlist = async (req, res) => {
 
     if (!deleted) {
       return res
-        .status(500)
+        .status(Status.INTERNAL_SERVER_ERROR)
         .json({
           success: true,
           message: "Could not updated...Something went wrong",

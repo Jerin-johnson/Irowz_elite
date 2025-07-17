@@ -6,11 +6,11 @@ const mongoose = require("mongoose");
 const fs = require("fs");
 const sharp = require("sharp");
 const path = require("path");
-const{calculateOfferDetails}=require("../../helpers/calculateSalesPrice");
+const { calculateOfferDetails } = require("../../helpers/calculateSalesPrice");
 const Status = require("../../utils/status");
 const message = require("../../utils/message");
 
-
+// load product page all
 const loadProductPage = async (req, res) => {
   try {
     const { search = "", page = 1 } = req.query;
@@ -33,7 +33,7 @@ const loadProductPage = async (req, res) => {
     const categories = await Category.find({ isListed: true });
 
     // Check if the request is AJAX
-    const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest';
+    const isAjax = req.headers["x-requested-with"] === "XMLHttpRequest";
 
     if (isAjax) {
       // Return JSON for AJAX requests
@@ -57,27 +57,26 @@ const loadProductPage = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
-      return res.status(500).json({ error: 'Server Error' });
+    if (req.headers["x-requested-with"] === "XMLHttpRequest") {
+      return res.status(500).json({ error: "Server Error" });
     }
     res.status(500).send("Server Error");
   }
 };
 
-
-
+// loadAddProductPage
 const loadAddProductPage = async (req, res) => {
   try {
-    const cat = await Category.find({ isListed: true });
+    const categories = await Category.find({ isListed: true });
     const brands = await Brand.find({ isBlocked: false });
 
     res.render("admin/addproducts", {
-      categories: cat,
+      categories,
       brands,
     });
   } catch (error) {
-    console.error(err);
-    res.status(500).send("Server Error");
+    console.error(error);
+    res.status(Status.INTERNAL_SERVER_ERROR).send("Server Error");
   }
 };
 
@@ -90,11 +89,18 @@ const addProduct = async (req, res) => {
       brand,
       stock,
       regularPrice,
-      productOffer
+      productOffer,
     } = req.body;
     const images = req.files;
-  
-        if (!name || !description || !category || !brand || !stock || !regularPrice) {
+
+    if (
+      !name ||
+      !description ||
+      !category ||
+      !brand ||
+      !stock ||
+      !regularPrice
+    ) {
       throw new Error("All fields are required except offer");
     }
 
@@ -106,13 +112,10 @@ const addProduct = async (req, res) => {
       throw new Error("Product offer must be between 0 and 90%");
     }
 
-
     // const existProduct = await Product.findOne({productName:{ $regex: name, $options: "i" }});
     const existProduct = await Product.findOne({
-  productName: { $regex: `^${name}$`, $options: "i" }
-});
-
-
+      productName: { $regex: `^${name}$`, $options: "i" },
+    });
 
     if (existProduct) {
       throw new Error("The Product Name already exist");
@@ -129,22 +132,24 @@ const addProduct = async (req, res) => {
       throw new Error("Selected brand does not exist");
     }
 
-    const calculateDetails = await calculateOfferDetails(regularPrice,productOffer,category);
-    console.log(calculateDetails)
+    const calculateDetails = await calculateOfferDetails(
+      regularPrice,
+      productOffer,
+      category
+    );
+    console.log(calculateDetails);
     const salePrice = calculateDetails.salePrice;
-    console.log("The Product Offer is",salePrice);
+    console.log("The Product Offer is", salePrice);
 
     const discountAmount = regularPrice - salePrice;
 
-    console.log("the discounted price",discountAmount);
+    console.log("the discounted price", discountAmount);
 
     const imageData = images.map((file, index) => ({
       path: file.path.replace(/\\/g, "/"),
     }));
 
-
-    
-    console.log("the applied offer",calculateDetails.appliedOfferType)
+    console.log("the applied offer", calculateDetails.appliedOfferType);
 
     // Create and save product
     const product = new Product({
@@ -157,9 +162,9 @@ const addProduct = async (req, res) => {
       regularPrice: parseFloat(regularPrice),
       salePrice,
       productImage: imageData,
-      productOffer:productOffer ||0,
+      productOffer: productOffer || 0,
       discountAmount,
-      appliedOfferType:calculateDetails.appliedOfferType,
+      appliedOfferType: calculateDetails.appliedOfferType,
     });
 
     await product.save();
@@ -170,14 +175,15 @@ const addProduct = async (req, res) => {
       .json({ success: true, message: "Product added successfully" });
   } catch (error) {
     console.log(error.message);
-    res.status(Status.BAD_REQUEST).json({ message: error.message || "Failed to add product" });
+    res
+      .status(Status.BAD_REQUEST)
+      .json({ message: error.message || "Failed to add product" });
   }
 };
 
 // GET Edit Product Page
 const loadEditProduct = async (req, res) => {
   try {
-
     const productId = req.query.id;
     const product = await Product.findById(productId);
 
@@ -199,10 +205,9 @@ const loadEditProduct = async (req, res) => {
       brands,
       error: null,
     });
-
   } catch (error) {
     console.log("Error loading edit product:", error);
-    res.status(500).render("admin/editproduct", {
+    res.status(Status.INTERNAL_SERVER_ERROR).render("admin/editproduct", {
       product: null,
       categories: [],
       brands: [],
@@ -228,7 +233,6 @@ const editProduct = async (req, res) => {
     } = req.body;
     const images = req.files;
 
-
     // Basic validation
     if (
       !name ||
@@ -246,11 +250,10 @@ const editProduct = async (req, res) => {
     if (parseFloat(regularPrice) <= 0) {
       throw new Error("Regular price must be positive");
     }
-  
-    if (productOffer && (productOffer < 0 || productOffer > 90)) {
-  throw new Error("Product offer must be between 0 and 90%");
-}
 
+    if (productOffer && (productOffer < 0 || productOffer > 90)) {
+      throw new Error("Product offer must be between 0 and 90%");
+    }
 
     // Check if product exists
     const product = await Product.findById(productId);
@@ -262,8 +265,6 @@ const editProduct = async (req, res) => {
     const existingImagesArray = JSON.parse(existingImages || "[]");
     const removedImagesArray = JSON.parse(removedImages || "[]");
 
-  
-
     // Validate image count
     const newImages = images
       ? images.map((file) => ({
@@ -274,7 +275,7 @@ const editProduct = async (req, res) => {
     const remainingImages = existingImagesArray.filter(
       (img) => !removedImagesArray.includes(img._id.toString())
     );
-    
+
     const totalImages = remainingImages.length + newImages.length;
     if (totalImages < 3 || totalImages > 5) {
       throw new Error("Please ensure 3 to 5 images in total");
@@ -306,13 +307,16 @@ const editProduct = async (req, res) => {
 
     const offer = parseFloat(productOffer) || 0;
 
-    const Pricedetails = await calculateOfferDetails(parseFloat(regularPrice),offer,category);
+    const Pricedetails = await calculateOfferDetails(
+      parseFloat(regularPrice),
+      offer,
+      category
+    );
     console.log(Pricedetails);
-
 
     const salePrice = Pricedetails.salePrice;
     const discountAmount = parseFloat(regularPrice) - salePrice;
-    console.log("Edit Product salePrice",salePrice);
+    console.log("Edit Product salePrice", salePrice);
 
     // Update product
     product.productName = name;
@@ -325,7 +329,7 @@ const editProduct = async (req, res) => {
     product.salePrice = salePrice;
     product.productImage = [...remainingImages, ...newImages];
     product.discountAmount = discountAmount;
-    product.appliedOfferType = Pricedetails.appliedOfferType
+    product.appliedOfferType = Pricedetails.appliedOfferType;
 
     await product.save();
 
@@ -340,21 +344,45 @@ const editProduct = async (req, res) => {
   }
 };
 
+// const blockProduct = async (req, res) => {
+//   try {
+//     const id = req.query.id;
+
+//     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+//       return res.status(Status.BAD_REQUEST).send("Invalid product ID");
+//     }
+
+//     const result = await Product.updateOne(
+//       { _id: id },
+//       { $set: { isBlocked: true } }
+//     );
+
+//     if (result.matchedCount === 0) {
+//       return res.status(Status.NOT_FOUND4).send("Product not found");
+//     }
+
+//     res.redirect("/admin/product");
+//   } catch (error) {
+//     console.error("Error blocking product:", error);
+//     res.status(500).send("Error in blocking product");
+//   }
+// };
+
 const blockProduct = async (req, res) => {
   try {
-    const id = req.query.id;
+    const productId = req.query.id;
 
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(Status.BAD_REQUEST).send("Invalid product ID");
     }
 
     const result = await Product.updateOne(
-      { _id: id },
+      { _id: productId },
       { $set: { isBlocked: true } }
     );
 
     if (result.matchedCount === 0) {
-      return res.status(Status.NOT_FOUND4).send("Product not found");
+      return res.status(Status.NOT_FOUND).send("Product not found");
     }
 
     res.redirect("/admin/product");
@@ -364,27 +392,51 @@ const blockProduct = async (req, res) => {
   }
 };
 
+// const unBlockProduct = async (req, res) => {
+//   try {
+//     const id = req.query.id;
+
+//     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+//       return res.status(Status.BAD_REQUEST).send("Invalid product ID");
+//     }
+
+//     const result = await Product.updateOne(
+//       { _id: id },
+//       { $set: { isBlocked: false } }
+//     );
+
+//     if (result.matchedCount === 0) {
+//       return res.status(Status.NOT_FOUND4).send("Product not found");
+//     }
+
+//     res.redirect("/admin/product");
+//   } catch (error) {
+//     console.error("Error unblocking product:", error);
+//     res.status(500).send("Error in unblocking product");
+//   }
+// };
+
 const unBlockProduct = async (req, res) => {
   try {
-    const id = req.query.id;
+    const productId = req.query.id;
 
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(Status.BAD_REQUEST).send("Invalid product ID");
     }
 
     const result = await Product.updateOne(
-      { _id: id },
+      { _id: productId },
       { $set: { isBlocked: false } }
     );
 
     if (result.matchedCount === 0) {
-      return res.status(Status.NOT_FOUND4).send("Product not found");
+      return res.status(Status.NOT_FOUND).send("Product not found");
     }
 
     res.redirect("/admin/product");
   } catch (error) {
     console.error("Error unblocking product:", error);
-    res.status(500).send("Error in unblocking product");
+    res.status(Status.INTERNAL_SERVER_ERROR).send("Error in unblocking product");
   }
 };
 

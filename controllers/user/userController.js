@@ -53,7 +53,7 @@ const loadHomePage = async (req, res) => {
     return res.render("user/home", { user: null, products: productData });
   } catch (error) {
     console.log(error.message);
-    res.status(500).send("Having issues in loading home page");
+    res.status(Status.INTERNAL_SERVER_ERROR).send("Having issues in loading home page");
   }
 };
 
@@ -124,7 +124,7 @@ const signUp = async (req, res) => {
     const emailSent = await sendVerficationEmail(email, otp);
 
     if (!emailSent) {
-      return res.status(500).json({ message: "Can't send the email" });
+      return res.status(Status.INTERNAL_SERVER_ERROR).json({ message: "Can't send the email" });
     }
 
     req.session.userData = {
@@ -152,7 +152,7 @@ const signUp = async (req, res) => {
 
   } catch (error) {
     console.error("Signup error:", error);
-    res.status(500).json({ message: "Server error, please try again later" });
+    res.status(Status.INTERNAL_SERVER_ERROR).json({ message: "Server error, please try again later" });
   }
 };
 
@@ -269,7 +269,7 @@ const verifyOtp = async (req, res) => {
     }
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ success: false, message: "an error occured" });
+    res.status(Status.INTERNAL_SERVER_ERROR).json({ success: false, message: "an error occured" });
   }
 };
 
@@ -295,7 +295,7 @@ const ResentOtp = async (req, res) => {
         .json({ success: true, message: "Opt resent successfully" });
     } else {
       return res
-        .status(500)
+        .status(Status.INTERNAL_SERVER_ERROR)
         .json({ success: false, message: "Failed to resend otp" });
     }
   } catch (error) {
@@ -452,7 +452,7 @@ const loadShoppingPage = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in /shop route:", error);
-    res.status(500).send("Server Error");
+    res.status(Status.INTERNAL_SERVER_ERROR).send("Server Error");
   }
 };
 
