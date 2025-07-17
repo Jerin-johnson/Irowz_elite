@@ -87,7 +87,7 @@ const loadCartPage = async (req, res) => {
   }
 };
 
-module.exports = { loadCartPage };
+// module.exports = { loadCartPage };
 
 const maxProductLimit = 10;
 

@@ -295,7 +295,7 @@ const downloadSalesReport = async (req, res) => {
     console.log("The format of", format);
 
     if (format === "pdf") {
-      await generatePDF(res, orders, statistics, period, startDate, endDate);
+      await generatePDF(res, orders, statistics, period, startDate, endDate,dateFilter);
     } else if (format === "excel") {
       await generateExcel(res, orders, statistics, period, startDate, endDate);
     } else {
@@ -309,40 +309,54 @@ const downloadSalesReport = async (req, res) => {
   }
 };
 
+
+
 const generatePDF = async (
   res,
   orders,
   statistics,
   period,
   startDate,
-  endDate
+  endDate,
+  dateFilter
 ) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
-      console.log("Generating PDF with buffer method...");
-      console.log({ orders, statistics, period, startDate, endDate }); // Log input for debugging
+      console.log("Generating professional sales report PDF...");
+      console.log({ orders, statistics, period, startDate, endDate });
 
       // Validate inputs
       if (!res || !orders || !statistics) {
-        throw new Error(
-          "Missing required parameters: res, orders, or statistics"
-        );
+        throw new Error("Missing required parameters: res, orders, or statistics");
       }
 
       const filename = `sales-report-${period}-${new Date().toISOString().split("T")[0]}.pdf`;
-      const doc = new PDFDocument({ margin: 50, size: "A4" });
-      const padding = 5; // Define padding globally within the function
+      const doc = new PDFDocument({ 
+        margin: 50, 
+        size: "A4",
+        info: {
+          Title: `Sales Report - ${period.toUpperCase()}`,
+          Author: 'Irowz Elite',
+          Subject: 'Sales Report',
+          Keywords: 'sales, report, analytics, orders'
+        }
+      });
 
       const chunks = [];
+
+      
+      let {finalRevune,
+      totalRefundAmount,
+      totalCouponDiscount,
+      totalOrders,
+      totalRevune,
+    } = await getDashSalesData(dateFilter);
 
       doc.on("data", (chunk) => chunks.push(chunk));
       doc.on("end", () => {
         const pdfBuffer = Buffer.concat(chunks);
         res.setHeader("Content-Type", "application/pdf");
-        res.setHeader(
-          "Content-Disposition",
-          `attachment; filename="${filename}"`
-        );
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
         res.setHeader("Content-Length", pdfBuffer.length);
         res.send(pdfBuffer);
         resolve();
@@ -352,203 +366,382 @@ const generatePDF = async (
         reject(err);
       });
 
-      // Helper function to draw a table row with borders and text wrapping
-      const drawTableRow = (
-        doc,
-        y,
-        values,
-        columnX,
-        columnWidths,
-        isHeader = false
-      ) => {
-        const rowHeight = 20;
-        let maxHeight = rowHeight;
-
-        values.forEach((value, i) => {
-          if (value === undefined || value === null) value = "N/A"; // Handle undefined/null values
-          const textY = y + padding;
-
-          // Draw cell background for headers
-          if (isHeader) {
-            doc
-              .rect(columnX[i], y, columnWidths[i], rowHeight)
-              .fillOpacity(0.1)
-              .fill("#b4883e")
-              .fillOpacity(1.0);
-          }
-
-          // Draw cell borders
-          doc
-            .rect(columnX[i], y, columnWidths[i], rowHeight)
-            .strokeColor("#666")
-            .lineWidth(0.5)
-            .stroke();
-
-          // Draw text with wrapping
-          const textOptions = {
-            width: columnWidths[i] - 2 * padding,
-            align: "left",
-          };
-          doc
-            .fontSize(10)
-            .font(isHeader ? "Helvetica-Bold" : "Helvetica")
-            .fillColor(isHeader ? "#333" : "black")
-            .text(value.toString(), columnX[i] + padding, textY, textOptions);
-
-          // Adjust height if text wraps
-          const textHeight = doc.heightOfString(value.toString(), textOptions);
-          maxHeight = Math.max(maxHeight, textHeight + 2 * padding);
-        });
-
-        return maxHeight; // Return the actual height needed for the row
+      // Color scheme
+      const colors = {
+        primary: '#2563eb',
+        secondary: '#64748b',
+        accent: '#f8fafc',
+        success: '#10b981',
+        warning: '#f59e0b',
+        danger: '#ef4444',
+        dark: '#1e293b',
+        light: '#f1f5f9'
       };
 
-      // Header
-      doc
-        .fontSize(24)
-        .font("Helvetica-Bold")
-        .text("SALES REPORT", { align: "center" });
-      doc.moveDown(0.5);
-      doc
-        .fontSize(14)
-        .font("Helvetica")
-        .text(`Period: ${period.toUpperCase()}`, { align: "center" });
+      // Helper function to draw rounded rectangle
+      const drawRoundedRect = (x, y, width, height, radius = 5) => {
+        doc.roundedRect(x, y, width, height, radius);
+      };
 
-      if (period === "custom" && startDate && endDate) {
-        doc.text(
-          `Date Range: ${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`,
-          { align: "center" }
-        );
-      }
+      // Helper function to format currency
+      const formatCurrency = (amount) => `₹${(amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
 
-      doc.text(`Generated on: ${new Date().toLocaleString()}`, {
-        align: "center",
-      });
-      doc.moveDown(2);
+      // Helper function to format date
+      const formatDate = (date) => {
+        return new Date(date).toLocaleDateString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+      };
 
-      // Summary Statistics Table
-      doc.fontSize(18).font("Helvetica-Bold").text("SUMMARY STATISTICS");
-      doc.moveDown(1);
+      // Helper function to get status color
+      const getStatusColor = (status) => {
+        const statusColors = {
+          'delivered': colors.success,
+          'shipped': colors.primary,
+          'processing': colors.warning,
+          'cancelled': colors.danger,
+          'returned': colors.secondary,
+          'pending': colors.warning
+        };
+        return statusColors[status?.toLowerCase()] || colors.secondary;
+      };
 
-      const tableStartY = doc.y;
-      const labelX = [50, 300]; // Fixed positions
-      const columnWidths = [250, 245]; // Total 495px to fit A4 width
+      // Enhanced table drawing function
+      const drawEnhancedTable = (headers, data, startY, options = {}) => {
+        const {
+          columnWidths = headers.map(() => 70),
+          headerHeight = 30,
+          rowHeight = 25,
+          headerBgColor = colors.primary,
+          alternateRowColor = colors.light,
+          fontSize = 10,
+          headerFontSize = 11
+        } = options;
 
-      // Draw table headers
-      let rowY = tableStartY;
-      rowY += drawTableRow(
-        doc,
-        rowY,
-        ["Metric", "Value"],
-        labelX,
-        columnWidths,
-        true
-      );
+        let currentY = startY;
+        const tableWidth = columnWidths.reduce((sum, width) => sum + width, 0);
+        const startX = (595 - tableWidth) / 2; // Center table on page
 
-      // Draw table rows
-      const statRows = [
-        ["Total Orders", statistics.totalSalesCount || 0],
-        [
-          "Total Order Amount",
-          `₹${(statistics.totalOrderAmount || 0).toFixed(2)}`,
-        ],
-        ["Product Discounts", `₹${(statistics.totalDiscount || 0).toFixed(2)}`],
-        [
-          "Coupon Discounts",
-          `₹${(statistics.totalCouponDiscount || 0).toFixed(2)}`,
-        ],
-        ["Tax Collected", `₹${(statistics.totalTax || 0).toFixed(2)}`],
-        ["Shipping Charges", `₹${(statistics.totalShipping || 0).toFixed(2)}`],
-        ["Final Revenue", `₹${(statistics.totalFinalAmount || 0).toFixed(2)}`],
-      ];
-
-      statRows.forEach(([label, value]) => {
-        rowY += drawTableRow(doc, rowY, [label, value], labelX, columnWidths);
-      });
-
-      doc.y = rowY + 20;
-
-      // Order Details Table
-      if (orders.length > 0) {
-        doc.fontSize(18).font("Helvetica-Bold").text("ORDER DETAILS");
-        doc.moveDown(1);
-
-        const headers = [
-          "#",
-          "Order ID",
-          "Date",
-          "Customer",
-          "Payment",
-          "Total",
-          "Final",
-          "Status",
-        ];
-        const columnWidths = [30, 80, 70, 100, 60, 50, 50, 55]; // Sum ~495px
-        const columnX = [50];
+        // Calculate column X positions
+        const columnX = [startX];
         for (let i = 1; i < headers.length; i++) {
           columnX.push(columnX[i - 1] + columnWidths[i - 1]);
         }
 
-        let y = doc.y;
+        // Draw table header
+        doc.fillColor(headerBgColor);
+        drawRoundedRect(startX, currentY, tableWidth, headerHeight, 5);
+        doc.fill();
 
-        // Draw headers
-        y += drawTableRow(doc, y, headers, columnX, columnWidths, true);
+        // Header text
+        doc.fillColor('#ffffff')
+           .fontSize(headerFontSize)
+           .font('Helvetica-Bold');
 
-        orders.slice(0, 15).forEach((order, index) => {
-          if (y > 650) {
-            // Threshold for page break
-            doc.addPage();
-            y = 50;
-            y += drawTableRow(doc, y, headers, columnX, columnWidths, true);
-          }
-
-          const customer =
-            order.userId?.name || order.userId?.fullName || "N/A";
-          const rowData = [
-            index + 1,
-            order.orderId || "N/A",
-            new Date(order.orderDate || Date.now()).toLocaleDateString(),
-            customer,
-            (order.paymentMethod || "N/A").toUpperCase(),
-            `₹${(order.totalAmount || 0).toFixed(2)}`,
-            `₹${(order.finalAmount || 0).toFixed(2)}`,
-            (order.orderStatus || "N/A").toUpperCase(),
-          ];
-
-          y += drawTableRow(doc, y, rowData, columnX, columnWidths);
-
-          // Add coupon info below row if exists
-          if (order.couponCode) {
-            doc.fontSize(8).fillColor("#555");
-            doc.text(
-              `Coupon: ${order.couponCode || "N/A"}`,
-              columnX[1] + padding,
-              y + padding,
-              {
-                width:
-                  columnWidths[1] +
-                  columnWidths[2] +
-                  columnWidths[3] +
-                  columnWidths[4] -
-                  2 * padding,
-                align: "left",
-              }
-            );
-            y += 15;
-            doc.fontSize(10).fillColor("black");
-          }
+        headers.forEach((header, i) => {
+          const textY = currentY + (headerHeight - headerFontSize) / 2;
+          doc.text(header, columnX[i] + 8, textY, {
+            width: columnWidths[i] - 16,
+            align: 'center'
+          });
         });
 
-        doc.y = y;
+        currentY += headerHeight;
+
+        // Draw data rows
+        data.forEach((row, rowIndex) => {
+          // Check for page break
+          if (currentY > 700) {
+            doc.addPage();
+            currentY = 80;
+            
+            // Redraw header on new page
+            doc.fillColor(headerBgColor);
+            drawRoundedRect(startX, currentY, tableWidth, headerHeight, 5);
+            doc.fill();
+
+            doc.fillColor('#ffffff')
+               .fontSize(headerFontSize)
+               .font('Helvetica-Bold');
+
+            headers.forEach((header, i) => {
+              const textY = currentY + (headerHeight - headerFontSize) / 2;
+              doc.text(header, columnX[i] + 8, textY, {
+                width: columnWidths[i] - 16,
+                align: 'center'
+              });
+            });
+
+            currentY += headerHeight;
+          }
+
+          // Alternate row background
+          if (rowIndex % 2 === 0) {
+            doc.fillColor(alternateRowColor);
+            doc.rect(startX, currentY, tableWidth, rowHeight).fill();
+          }
+
+          // Row border
+          doc.strokeColor('#e2e8f0')
+             .lineWidth(0.5)
+             .rect(startX, currentY, tableWidth, rowHeight)
+             .stroke();
+
+          // Row text
+          doc.fillColor(colors.dark)
+             .fontSize(fontSize)
+             .font('Helvetica');
+
+          row.forEach((cell, cellIndex) => {
+            const textY = currentY + (rowHeight - fontSize) / 2;
+            const cellValue = cell?.toString() || 'N/A';
+            
+            // Special formatting for certain columns
+            const align = cellIndex === 0 ? 'center' : 
+                         (cellIndex >= headers.length - 3 ? 'right' : 'left');
+            
+            doc.text(cellValue, columnX[cellIndex] + 8, textY, {
+              width: columnWidths[cellIndex] - 16,
+              align: align,
+              ellipsis: true
+            });
+          });
+
+          currentY += rowHeight;
+        });
+
+        return currentY;
+      };
+
+      // Page Header with Company Branding
+      const drawPageHeader = () => {
+        // Header background
+        doc.fillColor(colors.primary);
+        drawRoundedRect(50, 50, 495, 70, 10);
+        doc.fill();
+
+        // Company name
+        doc.fillColor('#ffffff')
+           .fontSize(28)
+           .font('Helvetica-Bold')
+           .text('IROWZ ELITE', 70, 75);
+
+        // Subtitle
+        doc.fontSize(12)
+           .font('Helvetica')
+           .text('Business Intelligence & Analytics', 70, 105);
+
+        // Date and time
+        doc.fontSize(10)
+           .text(`Generated: ${new Date().toLocaleString('en-IN')}`, 400, 85);
+      };
+
+      // Draw main header
+      drawPageHeader();
+
+      // Report Title Section
+      let yPosition = 150;
+      
+      doc.fillColor(colors.accent);
+      drawRoundedRect(50, yPosition, 495, 80, 8);
+      doc.fill();
+
+      doc.fillColor(colors.dark)
+         .fontSize(24)
+         .font('Helvetica-Bold')
+         .text('SALES REPORT', 70, yPosition + 20);
+
+      doc.fontSize(14)
+         .font('Helvetica')
+         .text(`Period: ${period.toUpperCase()}`, 70, yPosition + 50);
+
+      if (period === "custom" && startDate && endDate) {
+        doc.text(`${formatDate(startDate)} - ${formatDate(endDate)}`, 350, yPosition + 20);
       }
 
-      doc.moveDown(2);
-      doc
-        .fontSize(10)
-        .font("Helvetica")
-        .text("Thank you for using Irowz Elite Admin Panel!", {
-          align: "center",
-        });
+      doc.text(`Total Orders: ${orders.length}`, 350, yPosition + 50);
+
+      yPosition += 100;
+
+      // Key Metrics Cards
+      const metrics = [
+        { 
+          label: 'Total Revenue', 
+          value: formatCurrency(finalRevune || 0), 
+          color: colors.success 
+        },
+        { 
+          label: 'Total Orders', 
+          value: (statistics.totalSalesCount || 0).toString(), 
+          color: colors.primary 
+        },
+        { 
+          label: 'Avg Order Value', 
+          value: formatCurrency((finalRevune || 0) / (statistics.totalSalesCount || 1)), 
+          color: colors.warning 
+        },
+        { 
+          label: 'Total Discounts', 
+          value: formatCurrency((statistics.totalDiscount || 0) + (statistics.totalCouponDiscount || 0)), 
+          color: colors.danger 
+        }
+      ];
+
+      const cardWidth = 110;
+      const cardHeight = 60;
+      const cardSpacing = 15;
+      const startXCards = (595 - (4 * cardWidth + 3 * cardSpacing)) / 2;
+
+      metrics.forEach((metric, index) => {
+        const cardX = startXCards + index * (cardWidth + cardSpacing);
+        
+        // Card background
+        doc.fillColor(metric.color);
+        drawRoundedRect(cardX, yPosition, cardWidth, cardHeight, 8);
+        doc.fill();
+
+        // Card text
+        doc.fillColor('#ffffff')
+           .fontSize(10)
+           .font('Helvetica')
+           .text(metric.label, cardX + 8, yPosition + 10, {
+             width: cardWidth - 16,
+             align: 'center'
+           });
+
+        doc.fontSize(14)
+           .font('Helvetica-Bold')
+           .text(metric.value, cardX + 8, yPosition + 30, {
+             width: cardWidth - 16,
+             align: 'center'
+           });
+      });
+
+      yPosition += 90;
+
+      // Detailed Statistics Table
+      doc.fillColor(colors.dark)
+         .fontSize(18)
+         .font('Helvetica-Bold')
+         .text('FINANCIAL BREAKDOWN', 70, yPosition);
+
+      yPosition += 30;
+
+      const statsData = [
+        ['Total Order Amount', formatCurrency(totalOrders || 0)],
+        ['Product Discounts', formatCurrency(statistics.totalDiscount || 0)],
+        ['Coupon Discounts', formatCurrency(totalCouponDiscount || 0)],
+        ['Tax Collected', formatCurrency(statistics.totalTax || 0)],
+        ['Shipping Charges', formatCurrency(statistics.totalShipping || 0)],
+        ['Final Revenue', formatCurrency(finalRevune || 0)]
+      ];
+
+      yPosition = drawEnhancedTable(
+        ['Metric', 'Amount'],
+        statsData,
+        yPosition,
+        {
+          columnWidths: [300, 195],
+          headerHeight: 35,
+          rowHeight: 30,
+          fontSize: 12,
+          headerFontSize: 13
+        }
+      );
+
+      // Order Details Section
+      if (orders.length > 0) {
+        yPosition += 40;
+
+        // Check if we need a new page
+        if (yPosition > 600) {
+          doc.addPage();
+          yPosition = 80;
+        }
+
+        doc.fillColor(colors.dark)
+           .fontSize(18)
+           .font('Helvetica-Bold')
+           .text('ORDER DETAILS', 70, yPosition);
+
+        yPosition += 30;
+
+        const headers = ['#', 'Order ID', 'Date', 'Customer', 'Payment', 'Items', 'Total', 'Status'];
+        const orderData = orders.slice(0, 20).map((order, index) => [
+          (index + 1).toString(),
+          order.orderId?.substring(0, 8) + '...' || 'N/A',
+          formatDate(order.orderDate),
+          order.userId?.fullName || order.userId?.name || 'N/A',
+          (order.paymentMethod || 'N/A').toUpperCase(),
+          order.items?.length?.toString() || '0',
+          formatCurrency(order.finalAmount || 0),
+          (order.orderStatus || 'N/A').toUpperCase()
+        ]);
+
+        yPosition = drawEnhancedTable(
+          headers,
+          orderData,
+          yPosition,
+          {
+            columnWidths: [30, 70, 60, 100, 60, 40, 70, 65],
+            headerHeight: 35,
+            rowHeight: 28,
+            fontSize: 9,
+            headerFontSize: 10
+          }
+        );
+
+        // Payment Method Distribution
+        if (yPosition < 600) {
+          yPosition += 30;
+          
+          doc.fillColor(colors.dark)
+             .fontSize(16)
+             .font('Helvetica-Bold')
+             .text('PAYMENT METHOD DISTRIBUTION', 70, yPosition);
+
+          yPosition += 20;
+
+          const paymentMethods = orders.reduce((acc, order) => {
+            const method = order.paymentMethod || 'unknown';
+            acc[method] = (acc[method] || 0) + 1;
+            return acc;
+          }, {});
+
+          Object.entries(paymentMethods).forEach(([method, count]) => {
+            const percentage = ((count / orders.length) * 100).toFixed(1);
+            doc.fillColor(colors.secondary)
+               .fontSize(12)
+               .font('Helvetica')
+               .text(`${method.toUpperCase()}: ${count} orders (${percentage}%)`, 70, yPosition);
+            yPosition += 20;
+          });
+        }
+      }
+
+      // Footer
+      const footerY = 750;
+      doc.fillColor(colors.accent);
+      drawRoundedRect(50, footerY, 495, 50, 8);
+      doc.fill();
+
+      doc.fillColor(colors.dark)
+         .fontSize(12)
+         .font('Helvetica-Bold')
+         .text('Thank you for using Irowz Elite Admin Panel!', 70, footerY + 15);
+
+      doc.fontSize(10)
+         .font('Helvetica')
+         .text('For support, contact: admin@irowzelite.com', 70, footerY + 32);
+
+      // Add watermark
+      doc.fillColor('#f0f0f0')
+         .fontSize(60)
+         .font('Helvetica-Bold')
+         .opacity(0.1)
+         .text('CONFIDENTIAL', 200, 400, { rotate: 45 });
 
       doc.end();
     } catch (error) {
@@ -557,6 +750,7 @@ const generatePDF = async (
     }
   });
 };
+
 
 const generateExcel = async (
   res,

@@ -383,7 +383,7 @@ li[data-filter=".new-arrivals"]:hover {
           <a
             aria-label="Add to Wishlist"
             class="action-btn hover-up"
-            href="/addToWishlist/<%= products[i]._id %>"
+            href="/wishlist/add/<%= products[i]._id %>"
           >
             <i class="fi-rs-heart"></i>
           </a>
@@ -392,7 +392,7 @@ li[data-filter=".new-arrivals"]:hover {
         <div class="product-content-wrap">
           <h6><%= products[i].productName %></h6>
           <h5>₹<%= products[i].salePrice.toFixed(2) %></h5>
-          <a href="/product/details/<%= products[i]._id %>">Add to Cart</a>
+          <a href="/product/details/<%= products[i]._id %>">View Product</a>
         </div>
       </div>
     </div>
