@@ -593,9 +593,10 @@ const downloadInvoice = async (req, res) => {
       ...(order.shipping > 0
         ? [{ label: "Shipping:", value: order.shipping }]
         : []),
-      order.couponApplied
+      // Fixed: Flatten the array properly
+      ...(order.couponApplied
         ? [{ label: "Coupon:", value: -order.couponDiscount }]
-        : [],
+        : []),
     ];
 
     summaryItems.forEach((item) => {
