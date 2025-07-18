@@ -2,16 +2,22 @@
 <%- include('../partials/chatbot.ejs') %>
 
 <style>
-
-    .whishlist.active{
-            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
-    color: #fff;
-    border-color: transparent;
-    transform: scale(1.1);
+    .whishlist.active {
+        background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+        color: #fff;
+        border-color: transparent;
+        transform: scale(1.1);
     }
-
 </style>
 
+<style>
+  button:disabled {
+    background-color: #bbb;
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+</style>
 
 <link rel="stylesheet" href="/css/shop.css">
 <!-- SweetAlert2 CDN -->
@@ -135,7 +141,6 @@
                                 </div>
                             </div>
                             <!-- Apply and Reset Buttons -->
-                          
                             <% if (req.query.search) { %>
                                 <input type="hidden" name="search" value="<%= req.query.search %>">
                             <% } %>
@@ -145,8 +150,7 @@
                             <% if (currentPage) { %>
                                 <input type="hidden" name="page" value="<%= currentPage %>">
                             <% } %>
-
-                              <div class="shp_filter_apply">
+                            <div class="shp_filter_apply">
                                 <button type="submit" class="shp_btn_apply">Apply Filters</button>
                                 <button type="button" class="shp_btn_reset" onclick="window.location.href='/shop?page=1'">Reset All</button>
                             </div>
@@ -209,7 +213,6 @@
                                     </div>
                                     <% if (product.productOffer > 0) { %>
                                         <span class="shp_label">
-                                            
                                             <%= product.productOffer %>% Off
                                         </span>
                                     <% } %>
@@ -237,7 +240,7 @@
                                             </label>
                                         <% }) %>
                                     </div>
-                                    <button onclick="addToCart('<%= product._id %>')" class="shp_add_cart">Add To Cart</button>
+                                    <button onclick="addToCart('<%= product._id %>', this)" class="shp_add_cart">Add To Cart</button>
                                 </div>
                             </div>
                         </div>
@@ -298,10 +301,10 @@ async function addToWishlist(productId) {
                 timer: 1500
             });
         } else {
-             document.getElementById("whishlist-button").classList.add("active");
+            document.getElementById("whishlist-button").classList.add("active");
             Swal.fire({
                 icon: 'caution',
-                title: 'caution!',
+                title: 'Caution!',
                 text: result.message || 'Failed to add product to wishlist.',
                 confirmButtonText: 'OK'
             });
@@ -317,22 +320,20 @@ async function addToWishlist(productId) {
     }
 }
 
-// update cart quantity function
-
-function updateCart(newCount)
-{
+// Update cart quantity function
+function updateCart(newCount) {
     let cartCount = document.getElementById("cartCount");
-    console.log(newCount)
-
- if(cartCount)
-{
-    cartCount.textContent = newCount;
-}
+    console.log(newCount);
+    if (cartCount) {
+        cartCount.textContent = newCount;
+    }
 }
 
 // Function to add product to cart
-async function addToCart(productId) {
+async function addToCart(productId, btn) {
     try {
+        btn.disabled = true;
+        btn.textContent = "Adding to Cart";
         const response = await fetch(`/cart/add/${productId}`, {
             method: 'POST',
             headers: {
@@ -350,14 +351,19 @@ async function addToCart(productId) {
                 text: result.message || 'Product has been added to your cart.',
                 showConfirmButton: false,
                 timer: 1500
-            })
-                
+            }).then(() => {
+                btn.disabled = false;
+                btn.textContent = "Add To Cart";
+            });
         } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Error!',
                 text: result.message || 'Failed to add product to cart.',
                 confirmButtonText: 'OK'
+            }).then(() => {
+                btn.disabled = false;
+                btn.textContent = "Add To Cart";
             });
         }
     } catch (error) {
@@ -367,6 +373,9 @@ async function addToCart(productId) {
             title: 'Error!',
             text: 'Something went wrong. Please try again.',
             confirmButtonText: 'OK'
+        }).then(() => {
+            btn.disabled = false;
+            btn.textContent = "Add To Cart";
         });
     }
 }

@@ -169,7 +169,7 @@ const addToCart = async (req, res) => {
 
     return res.status(Status.OK).json({
       success: true,
-      message: "product added to cart successfully",
+      message: message.CART_UPDATED_SUCCESSFULLY,
       cart,
       cartCount: cart.items.length,
     });
@@ -192,7 +192,7 @@ const updateCartQuantity = async (req, res) => {
     const product = await Product.findById(productId);
 
     if (product.isBlocked || product.stock <= 0) {
-      throw new Error("The product is currently unavailable");
+      throw new Error(message.PRODUCT_NOT_FOUND);
     }
 
     if (product.stock < quantity) {
@@ -244,7 +244,7 @@ const updateCartQuantity = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Quantity updated successfully",
+      message: message.CART_UPDATED_SUCCESSFULLY,
       itemTotal: cart.items[itemIndex].totalPrice.toFixed(2),
       subtotal: subtotal.toFixed(2),
       discount: totalDiscount.toFixed(2),

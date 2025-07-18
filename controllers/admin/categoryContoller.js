@@ -39,35 +39,71 @@ const loadCategory = async (req, res) => {
   }
 };
 
+// const addCategory = async (req, res) => {
+//   try {
+//     let { name, description } = req.body;
+
+//     const existingCat = await Category.find({});
+//     console.log(existingCat);
+
+//     for (let cat of existingCat) {
+//       if (cat.name.toLowerCase() === name.toLowerCase()) {
+//         return res
+//           .status(Status.BAD_REQUEST)
+//           .json({ success: false, message: "The cateogroy already exists" });
+//       }
+//     }
+
+//     const newCat = await new Category({
+//       name,
+//       description,
+//     });
+//     await newCat.save();
+//     return res
+//       .status(Status.CREATED)
+//       .json({ message: "Category add successfully" });
+//   } catch (error) {
+//     return res
+//       .status(Status.INTERNAL_SERVER_ERROR)
+//       .json({ message: message.SERVER_ERROR });
+//   }
+// };
+
+
+
 const addCategory = async (req, res) => {
   try {
     let { name, description } = req.body;
 
-    const existingCat = await Category.find({});
-    console.log(existingCat);
+    // Fetch all existing categories
+    const existingCategories = await Category.find({});
+    console.log(existingCategories);
 
-    for (let cat of existingCat) {
-      if (cat.name.toLowerCase() === name.toLowerCase()) {
+    // Check if a category with the same name already exists (case-insensitive)
+    for (let category of existingCategories) {
+      if (category.name.toLowerCase() === name.toLowerCase()) {
         return res
           .status(Status.BAD_REQUEST)
-          .json({ success: false, message: "The cateogroy already exists" });
+          .json({ success: false, message: "The category already exists" });
       }
     }
 
-    const newCat = await new Category({
-      name,
-      description,
-    });
-    await newCat.save();
+    // Create and save new category
+    const newCategory = new Category({ name, description });
+    await newCategory.save();
+
     return res
       .status(Status.CREATED)
-      .json({ message: "Category add successfully" });
+      .json({ message: "Category added successfully" });
+
   } catch (error) {
     return res
       .status(Status.INTERNAL_SERVER_ERROR)
       .json({ message: message.SERVER_ERROR });
   }
 };
+
+
 
 const loadAddCategory = (req, res) => {
   try {
@@ -86,7 +122,7 @@ const listCategory = async (req, res) => {
     res.redirect("/admin/category");
   } catch (error) {
     console.error("Error unlisting category:", err);
-    res.status(Status.INTERNAL_SERVER_ERROR).send("Internal Server Error");
+    res.status(Status.INTERNAL_SERVER_ERROR).send(message.SERVER_ERROR);
   }
 };
 
@@ -99,7 +135,7 @@ const unlistCategory = async (req, res) => {
     res.redirect("/admin/category");
   } catch (error) {
     console.error("Error unlisting category:", err);
-    res.status(Status.INTERNAL_SERVER_ERROR).send("Internal Server Error");
+    res.status(Status.INTERNAL_SERVER_ERROR).send(message.SERVER_ERROR);
   }
 };
 

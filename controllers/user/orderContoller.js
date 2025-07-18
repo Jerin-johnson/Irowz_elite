@@ -14,7 +14,6 @@ const { Category } = require("../../models/categorySchema");
 const Status = require("../../utils/status");
 const message = require("../../utils/message");
 
-
 const loadOrderDetailedPage = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -262,7 +261,9 @@ const cancelOrderItem = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(Status.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
+    return res
+      .status(Status.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: error.message });
   }
 };
 
@@ -370,7 +371,9 @@ const cancelEntireOrder = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(Status.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
+    return res
+      .status(Status.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: error.message });
   }
 };
 
@@ -393,15 +396,15 @@ const downloadInvoice = async (req, res) => {
 
     const user = await User.findById(userId);
 
-    const doc = new PDFDocument({ 
-      margin: 50, 
-      size: 'A4',
+    const doc = new PDFDocument({
+      margin: 50,
+      size: "A4",
       info: {
         Title: `Invoice ${orderId}`,
-        Author: 'Irowz Elite',
-        Subject: 'Invoice',
-        Keywords: 'invoice, order, receipt'
-      }
+        Author: "Irowz Elite",
+        Subject: "Invoice",
+        Keywords: "invoice, order, receipt",
+      },
     });
 
     res.setHeader("Content-Type", "application/pdf");
@@ -413,10 +416,10 @@ const downloadInvoice = async (req, res) => {
     doc.pipe(res);
 
     // Colors
-    const primaryColor = '#2563eb';
-    const secondaryColor = '#64748b';
-    const accentColor = '#f8fafc';
-    const textColor = '#1e293b';
+    const primaryColor = "#2563eb";
+    const secondaryColor = "#64748b";
+    const accentColor = "#f8fafc";
+    const textColor = "#1e293b";
 
     // Helper function to draw rounded rectangle
     const drawRoundedRect = (x, y, width, height, radius = 5) => {
@@ -429,59 +432,67 @@ const downloadInvoice = async (req, res) => {
     doc.fill();
 
     // Company Header
-    doc.fillColor('#ffffff')
-       .fontSize(28)
-       .font('Helvetica-Bold')
-       .text('Irowz Elite', 70, 65);
-    
-    doc.fontSize(12)
-       .font('Helvetica')
-       .text('Premium Business Solutions', 70, 95);
+    doc
+      .fillColor("#ffffff")
+      .fontSize(28)
+      .font("Helvetica-Bold")
+      .text("Irowz Elite", 70, 65);
+
+    doc
+      .fontSize(12)
+      .font("Helvetica")
+      .text("Premium Business Solutions", 70, 95);
 
     // Company Contact Info (Right side of header)
-    doc.fontSize(10)
-       .text('123 Business Street', 400, 65)
-       .text('City, State 12345', 400, 78)
-       .text('Phone: (555) 123-4567', 400, 91)
-       .text('Email: info@irowzelite.com', 400, 104);
+    doc
+      .fontSize(10)
+      .text("123 Business Street", 400, 65)
+      .text("City, State 12345", 400, 78)
+      .text("Phone: (555) 123-4567", 400, 91)
+      .text("Email: info@irowzelite.com", 400, 104);
 
     // Invoice Title Section
     doc.fillColor(accentColor);
     drawRoundedRect(50, 140, 500, 60, 8);
     doc.fill();
 
-    doc.fillColor(textColor)
-       .fontSize(24)
-       .font('Helvetica-Bold')
-       .text('INVOICE', 70, 160);
+    doc
+      .fillColor(textColor)
+      .fontSize(24)
+      .font("Helvetica-Bold")
+      .text("INVOICE", 70, 160);
 
-    doc.fontSize(12)
-       .font('Helvetica')
-       .text(`Invoice #: ${orderId}`, 70, 185);
+    doc.fontSize(12).font("Helvetica").text(`Invoice #: ${orderId}`, 70, 185);
 
-    doc.text(`Date: ${new Date(order.orderDate).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })}`, 300, 160);
+    doc.text(
+      `Date: ${new Date(order.orderDate).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })}`,
+      300,
+      160
+    );
 
-    doc.text(`Status: ${order.status || 'Completed'}`, 300, 175);
-    doc.text(`Payment Method: ${order.paymentMethod || 'N/A'}`, 300, 190);
+    doc.text(`Status: ${order.status || "Completed"}`, 300, 175);
+    doc.text(`Payment Method: ${order.paymentMethod || "N/A"}`, 300, 190);
 
     // Customer Information Section
     let yPos = 230;
-    
-    // Bill To Section
-    doc.fillColor(secondaryColor)
-       .fontSize(14)
-       .font('Helvetica-Bold')
-       .text('BILL TO:', 70, yPos);
 
-    doc.fillColor(textColor)
-       .fontSize(12)
-       .font('Helvetica')
-       .text(`${user.fullName || 'N/A'}`, 70, yPos + 20)
-       .text(`${user.email || 'N/A'}`, 70, yPos + 35);
+    // Bill To Section
+    doc
+      .fillColor(secondaryColor)
+      .fontSize(14)
+      .font("Helvetica-Bold")
+      .text("BILL TO:", 70, yPos);
+
+    doc
+      .fillColor(textColor)
+      .fontSize(12)
+      .font("Helvetica")
+      .text(`${user.fullName || "N/A"}`, 70, yPos + 20)
+      .text(`${user.email || "N/A"}`, 70, yPos + 35);
 
     if (user.phone) {
       doc.text(`Phone: ${user.phone}`, 70, yPos + 50);
@@ -489,136 +500,167 @@ const downloadInvoice = async (req, res) => {
 
     // Ship To Section
     if (order.address) {
-      doc.fillColor(secondaryColor)
-         .fontSize(14)
-         .font('Helvetica-Bold')
-         .text('SHIP TO:', 320, yPos);
+      doc
+        .fillColor(secondaryColor)
+        .fontSize(14)
+        .font("Helvetica-Bold")
+        .text("SHIP TO:", 320, yPos);
 
-      doc.fillColor(textColor)
-         .fontSize(12)
-         .font('Helvetica')
-         .text(`${order.address.firstName || ''} ${order.address.lastName || ''}`, 320, yPos + 20)
-         .text(`${order.address.address || ''}`, 320, yPos + 35)
-         .text(`${order.address.state || ''}, ${order.address.pinCode || ''}`, 320, yPos + 50)
-         .text(`${order.address.country || ''}`, 320, yPos + 65);
+      doc
+        .fillColor(textColor)
+        .fontSize(12)
+        .font("Helvetica")
+        .text(
+          `${order.address.firstName || ""} ${order.address.lastName || ""}`,
+          320,
+          yPos + 20
+        )
+        .text(`${order.address.address || ""}`, 320, yPos + 35)
+        .text(
+          `${order.address.state || ""}, ${order.address.pinCode || ""}`,
+          320,
+          yPos + 50
+        )
+        .text(`${order.address.country || ""}`, 320, yPos + 65);
     }
 
     // Items Table
     yPos = 350;
-    
+
     // Table Header Background
     doc.fillColor(primaryColor);
     drawRoundedRect(50, yPos, 500, 25, 5);
     doc.fill();
 
     // Table Headers
-    doc.fillColor('#ffffff')
-       .fontSize(12)
-       .font('Helvetica-Bold')
-       .text('ITEM', 70, yPos + 8)
-       .text('QTY', 280, yPos + 8)
-       .text('PRICE', 330, yPos + 8)
-       .text('TOTAL', 400, yPos + 8)
-       .text('STATUS', 470, yPos + 8);
+    doc
+      .fillColor("#ffffff")
+      .fontSize(12)
+      .font("Helvetica-Bold")
+      .text("ITEM", 70, yPos + 8)
+      .text("QTY", 280, yPos + 8)
+      .text("PRICE", 330, yPos + 8)
+      .text("TOTAL", 400, yPos + 8)
+      .text("STATUS", 470, yPos + 8);
 
     yPos += 35;
-    
+
     // Table Rows
-    doc.fillColor(textColor).font('Helvetica');
-    
+    doc.fillColor(textColor).font("Helvetica");
+
     order.items.forEach((item, index) => {
       // Alternate row background
       if (index % 2 === 0) {
-        doc.fillColor('#f8fafc');
+        doc.fillColor("#f8fafc");
         doc.rect(50, yPos - 5, 500, 25).fill();
       }
 
-      const name = item.productName || item.productId?.productName || 'Unnamed Product';
-      const status = item.status || 'Delivered';
-      
-      doc.fillColor(textColor)
-         .fontSize(11)
-         .text(name, 70, yPos, { width: 180, ellipsis: true })
-         .text(item.quantity.toString(), 280, yPos)
-         .text(`₹${item.price.toFixed(2)}`, 330, yPos)
-         .text(`₹${item.totalPrice.toFixed(2)}`, 400, yPos)
-         .text(status, 470, yPos);
-      
+      const name =
+        item.productName || item.productId?.productName || "Unnamed Product";
+      const status = item.status || "Delivered";
+
+      doc
+        .fillColor(textColor)
+        .fontSize(11)
+        .text(name, 70, yPos, { width: 180, ellipsis: true })
+        .text(item.quantity.toString(), 280, yPos)
+        .text(`₹${item.price.toFixed(2)}`, 330, yPos)
+        .text(`₹${item.totalPrice.toFixed(2)}`, 400, yPos)
+        .text(status, 470, yPos);
+
       yPos += 25;
     });
 
     // Summary Section
     yPos += 20;
-    
+
     // Summary Background
     doc.fillColor(accentColor);
     drawRoundedRect(300, yPos, 250, 120, 8);
     doc.fill();
 
     yPos += 15;
-    
+
     // Summary Items
-    doc.fillColor(textColor)
-       .fontSize(12)
-       .font('Helvetica');
+    doc.fillColor(textColor).fontSize(12).font("Helvetica");
 
     const summaryItems = [
-      { label: 'Subtotal:', value: order.totalAmount },
-      ...(order.discount > 0 ? [{ label: 'Discount:', value: -order.discount }] : []),
-      ...(order.tax > 0 ? [{ label: 'Tax:', value: order.tax }] : []),
-      ...(order.shipping > 0 ? [{ label: 'Shipping:', value: order.shipping }] : []),
-      ...(order.couponApplied ? [{ label: 'Coupon:', value: -order.couponDiscount }] : [])
+      { label: "Subtotal:", value: order.totalAmount },
+      ...(order.discount > 0
+        ? [{ label: "Discount:", value: -order.discount }]
+        : []),
+      ...(order.tax > 0 ? [{ label: "Tax:", value: order.tax }] : []),
+      ...(order.shipping > 0
+        ? [{ label: "Shipping:", value: order.shipping }]
+        : []),
+      order.couponApplied
+        ? [{ label: "Coupon:", value: -order.couponDiscount }]
+        : [],
     ];
 
-    summaryItems.forEach(item => {
-      doc.text(item.label, 320, yPos)
-         .text(`₹${item.value.toFixed(2)}`, 480, yPos, { align: 'right' });
+    summaryItems.forEach((item) => {
+      doc
+        .text(item.label, 320, yPos)
+        .text(`₹${item.value.toFixed(2)}`, 480, yPos, { align: "right" });
       yPos += 18;
     });
 
     // Total Line
-    doc.strokeColor(primaryColor)
-       .lineWidth(1)
-       .moveTo(320, yPos)
-       .lineTo(530, yPos)
-       .stroke();
+    doc
+      .strokeColor(primaryColor)
+      .lineWidth(1)
+      .moveTo(320, yPos)
+      .lineTo(530, yPos)
+      .stroke();
 
     yPos += 10;
-    
+
     // Final Total
-    doc.fillColor(primaryColor)
-       .fontSize(16)
-       .font('Helvetica-Bold')
-       .text('TOTAL:', 320, yPos)
-       .text(`₹${order.finalAmount.toFixed(2)}`, 480, yPos, { align: 'right' });
+    doc
+      .fillColor(primaryColor)
+      .fontSize(16)
+      .font("Helvetica-Bold")
+      .text("TOTAL:", 320, yPos)
+      .text(`₹${order.finalAmount.toFixed(2)}`, 480, yPos, { align: "right" });
 
     // Footer Section
     yPos += 60;
-    
+
     // Footer Background
     doc.fillColor(accentColor);
     drawRoundedRect(50, yPos, 500, 80, 8);
     doc.fill();
 
-    doc.fillColor(textColor)
-       .fontSize(14)
-       .font('Helvetica-Bold')
-       .text('Thank you for your business!', 70, yPos + 15);
+    doc
+      .fillColor(textColor)
+      .fontSize(14)
+      .font("Helvetica-Bold")
+      .text("Thank you for your business!", 70, yPos + 15);
 
-    doc.fontSize(10)
-       .font('Helvetica')
-       .text('This invoice was generated on ' + new Date().toLocaleDateString(), 70, yPos + 35)
-       .text('For questions about this invoice, contact us at support@irowzelite.com', 70, yPos + 50)
-       .text('Visit us at www.irowzelite.com', 70, yPos + 65);
+    doc
+      .fontSize(10)
+      .font("Helvetica")
+      .text(
+        "This invoice was generated on " + new Date().toLocaleDateString(),
+        70,
+        yPos + 35
+      )
+      .text(
+        "For questions about this invoice, contact us at support@irowzelite.com",
+        70,
+        yPos + 50
+      )
+      .text("Visit us at www.irowzelite.com", 70, yPos + 65);
 
     // Add page numbers if needed
     const pageCount = doc.bufferedPageRange().count;
     if (pageCount > 1) {
       for (let i = 0; i < pageCount; i++) {
         doc.switchToPage(i);
-        doc.fillColor(secondaryColor)
-           .fontSize(8)
-           .text(`Page ${i + 1} of ${pageCount}`, 500, 750);
+        doc
+          .fillColor(secondaryColor)
+          .fontSize(8)
+          .text(`Page ${i + 1} of ${pageCount}`, 500, 750);
       }
     }
 

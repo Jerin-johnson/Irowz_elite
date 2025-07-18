@@ -375,7 +375,7 @@
           <input type="number" id="totalUsageLimit" name="totalUsageLimit" min="1">
         </div>
         
-        <button type="submit" class="btn btn-primary">Add Coupon</button>
+        <button type="submit" class="btn btn-primary" id="submitAddCoupon">Add Coupon</button>
       </form>
     </div>
   </div>
@@ -430,6 +430,9 @@
     // Helper functions
     function showError(element, message) {
       if (element) {
+           let submitAddCoupon = document.getElementById("submitAddCoupon");
+      submitAddCoupon.disabled = false;
+      submitAddCoupon.textContent ="Add Coupon";
         element.textContent = message;
         element.style.display = 'block';
       }
@@ -444,7 +447,9 @@
     // Form submission
     couponForm.addEventListener('submit', function(e) {
       e.preventDefault();
-      
+      let submitAddCoupon = document.getElementById("submitAddCoupon");
+      submitAddCoupon.disabled = true;
+      submitAddCoupon.textContent ="loading";
       const formData = new FormData(this);
       const data = Object.fromEntries(formData);
       
@@ -463,6 +468,9 @@
             location.reload();
           });
         } else {
+           let submitAddCoupon = document.getElementById("submitAddCoupon");
+      submitAddCoupon.disabled = false;
+      submitAddCoupon.textContent ="Add Coupon";
           Swal.fire('Failed!', data.message, 'error');
         }
       })
